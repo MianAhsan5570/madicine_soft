@@ -122,7 +122,11 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
 
               <!-- Product + Add Button -->
               <div class="col-6 col-sm-4 col-md-3 col-lg-3">
-                <label class="form-label fs-6 mb-1">Product</label>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label for="get_product_name" class="mb-0 form-label ">Products</label>
+                  <span id="instockQty" class="badge badge-info font-weight-bold px-3 py-1"
+                    style="font-size: 0.9rem;">In Stock: 0</span>
+                </div>
                 <div class="input-group input-group-sm">
                   <select class="form-control form-control-sm searchableSelect" id="get_product_name" name="product_id">
                     <option value="">Select Product</option>
@@ -144,7 +148,6 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                     <i class="fa fa-plus"></i>
                   </button>
                 </div>
-                <div class="text-center small text-muted mt-1" id="instockQty"></div>
               </div>
 
               <!-- Batch No -->
@@ -195,8 +198,10 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                 <table class="table  saleTable" id="myDiv">
                   <thead class="table-bordered">
                     <tr>
-                      <th>Code</th>
+                      <!-- <th>Code</th> -->
                       <th>Product Name</th>
+                      <th>Batch No</th>
+                      <th>Expiry</th>
                       <th>Purchase Price</th>
                       <th>Sale Price</th>
                       <th>Quantity</th>
@@ -223,8 +228,15 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                             value="<?= $r['rate'] ?>">
                           <input type="hidden" id="product_salerate_<?= $r['product_id'] ?>" name="product_salerates[]"
                             value="<?= $r['sale_rate'] ?>">
-                          <td><?= $r['product_code'] ?></td>
+                          <input type="hidden" id="batch_no_<?= $r['product_id'] ?>" name="batch_nos[]"
+                            value="<?= $r['batch_no'] ?>">
+                          <input type="hidden" id="expiry_<?= $r['product_id'] ?>" name="expires[]"
+                            value="<?= $r['expiry_date'] ?>">
+
+                          <!-- <td><?= $r['product_code'] ?></td> -->
                           <td><?= $r['product_name'] ?></td>
+                          <td><?= $r['batch_no'] ?></td>
+                          <td><?= $r['expiry_date'] ?></td>
                           <td><?= $r['rate'] ?></td>
                           <td><?= $r['sale_rate'] ?></td>
                           <td><?= $r['quantity'] ?></td>
@@ -235,7 +247,7 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                             <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>`)"
                               class="fa fa-trash text-danger" href="#"></button>
                             <button type="button"
-                              onclick="editByid(<?= $r['product_id'] ?>,`<?= $r['product_code'] ?>`,<?= $r['rate'] ?>,<?= $r['quantity'] ?>)"
+                              onclick="editByid(<?= $r['product_id'] ?>,<?= $r['batch_no'] ?>,'<?= $r['expiry_date'] ?>',<?= $r['rate'] ?>,<?= $r['sale_rate'] ?>,<?= $r['quantity'] ?>)"
                               class="fa fa-edit text-success ml-2 "></button>
 
                           </td>
@@ -246,7 +258,7 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
 
                   <tfoot>
                     <tr>
-                      <td colspan="3"></td>
+                      <td colspan="4"></td>
 
                       <td class="table-bordered"> Sub Total :</td>
                       <td class="table-bordered" id="product_total_amount"><?= @$fetchPurchase['total_amount'] ?></td>
@@ -258,7 +270,7 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                       </td>
                     </tr>
                     <tr>
-                      <td colspan="3" class="border-none"></td>
+                      <td colspan="4" class="border-none"></td>
                       <td class="table-bordered"> <strong>Grand Total :</strong> </td>
                       <td class="table-bordered" id="product_grand_total_amount"><?= @$fetchPurchase['grand_total'] ?>
                       </td>
@@ -270,7 +282,7 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                       </td>
                     </tr>
                     <tr>
-                      <td colspan="3" class="border-none"></td>
+                      <td colspan="4" class="border-none"></td>
                       <td class="table-bordered">Remaing Amount :</td>
                       <td class="table-bordered"><input type="number" class="form-control form-control-sm"
                           id="remaining_ammount" readonly name="remaining_ammount"

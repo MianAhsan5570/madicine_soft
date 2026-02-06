@@ -133,10 +133,10 @@ $(document).ready(function () {
               // Open the invoice in a new tab
               window.open(
                 response.print_url +
-                  "?id=" +
-                  response.order_id +
-                  "&type=" +
-                  response.type
+                "?id=" +
+                response.order_id +
+                "&type=" +
+                response.type
               );
               setTimeout(() => {
                 location.reload();
@@ -238,19 +238,19 @@ $(document).ready(function () {
               if (result.isConfirmed) {
                 window.open(
                   "print_voucher.php?type=debit&voucher_id=" +
-                    response.voucher_id,
+                  response.voucher_id,
                   "_blank"
                 );
               } else if (result.isDenied) {
                 window.open(
                   "print_voucher.php?type=credit&voucher_id=" +
-                    response.voucher_id,
+                  response.voucher_id,
                   "_blank"
                 );
               } else {
                 window.open(
                   "print_voucher.php?type=both&voucher_id=" +
-                    response.voucher_id,
+                  response.voucher_id,
                   "_blank"
                 );
               }
@@ -303,19 +303,19 @@ $(document).ready(function () {
               if (result.isConfirmed) {
                 window.open(
                   "print_voucher.php?type=debit&voucher_id=" +
-                    response.voucher_id,
+                  response.voucher_id,
                   "_blank"
                 );
               } else if (result.isDenied) {
                 window.open(
                   "print_voucher.php?type=credit&voucher_id=" +
-                    response.voucher_id,
+                  response.voucher_id,
                   "_blank"
                 );
               } else {
                 window.open(
                   "print_voucher.php?type=both&voucher_id=" +
-                    response.voucher_id,
+                  response.voucher_id,
                   "_blank"
                 );
               }
@@ -625,8 +625,9 @@ $("#addProductSale").on("click", function () {
   var product_quantity = parseInt($("#get_product_quantity").val());
   var pro_type = $("#add_pro_type").val();
   var max_qty = parseInt($("#get_product_quantity").attr("max"));
+  var batch_no = $("#get_batch_no").val().trim();
 
- 
+
 
   if (order_return) {
     max_qty = 999999999;
@@ -657,8 +658,9 @@ $("#addProductSale").on("click", function () {
     $("#sale_product_price").val("");
     $("#get_product_detail").val("");
     $("#get_product_code").focus();
+    $("#get_batch_no").val("").trigger("change");
 
-    
+
 
     if ($("#product_idN_" + id).length) {
       $(".product_ids").each(function () {
@@ -684,8 +686,10 @@ $("#addProductSale").on("click", function () {
                 <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
                 <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
                 <input type="hidden" id="product_detail_${id}" name="product_detail[]" value="${detail}">
-                <td>${code}</td>
+                <td>${batch_no || '-'}</td>
+
                 <td>${name}</td>
+                <td>${batch_no || '-'}</td>
                 <td>${price}</td>
                 <td>${Currentquantity}</td>
                 <td>${total_price}</td>
@@ -711,10 +715,11 @@ $("#addProductSale").on("click", function () {
           <input type="hidden" id="product_quantites_${id}" name="product_quantites[]" value="${product_quantity}">
           <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
           <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
-         
           <input type="hidden" id="product_detail_${id}" name="product_detail[]" value="${detail}">
-          <td>${code}</td>
+          <input type="hidden" name="batch_nos[]"   value="${batch_no}">
+          
           <td>${name}</td>
+          <td>${batch_no || '-'}</td>
           <td>${price}</td>
           <td>${product_quantity}</td>
           <td>${total_price}</td>
@@ -738,130 +743,9 @@ $("#addProductSale").on("click", function () {
   }
 });
 
-// =============================================================================================================================
-
-// ============= add product sale
-// $("#addProductPurchase").on("click", function () {
-//   var total_price = 0;
-//   var payment_type = $("#payment_type").val();
-//   var is_purchase_return =
-//     $("#purchase_return").length &&
-//     $("#purchase_return").val() === "purchase_return";
-//   var name = $("#get_product_name :selected").text();
-//   var pro_details = $("#get_product_detail").val();
-//   var price = $("#get_product_price").val();
-//   var sale_price = $("#get_product_sale_price").val();
-//   var id = $("#get_product_name :selected").val();
-//   var code = $("#get_product_code").val();
-//   var product_quantity = parseInt($("#get_product_quantity").val());
-//   var pro_type = $("#add_pro_type").val();
-//   var max_qty = parseInt($("#get_product_quantity").attr("max"));
-
-//   if ((payment_type == "cash_purchase" || payment_type == "credit_purchase") && !is_purchase_return){
-//     max_qty = getRandomInt(99999999999);
-//   }
-
-//   var GrandTotalAva = $("#remaining_ammount").val();
-//   var ThisTotal = price * product_quantity + Number(GrandTotalAva);
-//   var RThisPersonLIMIT = $("#R_LimitInput").val();
-
-//   if (
-//     id !== "" &&
-//     product_quantity !== "" &&
-//     max_qty >= product_quantity &&
-//     code !== ""
-//   ) {
-//     // Reset input fields
-//    $("#get_product_name").val('').trigger('change');
-//     $("#add_pro_type").val("add");
-//     $("#get_product_code").val("");
-//     $("#get_product_price").val("");
-//     $("#get_product_sale_price").val("");
-//     $("#get_product_quantity").val("1");
-//     $("#sale_product_price").val("");
-//     $("#get_product_detail").val("");
-//     $("#get_product_code").focus();
-//     if ($("#product_idN_" + id).length) {
-//       // Product already exists in list
-//       $(".product_ids").each(function () {
-//         var quantity = $(this).data("quantity");
-//         total_price = 0;
-//         var val = $(this).val();
-
-//         if (val == id) {
-//           var Currentquantity =
-//             pro_type === "add"
-//               ? parseInt(quantity) + parseInt(product_quantity)
-//               : parseInt(product_quantity);
-
-//           total_price = parseFloat(price) * parseFloat(Currentquantity);
-
-//           if (Currentquantity <= max_qty) {
-//             $("#product_idN_" + id).replaceWith(`
-//                           <tr id="product_idN_${id}">
-//                               <input type="hidden" data-price="${price}" data-quantity="${Currentquantity}"
-//                                      id="product_ids_${id}" class="product_ids" name="product_ids[]" value="${id}">
-//                               <input type="hidden" id="product_quantites_${id}" name="product_quantites[]" value="${Currentquantity}">
-//                               <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
-//                               <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
-//                               <input type="hidden" id="product_salerate_${id}" name="product_salerates[]" value="${sale_price}">
-//                               <td>${code}</td>
-//                               <td>${name}</td>
-//                               <td>${price}</td>
-//                               ${sale_price ? `<td>${sale_price}</td>` : ""}
-//                               <td>${Currentquantity}</td>
-//                               <td>${total_price}</td>
-//                               <td>
-//                                   <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
-//                                   <button type="button" onclick="editByid(${id}, '${code}', '${price}', '${product_quantity}','${pro_details}')" class="fa fa-edit text-success"></button>
-//                               </td>
-//                           </tr>
-//                       `);
-//           } else {
-//             sweeetalert("Cannot Add Quantity more than stock", "error", 1500);
-//           }
-//         }
-//         getOrderTotal();
-//       });
-//     } else {
-//       // New product row
-//       total_price = parseFloat(price) * parseFloat(product_quantity);
-
-//       $("#purchase_product_tb").append(`
-//               <tr id="product_idN_${id}">
-//                   <input type="hidden" data-price="${price}" data-quantity="${product_quantity}"
-//                          id="product_ids_${id}" class="product_ids" name="product_ids[]" value="${id}">
-//                   <input type="hidden" id="product_quantites_${id}" name="product_quantites[]" value="${product_quantity}">
-//                   <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
-//                   <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
-//                   <input type="hidden" id="product_salerate_${id}" name="product_salerates[]" value="${sale_price}">
-//                   <td>${code}</td>
-//                   <td>${name}</td>
-//                   <td>${price}</td>
-//                   ${sale_price ? `<td>${sale_price}</td>` : ""}
-//                   <td>${product_quantity}</td>
-//                   <td>${total_price}</td>
-//                   <td>
-//                       <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
-//                       <button type="button" onclick="editByid(${id}, '${code}', '${price}', '${product_quantity}','${pro_details}')" class="fa fa-edit text-success"></button>
-//                   </td>
-//               </tr>
-//           `);
-
-//       getOrderTotal();
-//     }
-//   } else {
-//      console.log(product_quantity,max_qty);
-//     if (max_qty < product_quantity) {
-//       sweeetalert("Cannot Add Quantity more than stock", "error", 1500);
-//     } else if (code === "") {
-//       sweeetalert("Select The Product first", "error", 1500);
-//     }
-//   }
-
-// });
 
 $("#addProductPurchase").on("click", function () {
+
   var total_price = 0;
   var payment_type = $("#payment_type").val();
   var is_purchase_return =
@@ -869,15 +753,15 @@ $("#addProductPurchase").on("click", function () {
     $("#purchase_return").val() === "purchase_return";
   var name = $("#get_product_name :selected").text();
   var pro_details = $("#get_product_detail").val();
-  var price = parseFloat($("#get_product_price").val()) ;
-  var sale_price = parseFloat($("#sale_product_price").val()) ;
+  var price = parseFloat($("#get_product_price").val());
+  var sale_price = parseFloat($("#sale_product_price").val());
   var id = $("#get_product_name :selected").val();
   var code = $("#get_product_code").val();
   var product_quantity = parseInt($("#get_product_quantity").val()) || 0;
   var pro_type = $("#add_pro_type").val();
   var max_qty = parseInt($("#get_product_quantity").attr("max")) || 0;
-
-  
+  var batch_no = $("#get_batch_no").val().trim();
+  var expiry_date = $("#get_expiry_date").val();
   // For non-purchase returns (cash/credit), allow unlimited quantities
   if (
     (payment_type === "cash_purchase" || payment_type === "credit_purchase") &&
@@ -906,6 +790,9 @@ $("#addProductPurchase").on("click", function () {
     $("#sale_product_price").val("");
     $("#get_product_detail").val("");
     $("#get_product_code").focus();
+    $("#get_expiry_date").val("");
+    $("#get_batch_no").val("");
+
 
     if ($("#product_idN_" + id).length) {
       // Product already exists in list
@@ -932,15 +819,20 @@ $("#addProductPurchase").on("click", function () {
                 <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
                 <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
                <input type="hidden" id="product_salerate_${id}" name="product_salerates[]" value="${sale_price}">
-                <td>${code}</td>
+                <input type="hidden" name="batch_nos[]"   value="${batch_no}">
+                <input type="hidden" name="expires[]"     value="${expiry_date}">
+                 
+              
                 <td>${name}</td>
+                <td>${batch_no || '-'}</td>
+                <td>${expiry_date || '-'}</td>
                 <td>${price}</td>
-                
+                <td>${sale_price}</td>
                 <td>${Currentquantity}</td>
                 <td>${total_price}</td>
                 <td>
                   <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
-                  <button type="button" onclick="editByid(${id}, '${code}', '${price}', '${Currentquantity}','${pro_details}')" class="fa fa-edit text-success"></button>
+                  <button type="button" onclick="editByid(${id}, '${batch_no}','${expiry_date}', '${price}','${sale_price}', '${Currentquantity}')" class="fa fa-edit text-success"></button>
                 </td>
               </tr>
             `);
@@ -967,15 +859,20 @@ $("#addProductPurchase").on("click", function () {
           <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
           <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
           <input type="hidden" id="product_salerate_${id}" name="product_salerates[]" value="${sale_price}">
-          <td>${code}</td>
+          <input type="hidden" name="batch_nos[]"   value="${batch_no}">
+          <input type="hidden" name="expires[]"     value="${expiry_date}">
+                
+          
           <td>${name}</td>
+          <td>${batch_no || '-'}</td>
+          <td>${expiry_date || '-'}</td>
           <td>${price}</td>
-         
+          <td>${sale_price}</td>
           <td>${product_quantity}</td>
           <td>${total_price}</td>
           <td>
             <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
-            <button type="button" onclick="editByid(${id}, '${code}', '${price}',  '${product_quantity}','${pro_details}')" class="fa fa-edit text-success"></button>
+            <button type="button" onclick="editByid(${id}, '${batch_no}','${expiry_date}', '${price}','${sale_price}',  '${product_quantity}','${pro_details}')" class="fa fa-edit text-success"></button>
           </td>
         </tr>
       `);
@@ -1057,11 +954,13 @@ function getOrderTotal() {
   getRemaingAmount();
 }
 
-function editByid(id, code, price, qty,sale_price) {
-// function editByid(id, code, price, qty, detail) {
-  // alert(price);
+function editByid(id, batch_no, expiry_date, price, sale_price, qty) {
+  // function editByid(id, code, price, qty, detail) {
+  alert(qty);
   $(".searchableSelect").val(id);
-  $("#get_product_code").val(code);
+  // $("#get_product_code").val(code);
+  $("#get_batch_no").val(batch_no);
+  $("#get_expiry_date").val(expiry_date);
   $("#get_product_quantity").val(qty);
   $("#add_pro_type").val("update");
   // $("#get_product_detail").val(detail);
@@ -1072,10 +971,10 @@ function editByid(id, code, price, qty,sale_price) {
 
   $.when(effect()).done(function () {
     setTimeout(function () {
-      
+
       $("#get_product_price").val(price);
       $("#sale_product_price").val(sale_price);
-      
+
     }, 600);
   });
 }
@@ -1153,53 +1052,53 @@ function addbarcode_product(code, action_value) {
 
             $("#product_idN_" + res.product_id).replaceWith(
               '<tr id="product_idN_' +
-                res.product_id +
-                '">\
+              res.product_id +
+              '">\
 					<input type="hidden" data-price="' +
-                res.rate +
-                '" data-quantity="' +
-                Currentquantity +
-                '" id="product_ids_' +
-                res.product_id +
-                '" class="product_ids" name="product_ids[]" value="' +
-                res.product_id +
-                '">\
+              res.rate +
+              '" data-quantity="' +
+              Currentquantity +
+              '" id="product_ids_' +
+              res.product_id +
+              '" class="product_ids" name="product_ids[]" value="' +
+              res.product_id +
+              '">\
 					<input type="hidden" id="product_quantites_' +
-                res.product_id +
-                '" name="product_quantites[]" value="' +
-                Currentquantity +
-                '">\
+              res.product_id +
+              '" name="product_quantites[]" value="' +
+              Currentquantity +
+              '">\
 					<input type="hidden" id="product_rates_' +
-                res.product_id +
-                '" name="product_rates[]" value="' +
-                res.rate +
-                '">\
+              res.product_id +
+              '" name="product_rates[]" value="' +
+              res.rate +
+              '">\
 					<td>' +
-                res.product_code +
-                "  </td>\
+              res.product_code +
+              "  </td>\
           <td>" +
-                res.product_name +
-                ' (<span class="text-success">' +
-                res.brand_name +
-                "</span>) </td>\
+              res.product_name +
+              ' (<span class="text-success">' +
+              res.brand_name +
+              "</span>) </td>\
 					<td>" +
-                res.rate +
-                " </td>\
+              res.rate +
+              " </td>\
 					<td>" +
-                Currentquantity +
-                " </td>\
+              Currentquantity +
+              " </td>\
 					<td>" +
-                res.current_rate * Currentquantity +
-                ' </td>\
+              res.current_rate * Currentquantity +
+              ' </td>\
 					<td> <button type="button" onclick="addbarcode_product(`' +
-                res.product_code +
-                '`,`plus`)" class="fa fa-plus text-success" href="#" ></button>\
+              res.product_code +
+              '`,`plus`)" class="fa fa-plus text-success" href="#" ></button>\
 						<button type="button" onclick="addbarcode_product(`' +
-                res.product_code +
-                '`,`minus`)" class="fa fa-minus text-warning" href="#" ></button>\
+              res.product_code +
+              '`,`minus`)" class="fa fa-minus text-warning" href="#" ></button>\
 						<button type="button" onclick="removeByid(`#product_idN_' +
-                res.product_id +
-                '`)" class="fa fa-trash text-danger" href="#" ></button>\
+              res.product_id +
+              '`)" class="fa fa-trash text-danger" href="#" ></button>\
 						</td>\
 					</tr>'
             );
@@ -1209,53 +1108,53 @@ function addbarcode_product(code, action_value) {
       } else {
         $("#purchase_product_tb").append(
           '<tr id="product_idN_' +
-            res.product_id +
-            '">\
+          res.product_id +
+          '">\
 			          <input type="hidden" data-price="' +
-            res.current_rate +
-            '"  data-quantity="1" id="product_ids_' +
-            res.product_id +
-            '" class="product_ids" name="product_ids[]" value="' +
-            res.product_id +
-            '">\
+          res.current_rate +
+          '"  data-quantity="1" id="product_ids_' +
+          res.product_id +
+          '" class="product_ids" name="product_ids[]" value="' +
+          res.product_id +
+          '">\
 			          <input type="hidden" id="product_quantites_' +
-            res.product_id +
-            '" name="product_quantites[]" value="1">\
+          res.product_id +
+          '" name="product_quantites[]" value="1">\
 			          <input type="hidden" id="product_rate_' +
-            res.product_id +
-            '" name="product_rates[]" value="' +
-            res.current_rate +
-            '">\
+          res.product_id +
+          '" name="product_rates[]" value="' +
+          res.current_rate +
+          '">\
 			          <input type="hidden" id="product_totalrate_' +
-            res.product_id +
-            '" name="product_totalrates[]" value="' +
-            res.current_rate +
-            '">\
+          res.product_id +
+          '" name="product_totalrates[]" value="' +
+          res.current_rate +
+          '">\
 			          <td>' +
-            res.product_code +
-            "  </td>\
+          res.product_code +
+          "  </td>\
                 <td>" +
-            res.product_name +
-            ' (<span class="text-success">' +
-            res.brand_name +
-            "</span>)</td>\
+          res.product_name +
+          ' (<span class="text-success">' +
+          res.brand_name +
+          "</span>)</td>\
 			           <td>" +
-            res.current_rate +
-            "</td>\
+          res.current_rate +
+          "</td>\
 			           <td>1</td>\
 			          <td>" +
-            res.current_rate +
-            '</td>\
+          res.current_rate +
+          '</td>\
 			          <td>\
 			            <button type="button" onclick="addbarcode_product(`' +
-            res.product_code +
-            '`,`plus`)" class="fa fa-plus text-success" href="#" ></button>\
+          res.product_code +
+          '`,`plus`)" class="fa fa-plus text-success" href="#" ></button>\
 						<button type="button" onclick="addbarcode_product(`' +
-            res.product_code +
-            '`,`minus`)" class="fa fa-minus text-warning" href="#" ></button>\
+          res.product_code +
+          '`,`minus`)" class="fa fa-minus text-warning" href="#" ></button>\
 						<button type="button" onclick="removeByid(`#product_idN_' +
-            res.product_id +
-            '`)" class="fa fa-trash text-danger" href="#" ></button>\
+          res.product_id +
+          '`)" class="fa fa-trash text-danger" href="#" ></button>\
 						</td>\
 			          </tr>'
         );
@@ -1299,54 +1198,54 @@ function addProductOrder(id, max = 100, action_value) {
 
             $("#product_idN_" + id).replaceWith(
               '<tr id="product_idN_' +
-                id +
-                '">\
+              id +
+              '">\
           <input type="hidden" data-price="' +
-                res.current_rate +
-                '" data-quantity="' +
-                Currentquantity +
-                '" id="product_ids_' +
-                id +
-                '" class="product_ids" name="product_ids[]" value="' +
-                res.product_id +
-                '">\
+              res.current_rate +
+              '" data-quantity="' +
+              Currentquantity +
+              '" id="product_ids_' +
+              id +
+              '" class="product_ids" name="product_ids[]" value="' +
+              res.product_id +
+              '">\
           <input type="hidden" id="product_quantites_' +
-                id +
-                '" name="product_quantites[]" value="' +
-                Currentquantity +
-                '">\
+              id +
+              '" name="product_quantites[]" value="' +
+              Currentquantity +
+              '">\
           <input type="hidden" id="product_rates_' +
-                id +
-                '" name="product_rates[]" value="' +
-                res.current_rate +
-                '">\
+              id +
+              '" name="product_rates[]" value="' +
+              res.current_rate +
+              '">\
           <td>' +
-                res.product_name +
-                ' (<span class="text-success">' +
-                res.brand_name +
-                "</span>) </td>\
+              res.product_name +
+              ' (<span class="text-success">' +
+              res.brand_name +
+              "</span>) </td>\
           <td>" +
-                res.current_rate +
-                " </td>\
+              res.current_rate +
+              " </td>\
           <td>" +
-                Currentquantity +
-                " </td>\
+              Currentquantity +
+              " </td>\
           <td>" +
-                res.current_rate * Currentquantity +
-                ' </td>\
+              res.current_rate * Currentquantity +
+              ' </td>\
           <td> <button type="button" onclick="addProductOrder(' +
-                id +
-                "," +
-                res.quantity +
-                ',`plus`)" class="fa fa-plus text-success" href="#" ></button>\
+              id +
+              "," +
+              res.quantity +
+              ',`plus`)" class="fa fa-plus text-success" href="#" ></button>\
             <button type="button" onclick="addProductOrder(' +
-                id +
-                "," +
-                res.quantity +
-                ',`minus`)" class="fa fa-minus text-warning" href="#" ></button>\
+              id +
+              "," +
+              res.quantity +
+              ',`minus`)" class="fa fa-minus text-warning" href="#" ></button>\
             <button type="button" onclick="removeByid(`#product_idN_' +
-                id +
-                '`)" class="fa fa-trash text-danger" href="#" ></button>\
+              id +
+              '`)" class="fa fa-trash text-danger" href="#" ></button>\
             </td>\
           </tr>'
             );
@@ -1356,54 +1255,54 @@ function addProductOrder(id, max = 100, action_value) {
       } else {
         $("#purchase_product_tb").append(
           '<tr id="product_idN_' +
-            id +
-            '">\
+          id +
+          '">\
                 <input type="hidden" data-price="' +
-            res.current_rate +
-            '"  data-quantity="1" id="product_ids_' +
-            id +
-            '" class="product_ids" name="product_ids[]" value="' +
-            id +
-            '">\
+          res.current_rate +
+          '"  data-quantity="1" id="product_ids_' +
+          id +
+          '" class="product_ids" name="product_ids[]" value="' +
+          id +
+          '">\
                 <input type="hidden" id="product_quantites_' +
-            id +
-            '" name="product_quantites[]" value="1">\
+          id +
+          '" name="product_quantites[]" value="1">\
                 <input type="hidden" id="product_rate_' +
-            id +
-            '" name="product_rates[]" value="' +
-            res.current_rate +
-            '">\
+          id +
+          '" name="product_rates[]" value="' +
+          res.current_rate +
+          '">\
                 <input type="hidden" id="product_totalrate_' +
-            id +
-            '" name="product_totalrates[]" value="' +
-            res.current_rate +
-            '">\
+          id +
+          '" name="product_totalrates[]" value="' +
+          res.current_rate +
+          '">\
                 <td>' +
-            res.product_name +
-            ' (<span class="text-success">' +
-            res.brand_name +
-            "</span>)</td>\
+          res.product_name +
+          ' (<span class="text-success">' +
+          res.brand_name +
+          "</span>)</td>\
                  <td>" +
-            res.current_rate +
-            "</td>\
+          res.current_rate +
+          "</td>\
                  <td>1</td>\
                 <td>" +
-            res.current_rate +
-            '</td>\
+          res.current_rate +
+          '</td>\
                 <td>\
                   <button type="button" onclick="addProductOrder(' +
-            id +
-            "," +
-            res.quantity +
-            ',`plus`)" class="fa fa-plus text-success" href="#" ></button>\
+          id +
+          "," +
+          res.quantity +
+          ',`plus`)" class="fa fa-plus text-success" href="#" ></button>\
             <button type="button" onclick="addProductOrder(' +
-            id +
-            "," +
-            res.quantity +
-            ',`minus`)" class="fa fa-minus text-warning" href="#" ></button>\
+          id +
+          "," +
+          res.quantity +
+          ',`minus`)" class="fa fa-minus text-warning" href="#" ></button>\
             <button type="button" onclick="removeByid(`#product_idN_' +
-            id +
-            '`)" class="fa fa-trash text-danger" href="#" ></button>\
+          id +
+          '`)" class="fa fa-trash text-danger" href="#" ></button>\
             </td>\
                 </tr>'
         );

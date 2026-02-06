@@ -502,25 +502,43 @@ if (isset($_REQUEST['get_products_list'])) {
 if (!empty($_REQUEST['getPrice'])) {
 	if ($_REQUEST['type'] == "product") {
 		$record = fetchRecord($dbc, "product", "product_id", $_REQUEST['getPrice']);
+		$product_id = $record['product_id'] ?? 0;
 	} else {
 		$record = fetchRecord($dbc, "product", "product_code", $_REQUEST['getPrice']);
+		$product_id = $record['product_id'] ?? 0;
 	}
-	$sale_price = @$record['current_rate'];
-	$price = @$record['purchase_rate'];
 
+	// Get sale & purchase price from product table
+	$sale_price = $record['current_rate'] ?? 0;
+	$price = $record['purchase_rate'] ?? 0;
+	$description = $record['product_description'] ?? '';
 
+	// Get TOTAL quantity from all batches of this product
+	$total_qty = 0;
+	if ($product_id > 0) {
+		$query = "SELECT COALESCE(SUM(available_qty), 0) AS total_qty 
+                  FROM product_batches 
+                  WHERE product_id = ?";
 
+		$stmt = mysqli_prepare($dbc, $query);
+		mysqli_stmt_bind_param($stmt, "i", $product_id);
+		mysqli_stmt_execute($stmt);
+		$result = mysqli_stmt_get_result($stmt);
 
+		if ($row = mysqli_fetch_assoc($result)) {
+			$total_qty = (float) $row['total_qty'];
+		}
+		mysqli_stmt_close($stmt);
+	}
 
 	$response = [
-		"sale_price" => isset($sale_price) ? $sale_price : 0,
-		"price" => isset($price) ? $price : 0,
-		"qty" => @(float) $record['quantity_instock'],
-		"description" => $record['product_description'],
+		"sale_price" => $sale_price,
+		"price" => $price,
+		"qty" => $total_qty,           // ← now correct total from batches
+		"description" => $description,
 		"sts" => "success",
-		"type" => @$_REQUEST['credit_sale_type'],
+		"type" => $_REQUEST['credit_sale_type'] ?? '',
 	];
-
 
 	echo json_encode($response);
 }
@@ -668,7 +686,7 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 
 					$x++;
 				} //end of foreach
-				$total_grand = @(float) $_REQUEST['freight'] + $total_ammount - (float) $_REQUEST['ordered_discount'] ;
+				$total_grand = @(float) $_REQUEST['freight'] + $total_ammount - (float) $_REQUEST['ordered_discount'];
 				$due_amount = (float) $total_grand - @(float) $_REQUEST['paid_ammount'];
 				if ($due_amount > 0) {
 					$payment_status = 0; //pending
@@ -770,7 +788,7 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 					$x++;
 				} //end of foreach
 
-				$total_grand = @(float) $_REQUEST['freight'] + $total_ammount - (float) $_REQUEST['ordered_discount'] ;
+				$total_grand = @(float) $_REQUEST['freight'] + $total_ammount - (float) $_REQUEST['ordered_discount'];
 				$due_amount = (float) $total_grand - @(float) $_REQUEST['paid_ammount'];
 
 				$credit = [
@@ -870,7 +888,7 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 
 					$x++;
 				} //end of foreach
-				$total_grand = @(float) $_REQUEST['freight'] + $total_ammount - (float) $_REQUEST['ordered_discount'] ;
+				$total_grand = @(float) $_REQUEST['freight'] + $total_ammount - (float) $_REQUEST['ordered_discount'];
 				$due_amount = (float) $total_grand - @(float) $_REQUEST['paid_ammount'];
 
 				$transactions = fetchRecord($dbc, "orders", "order_id", $_REQUEST['product_order_id']);
@@ -1004,25 +1022,32 @@ if (isset($_REQUEST['cash_purchase_supplier']) && empty($_REQUEST['purchase_retu
 					$product_quantites = (float) $_REQUEST['product_quantites'][$x];
 					$product_rates = (float) @$_REQUEST['product_rates'][$x];
 					$product_salerates = (float) @$_REQUEST['product_salerates'][$x];
+					$batch = $_REQUEST['batch_nos'][$x] ?? '';
+					$expiry = $_REQUEST['expires'][$x] ?? '';
 					$total = (float) $product_quantites * $product_rates;
 					$total_ammount += (float) $total;
 
 					$updateProduct = mysqli_query($dbc, "
-        UPDATE product 
-        SET  
-            purchase_rate = '$product_rates' 
-        WHERE product_id = '$value'
-    ");
+														UPDATE product 
+														SET  
+															purchase_rate = '$product_rates' ,
+															current_rate = '$product_salerates' 
+														WHERE product_id = '$value'
+													");
 					$order_items = [
 						'product_id' => $_REQUEST['product_ids'][$x],
 						'rate' => $product_rates,
 						'sale_rate' => $product_salerates,
 						'total' => $total,
 						'purchase_id' => $last_id,
+						'batch_no' => $batch,
+						'expiry_date' => $expiry,
 						'product_detail' => @$_REQUEST['product_detail'][$x],
 						'quantity' => $product_quantites,
 						'purchase_item_status' => 1,
 					];
+
+
 
 					insert_data($dbc, 'purchase_item', $order_items);
 
@@ -1039,6 +1064,53 @@ if (isset($_REQUEST['cash_purchase_supplier']) && empty($_REQUEST['purchase_retu
 					// 	$quantity_update = mysqli_query($dbc, "UPDATE product SET  current_rate='$current_rate' WHERE product_id='" . $product_id . "' ");
 					// }
 
+					// 3. ────────────── Handle product_batches table ──────────────
+
+					if (!empty($batch) && $product_quantites > 0) {
+
+						// Check if this batch + expiry already exists for this product
+						$check_sql = "SELECT batch_id, available_qty ,qty_in
+                      FROM product_batches 
+                      WHERE product_id = '$product_id' 
+                        AND batch_no = '" . mysqli_real_escape_string($dbc, $batch) . "' 
+                        AND expiry_date " . ($expiry ? "= '$expiry'" : "IS NULL");
+
+						$check_result = mysqli_query($dbc, $check_sql);
+
+						if (mysqli_num_rows($check_result) > 0) {
+							// Batch already exists → update quantities
+							$row = mysqli_fetch_assoc($check_result);
+							$existing_qty = (int) $row['available_qty'];
+							$existing_qty_in = (int) $row['qty_in'];
+
+							$new_available = $existing_qty + $product_quantites;
+							$new_qty_in = $existing_qty_in + $product_quantites;
+							$update_batch = [
+								'qty_in' => $new_qty_in,
+								'available_qty' => $new_available,
+								'updated_at' => date('Y-m-d H:i:s'),
+								// optional: 'purchase_id' => $last_id   (if you want to track last purchase)
+							];
+
+							update_data($dbc, 'product_batches', $update_batch, 'batch_id', $row['batch_id']);
+
+						} else {
+							// New batch → insert
+							$new_batch = [
+								'product_id' => $product_id,
+								'batch_no' => $batch,
+								'expiry_date' => $expiry ?: null,
+								'qty_in' => $product_quantites,
+								'qty_out' => 0,
+								'available_qty' => $product_quantites,
+								'purchase_id' => $last_id,               // useful for traceability
+								'created_at' => date('Y-m-d H:i:s'),
+								'updated_at' => date('Y-m-d H:i:s'),
+							];
+
+							insert_data($dbc, 'product_batches', $new_batch);
+						}
+					}
 
 
 					$x++;
@@ -1100,60 +1172,181 @@ if (isset($_REQUEST['cash_purchase_supplier']) && empty($_REQUEST['purchase_retu
 			}
 		} else {
 			if (update_data($dbc, 'purchase', $data, 'purchase_id', $_REQUEST['product_purchase_id'])) {
-				$last_id = $_REQUEST['product_purchase_id'];
+				$purchase_id = $last_id = $_REQUEST['product_purchase_id'];
 
 
 				if ($get_company['stock_manage'] == 1) {
-					$proQ = get($dbc, "purchase_item WHERE purchase_id='" . $last_id . "' ");
 
-					while ($proR = mysqli_fetch_assoc($proQ)) {
-						$newqty = 0;
-						$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM  product WHERE product_id='" . $proR['product_id'] . "' "));
-						$newqty = (float) $quantity_instock['quantity_instock'] - (float) $proR['quantity'];
-						$quantity_update = mysqli_query($dbc, "UPDATE product SET  quantity_instock='$newqty' WHERE product_id='" . $proR['product_id'] . "' ");
+					// ─── 1. REVERSE OLD STOCK (total + batch level) ───
+					$oldItemsQuery = get($dbc, "purchase_item WHERE purchase_id = '$purchase_id'");
+
+					while ($oldItem = mysqli_fetch_assoc($oldItemsQuery)) {
+
+						$old_product_id = $oldItem['product_id'];
+						$old_quantity = (float) $oldItem['quantity'];
+						$old_batch = trim($oldItem['batch_no'] ?? '');
+						$old_expiry = $oldItem['expiry_date'] ?? null;
+
+						// A. Reverse total stock
+						$current_stock = mysqli_fetch_assoc(mysqli_query(
+							$dbc,
+							"SELECT quantity_instock 
+                 FROM product 
+                 WHERE product_id = '$old_product_id'"
+						));
+
+						$new_total_stock = ($current_stock['quantity_instock'] ?? 0) - $old_quantity;
+
+						mysqli_query(
+							$dbc,
+							"UPDATE product 
+                 SET quantity_instock = '$new_total_stock' 
+                 WHERE product_id = '$old_product_id'"
+						);
+
+						// B. Reverse batch-level stock (if batch exists)
+						if (!empty($old_batch)) {
+
+							$batch_condition = "product_id = '$old_product_id' 
+                                AND batch_no = '" . mysqli_real_escape_string($dbc, $old_batch) . "'";
+
+							if ($old_expiry) {
+								$batch_condition .= " AND expiry_date = '$old_expiry'";
+							} else {
+								$batch_condition .= " AND expiry_date IS NULL";
+							}
+
+							// Decrease qty_in and available_qty
+							mysqli_query(
+								$dbc,
+								"UPDATE product_batches 
+                     SET 
+                        qty_in = GREATEST(0, qty_in - $old_quantity),
+                        available_qty = GREATEST(0, available_qty - $old_quantity),
+                        updated_at = NOW()
+                     WHERE $batch_condition"
+							);
+						}
 					}
 				}
-				deleteFromTable($dbc, "purchase_item", 'purchase_id', $_REQUEST['product_purchase_id']);
+
+				// ─── 2. Delete old purchase items ───
+				deleteFromTable($dbc, "purchase_item", 'purchase_id', $purchase_id);
+
+				// ─── 3. Insert new items + update batches + stock ───
+				$total_ammount = 0;
 				$x = 0;
+
 				foreach ($_REQUEST['product_ids'] as $key => $value) {
 
-
-					$total = $qty = 0;
+					$product_id = $_REQUEST['product_ids'][$x];
 					$product_quantites = (float) $_REQUEST['product_quantites'][$x];
 					$product_rates = (float) $_REQUEST['product_rates'][$x];
-					// $product_salerates = (float)$_REQUEST['product_salerates'][$x];
+					$product_salerates = (float) ($_REQUEST['product_salerates'][$x] ?? 0);
+
+					$batch = trim($_REQUEST['batch_nos'][$x] ?? '');
+					$expiry = $_REQUEST['expires'][$x] ?? null;
+
 					$total = $product_quantites * $product_rates;
-					$total_ammount += (float) $total;
-							$updateProduct = mysqli_query($dbc, "
-        UPDATE product 
-        SET  
-            purchase_rate = '$product_rates' 
-        WHERE product_id = '$value'
-    ");
+					$total_ammount += $total;
+
+					// Update product's last purchase rate
+					mysqli_query(
+						$dbc,
+						"UPDATE product 
+             SET purchase_rate = '$product_rates' 
+             WHERE product_id = '$product_id'"
+					);
+
+					// Insert into purchase_item
 					$purchase_item = [
-						'product_id' => $_REQUEST['product_ids'][$x],
+						'product_id' => $product_id,
 						'rate' => $product_rates,
-						// 'sale_rate' => $product_salerates,
+						'sale_rate' => $product_salerates,
 						'total' => $total,
-						'purchase_id' => $_REQUEST['product_purchase_id'],
-						'product_detail' => @$_REQUEST['product_detail'][$x],
+						'purchase_id' => $purchase_id,
+						'product_detail' => @$_REQUEST['product_detail'][$x] ?? '',
 						'quantity' => $product_quantites,
+						'batch_no' => $batch,
+						'expiry_date' => $expiry,
 						'purchase_item_status' => 1,
 					];
 
-					//update_data($dbc,'order_item', $order_items , 'purchase_id',$_REQUEST['product_purchase_id']);
 					insert_data($dbc, 'purchase_item', $purchase_item);
 
-					if ($get_company['stock_manage'] == 1) {
-						$product_id = $_REQUEST['product_ids'][$x];
-						$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM  product WHERE product_id='" . $product_id . "' "));
-						$qty = (float) $quantity_instock['quantity_instock'] + $product_quantites;
-						$quantity_update = mysqli_query($dbc, "UPDATE product SET  quantity_instock='$qty' WHERE product_id='" . $product_id . "' ");
+					// ─── 4. Handle batch stock (product_batches) ───
+					if ($get_company['stock_manage'] == 1 && $product_quantites > 0 && !empty($batch)) {
+
+						$batch_condition = "product_id = '$product_id' 
+                            AND batch_no = '" . mysqli_real_escape_string($dbc, $batch) . "'";
+
+						if ($expiry) {
+							$batch_condition .= " AND expiry_date = '$expiry'";
+						} else {
+							$batch_condition .= " AND expiry_date IS NULL";
+						}
+
+						$check = mysqli_query(
+							$dbc,
+							"SELECT batch_id, available_qty 
+                 FROM product_batches 
+                 WHERE $batch_condition 
+                 LIMIT 1"
+						);
+
+						if (mysqli_num_rows($check) > 0) {
+							// Update existing batch
+							$row = mysqli_fetch_assoc($check);
+							$existing_available = (int) $row['available_qty'];
+
+							$new_available = $existing_available + $product_quantites;
+
+							mysqli_query(
+								$dbc,
+								"UPDATE product_batches 
+                     SET 
+                        qty_in = qty_in + $product_quantites,
+                        available_qty = $new_available,
+                        updated_at = NOW()
+                     WHERE batch_id = '{$row['batch_id']}'"
+							);
+						} else {
+							// Insert new batch entry
+							$new_batch = [
+								'product_id' => $product_id,
+								'batch_no' => $batch,
+								'expiry_date' => $expiry ?: null,
+								'qty_in' => $product_quantites,
+								'qty_out' => 0,
+								'available_qty' => $product_quantites,
+								'purchase_id' => $purchase_id,
+								'created_at' => date('Y-m-d H:i:s'),
+								'updated_at' => date('Y-m-d H:i:s'),
+							];
+
+							insert_data($dbc, 'product_batches', $new_batch);
+						}
+
+						// Also update total product stock
+						$current_stock = mysqli_fetch_assoc(mysqli_query(
+							$dbc,
+							"SELECT quantity_instock FROM product WHERE product_id = '$product_id'"
+						));
+
+						$new_stock = ($current_stock['quantity_instock'] ?? 0) + $product_quantites;
+
+						mysqli_query(
+							$dbc,
+							"UPDATE product 
+                 SET quantity_instock = '$new_stock' 
+                 WHERE product_id = '$product_id'"
+						);
 					}
 
 					$x++;
-				} //end of foreach
-				$total_grand = $total_ammount - (float) $_REQUEST['ordered_discount'] ;
+				}
+				//end of foreach
+				$total_grand = $total_ammount - (float) $_REQUEST['ordered_discount'];
 				$due_amount = (float) $total_grand - @(float) $_REQUEST['paid_ammount'];
 
 
