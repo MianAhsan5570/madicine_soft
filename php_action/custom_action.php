@@ -1896,9 +1896,26 @@ if (isset($_REQUEST['credit_order_client_name']) && isset($_REQUEST['order_retur
 			$res = mysqli_query($dbc, "SELECT * FROM order_return_item WHERE order_id='$last_id'");
 			while ($proR = mysqli_fetch_assoc($res)) {
 				$product_id = $proR['product_id'];
+				$o_qty = (float) $proR['quantity'];
+				$o_batch_id = $proR['batch_id'];
+				$o_batch_no = $proR['batch_no'];
+
 				$stock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$product_id'"));
-				$new_qty = (float) $stock['quantity_instock'] - (float) $proR['quantity'];
+				$new_qty = (float) $stock['quantity_instock'] - $o_qty;
 				mysqli_query($dbc, "UPDATE product SET quantity_instock='$new_qty' WHERE product_id='$product_id'");
+
+				// REVERSE Batch Stock (Subtract since return added earlier)
+				if (!empty($o_batch_id)) {
+					mysqli_query($dbc, "UPDATE product_batches 
+					                    SET qty_out = qty_out + $o_qty, 
+					                        available_qty = available_qty - $o_qty 
+					                    WHERE batch_id = '$o_batch_id'");
+				} elseif (!empty($o_batch_no)) {
+					mysqli_query($dbc, "UPDATE product_batches 
+					                    SET qty_out = qty_out + $o_qty, 
+					                        available_qty = available_qty - $o_qty 
+					                    WHERE product_id = '$product_id' AND batch_no = '$o_batch_no'");
+				}
 			}
 		}
 
@@ -1975,7 +1992,7 @@ if (isset($_REQUEST['credit_order_client_name']) && isset($_REQUEST['order_retur
 			$x++;
 		}
 
-		$total_grand = $total_amount - (float) $_REQUEST['ordered_discount'];
+		$total_grand = $total_amount + (float) @$_REQUEST['freight'] - (float) $_REQUEST['ordered_discount'];
 		$due_amount = $total_grand - $paid;
 		$payment_status = ($due_amount > 0) ? 0 : 1;
 
@@ -2186,7 +2203,7 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					}
 				}
 
-				$total_grand = $total_amount - (float) $_REQUEST['ordered_discount'];
+				$total_grand = $total_amount + (float) @$_REQUEST['freight'] - (float) $_REQUEST['ordered_discount'];
 				$due_amount = $total_grand - $paidAmount;
 				$payment_status = $due_amount > 0 ? 0 : 1;
 
@@ -2305,7 +2322,7 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					update_data($dbc, "transactions", $transactionUpdate, "transaction_id", $order['transaction_paid_id']);
 				}
 
-				$total_grand = $total_amount - $_REQUEST['ordered_discount'];
+				$total_grand = $total_amount + (float) @$_REQUEST['freight'] - $_REQUEST['ordered_discount'];
 				$due_amount = $total_grand - $paidAmount;
 				$payment_status = $due_amount > 0 ? 0 : 1;
 
