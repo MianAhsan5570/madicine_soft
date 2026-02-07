@@ -77,33 +77,42 @@
                </div>
              </div> <!-- end of form-group -->
              <div class="form-group row mt-3 mb-3">
-               <div class="col-6 col-md-2 ml-auto">
+               <!-- <div class="col-6 col-md-2 ml-auto">
                  <label>Product Code</label>
                  <input type="text" name="product_code" placeholder="Product Code" autocomplete="off" id="get_product_code" class="form-control">
-               </div>
+               </div> -->
                <div class="col-6 col-md-4">
                  <label>Products</label>
                  <input type="hidden" id="add_pro_type" value="add">
-                 <select class="form-control searchableSelect" id="get_product_name" name="product_id">
-                   <option value=" ">Select Product</option>
-                   <?php
+                  <select class="form-control searchableSelect" id="get_product_name" name="product_id">
+                    <option value=" ">Select Product</option>
+                    <?php
                     $result = mysqli_query($dbc, "SELECT * FROM product WHERE status=1 ");
                     while ($row = mysqli_fetch_array($result)) {
                       $getBrand = fetchRecord($dbc, "brands", "brand_id", $row['brand_id']);
                       $getCat = fetchRecord($dbc, "categories", "categories_id", $row['category_id']);
                     ?>
 
-                     <option data-price="<?= $row["current_rate"] ?>" <?= empty($r['product_id']) ? "" : "selected" ?> value="<?= $row["product_id"] ?>">
-                       <?= ucwords($row["product_name"]) ?> | <?= ucwords(@$getBrand["brand_name"]) ?>(<?= @$getCat["categories_name"] ?>) </option>
+                      <option data-price="<?= $row["current_rate"] ?>" <?= empty($r['product_id']) ? "" : "selected" ?> value="<?= $row["product_id"] ?>">
+                        <?= ucwords($row["product_name"]) ?> | <?= ucwords(@$getBrand["brand_name"]) ?>(<?= @$getCat["categories_name"] ?>) </option>
 
-                   <?php   } ?>
-                 </select>
-                 <span class="text-center w-100" id="instockQty"></span>
-               </div>
-               <div class="col-6 col-sm-2 col-md-2">
+                    <?php   } ?>
+                  </select>
+                  <span class="text-center w-100 badge badge-info mt-1" id="instockQty" style="font-size: 0.85rem;">InstockQty: 0</span>
+                </div>
+                <!-- Batch Selection -->
+                <div class="col-6 col-sm-2 col-md-2" id="batch_div">
+                  <label>Batch</label>
+                  <select class="form-control" id="get_batch_no" name="batch_id">
+                    <option value="">Select Batch</option>
+                  </select>
+                  <span class="text-center w-100 badge badge-info mt-1" id="batchQty" style="font-size: 0.85rem;">Batch Qty: 0</span>
+                  <input type="hidden" id="get_expiry_date">
+                </div>
+               <!-- <div class="col-6 col-sm-2 col-md-2">
                  <label>Purchase Price</label>
                  <input type="number" min="0" class="form-control" placeholder="Purchase Price" id="get_product_price">
-               </div>
+               </div> -->
                <div class="col-6 col-sm-2 col-md-2">
                  <label>Sale Price</label>
                  <input type="number" min="0" class="form-control" placeholder="Sale Price" id="sale_product_price">
@@ -125,21 +134,24 @@
                  <table class="table  saleTable" id="myDiv">
                    <thead class="table-bordered">
                      <tr>
-                       <th>Code</th>
-                       <th>Product Name</th>
-                       <th>Unit Price</th>
-                       <th>Quantity</th>
-                       <th>Total Price</th>
-                       <th>Action</th>
+                        <!-- <th>Code</th> -->
+                        <th>Product Name</th>
+                        <th>Batch No</th>
+                        <!-- <th>Expiry</th> -->
+                        <th>Sale Price</th>
+                        <th>Quantity</th>
+                        <th>Total Price</th>
+                        <th>Action</th>
                      </tr>
                    </thead>
                    <tbody class="table table-bordered" id="purchase_product_tb">
                      <?php if (isset($_REQUEST['edit_order_id'])):
                         $q = mysqli_query($dbc, "
-  SELECT product.*, brands.*, order_return_item.* 
-  FROM order_return_item 
-  INNER JOIN product ON product.product_id = order_return_item.product_id 
-  INNER JOIN brands ON product.brand_id = brands.brand_id 
+  SELECT product.*, brands.*, order_return_item.* ,product_batches.batch_no, product_batches.batch_id
+  FROM order_return_item
+  INNER JOIN product ON product.product_id = order_return_item.product_id
+  INNER JOIN brands ON product.brand_id = brands.brand_id
+  LEFT JOIN product_batches ON product_batches.batch_id = order_return_item.batch_id 
   WHERE order_return_item.order_id = '" . base64_decode($_REQUEST['edit_order_id']) . "'
 ");
 
@@ -147,24 +159,34 @@
 
                       ?>
                          <tr id="product_idN_<?= $r['product_id'] ?>">
-                           <!-- <input type="hidden" data-price="<?= $r['rate'] ?>" data-quantity="<?= $r['quantity'] ?>" id="product_ids_<?= $r['product_id'] ?>" class="product_ids" name="product_ids[]" value="<?= $r['product_id'] ?>"> -->
-                           <input type="hidden" data-price="<?= $r['rate'] ?>" data-quantity="<?= $r['quantity'] ?>" id="product_ids_<?= $r['product_id'] ?>" class="product_ids" name="product_ids[]" value="<?= $r['product_id'] ?>">
-                           <input type="hidden" id="product_quantites_<?= $r['product_id'] ?>" name="product_quantites[]" value="<?= $r['quantity'] ?>">
-                           <input type="hidden" id="product_rate_<?= $r['product_id'] ?>" name="product_rates[]" value="<?= $r['rate'] ?>">
-                           <input type="hidden" id="product_totalrate_<?= $r['product_id'] ?>" name="product_totalrates[]" value="<?= $r['rate'] ?>">
-                           <td><?= $r['product_code'] ?></td>
-                           <td><?= $r['product_name'] ?></td>
-                           <td><?= $r['rate'] ?></td>
-                           <td><?= $r['quantity'] ?></td>
-                           <td><?= (float)$r['rate'] * (float)$r['quantity'] ?></?>
-                           </td>
-                           <td>
+                          <input type="hidden" data-price="<?= $r['rate'] ?>" data-quantity="<?= $r['quantity'] ?>"
+                            id="product_ids_<?= $r['product_id'] ?>" class="product_ids" name="product_ids[]"
+                            value="<?= $r['product_id'] ?>">
+                          <input type="hidden" id="product_quantites_<?= $r['product_id'] ?>" name="product_quantites[]"
+                            value="<?= $r['quantity'] ?>">
+                          <input type="hidden" id="product_rate_<?= $r['product_id'] ?>" name="product_rates[]"
+                            value="<?= $r['rate'] ?>">
+                          <input type="hidden" id="product_totalrate_<?= $r['product_id'] ?>" name="product_totalrates[]"
+                            value="<?= (float)$r['rate'] * (float)$r['quantity'] ?>">
+                          <input type="hidden" name="batch_ids[]" value="<?= $r['batch_id'] ?>">
+                          <input type="hidden" name="batch_nos[]" value="<?= $r['batch_no'] ?>">
+                          <input type="hidden" name="expires[]" value="<?= $r['expiry_date'] ?>">
 
-                             <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>`)" class="fa fa-trash text-danger" href="#"></button>
-                             <button type="button" onclick="editByid(<?= $r['product_id'] ?>,`<?= $r['product_code'] ?>`,<?= $r['purchase_rate'] ?>,<?= $r['quantity'] ?>,<?= $r['rate'] ?>)" class="fa fa-edit text-success ml-2 "></button>
-
-                           </td>
-                         </tr>
+                          <!-- <td><?= $r['product_code'] ?></td> -->
+                          <td><?= $r['product_name'] ?></td>
+                          <td><?= $r['batch_no'] ?: '-' ?></td>
+                          <!-- <td><?= $r['expiry_date'] ?: '-' ?></td> -->
+                          <td><?= $r['rate'] ?></td>
+                          <td><?= $r['quantity'] ?></td>
+                          <td><?= (float) $r['rate'] * (float) $r['quantity'] ?></td>
+                          <td>
+                            <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>`)"
+                              class="fa fa-trash text-danger" href="#"></button>
+                             <button type="button"
+                               onclick="editPurchaseItem(<?= $r['product_id'] ?>,`<?= $r['batch_no'] ?>`,`<?= $r['expiry_date'] ?>`,<?= $r['rate'] ?>,<?= $r['purchase_rate'] ?>,<?= $r['quantity'] ?>,<?= $r['batch_id'] ?>)"
+                               class="fa fa-edit text-success ml-2 "></button>
+                          </td>
+                        </tr>
                      <?php }
                       endif ?>
                    </tbody>

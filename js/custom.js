@@ -555,6 +555,41 @@ $("#get_product_name").on("change", function () {
       }
     },
   }); //ajax call }
+
+  // ============================================================================
+  // Fetch available batches for the selected product (for sales)
+  // ============================================================================
+  $.ajax({
+    type: "POST",
+    url: "php_action/custom_action.php",
+    data: {
+      get_product_batches: code,
+    },
+    dataType: "json",
+    success: function (response) {
+      $("#get_batch_no").empty().append('<option value="">Select Batch</option>');
+      $("#batchQty").text("Batch Qty: 0");
+
+      if (response.batches && response.batches.length > 0) {
+        response.batches.forEach(function (batch) {
+          var expiry = batch.expiry_date ? ' (Exp: ' + batch.expiry_date + ')' : '';
+          var optionText = batch.batch_no + expiry + ' - Qty: ' + batch.available_qty;
+
+          $("#get_batch_no").append(
+            '<option value="' + batch.batch_id + '" data-qty="' + batch.available_qty + '" data-batch-no="' + batch.batch_no + '" data-expiry="' + (batch.expiry_date || '') + '">' +
+            optionText +
+            '</option>'
+          );
+        });
+      } else {
+        $("#get_batch_no").append('<option value="">No batches available</option>');
+        $("#addProductSale").prop("disabled", true);
+      }
+    },
+    error: function () {
+      $("#get_batch_no").empty().append('<option value="">Error loading batches</option>');
+    }
+  });
 });
 $("#product_code").on("change", function () {
   //var code=  $('#get_product_code').val();
@@ -592,6 +627,33 @@ $("#product_code").on("change", function () {
     });
   }
 });
+
+// ============================================================================
+// Handle batch selection change - update quantity limits
+// ============================================================================
+$("#get_batch_no").on("change", function () {
+  var selectedOption = $(this).find(":selected");
+  var batchQty = parseInt(selectedOption.data("qty")) || 0;
+  var payment_type = $("#payment_type").val();
+  var order_return = $("#order_return").val();
+
+  $("#batchQty").text("Batch Qty: " + batchQty);
+  $("#get_expiry_date").val(selectedOption.data("expiry") || "");
+
+  // Set max quantity based on batch availability
+  if (payment_type === "cash_in_hand" || payment_type === "credit_sale") {
+    if (order_return !== "order_return") {
+      $("#get_product_quantity").attr("max", batchQty);
+
+      if (batchQty <= 0) {
+        $("#addProductSale").prop("disabled", true);
+      } else {
+        $("#addProductSale").prop("disabled", false);
+      }
+    }
+  }
+});
+
 $("#full_payment_check").on("click", function () {
   var checked = $("#full_payment_check").is(":checked");
   var grand = $("#product_grand_total_amount").html();
@@ -625,9 +687,29 @@ $("#addProductSale").on("click", function () {
   var product_quantity = parseInt($("#get_product_quantity").val());
   var pro_type = $("#add_pro_type").val();
   var max_qty = parseInt($("#get_product_quantity").attr("max"));
-  var batch_no = $("#get_batch_no").val().trim();
 
+  // ============================================================================
+  // Batch-related variables
+  // ============================================================================
+  var batch_id = $("#get_batch_no").val();
+  var batch_no = $("#get_batch_no :selected").data("batch-no") || "";
+  var expiry_date = $("#get_expiry_date").val() || "";
+  var batch_qty = parseInt($("#get_batch_no :selected").data("qty")) || 0;
 
+  // ============================================================================
+  // Validate batch selection for sales (not for returns or purchases)
+  // ============================================================================
+  if ((payment_type === "cash_in_hand" || payment_type === "credit_sale") && !order_return) {
+    if (!batch_id || batch_id === "") {
+      sweeetalert("Please select a batch", "error", 1500);
+      return;
+    }
+
+    if (product_quantity > batch_qty) {
+      sweeetalert("Quantity cannot exceed batch quantity (" + batch_qty + ")", "error", 1500);
+      return;
+    }
+  }
 
   if (order_return) {
     max_qty = 999999999;
@@ -646,6 +728,7 @@ $("#addProductSale").on("click", function () {
     id !== "" &&
     product_quantity !== "" &&
     max_qty >= product_quantity &&
+    (!order_return || (order_return && batch_id !== "" && batch_id !== null)) && // Require batch for returns
     code !== ""
   ) {
     // $("#get_product_name").prop("selectedIndex", 0);
@@ -654,9 +737,11 @@ $("#addProductSale").on("click", function () {
     $("#get_product_code").val("");
     $("#get_product_price").val("");
     $("#get_product_sale_price").val("");
-    $("#get_product_quantity").val("1");
+    $("#get_product_quantity").val("");
     $("#sale_product_price").val("");
     $("#get_product_detail").val("");
+    $("#get_expiry_date").val("");
+    $("#get_batch_no").val("");
     $("#get_product_code").focus();
     $("#get_batch_no").val("").trigger("change");
 
@@ -686,7 +771,8 @@ $("#addProductSale").on("click", function () {
                 <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
                 <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
                 <input type="hidden" id="product_detail_${id}" name="product_detail[]" value="${detail}">
-                <td>${batch_no || '-'}</td>
+                <input type="hidden" name="batch_ids[]" value="${batch_id}">
+                
 
                 <td>${name}</td>
                 <td>${batch_no || '-'}</td>
@@ -695,7 +781,7 @@ $("#addProductSale").on("click", function () {
                 <td>${total_price}</td>
                 <td>
                   <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
-                  <button type="button" onclick="editByid(${id}, '${code}', '${purchase_price}', '${product_quantity}','${price}')" class="fa fa-edit text-success"></button>
+                  <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${product_quantity},'${price}', '${detail}')" class="fa fa-edit text-success"></button>
                 </td>
               </tr>
             `);
@@ -716,16 +802,18 @@ $("#addProductSale").on("click", function () {
           <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
           <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
           <input type="hidden" id="product_detail_${id}" name="product_detail[]" value="${detail}">
-          <input type="hidden" name="batch_nos[]"   value="${batch_no}">
-          
+          <input type="hidden" name="batch_nos[]"     value="${batch_no}">
+          <input type="hidden" name="batch_ids[]"     value="${batch_id}">
+          <input type="hidden" name="expires[]"       value="${expiry_date}">
           <td>${name}</td>
-          <td>${batch_no || '-'}</td>
+          <td>${batch_no || "-"}</td>
+         
           <td>${price}</td>
           <td>${product_quantity}</td>
           <td>${total_price}</td>
           <td>
             <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
-            <button type="button" onclick="editByid(${id}, '${code}', '${purchase_price}', '${product_quantity}','${price}')" class="fa fa-edit text-success"></button>
+            <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${product_quantity},'${price}', '${detail}')" class="fa fa-edit text-success"></button>
           </td>
         </tr>
       `);
@@ -739,6 +827,8 @@ $("#addProductSale").on("click", function () {
       sweeetalert("Cannot Add Quantity more than stock", "error", 1500);
     } else if (code === "") {
       sweeetalert("Select The Product first", "error", 1500);
+    } else if (order_return && (batch_id === "" || batch_id === null)) {
+      sweeetalert("Select the Batch first", "error", 1500);
     }
   }
 });
@@ -770,6 +860,19 @@ $("#addProductPurchase").on("click", function () {
     max_qty = 99999999999;
   }
 
+  // ============================================================================
+  // DETERMINE BATCH INFO (Captured early for both Add and Update)
+  // ============================================================================
+  var batch_id_val = "";
+  var batch_no_text = batch_no; // Default to input value
+
+  if (is_purchase_return) {
+    batch_id_val = $("#get_batch_no").val();
+    batch_no_text = $("#get_batch_no option:selected").data("batch-no") || batch_no;
+    // Fallback if data attribute is missing
+    if (!batch_no_text && batch_id_val) batch_no_text = batch_id_val;
+  }
+
   var GrandTotalAva = parseFloat($("#remaining_ammount").val()) || 0;
   var ThisTotal = price * product_quantity + GrandTotalAva;
   var RThisPersonLIMIT = $("#R_LimitInput").val();
@@ -778,7 +881,8 @@ $("#addProductPurchase").on("click", function () {
     id !== "" &&
     product_quantity > 0 &&
     code !== "" &&
-    (!is_purchase_return || (is_purchase_return && product_quantity <= max_qty)) // Explicit purchase return check
+    (!is_purchase_return || (is_purchase_return && batch_id_val !== "")) && // Require batch for returns
+    (!is_purchase_return || (is_purchase_return && product_quantity <= max_qty))
   ) {
     // Reset input fields
     $("#get_product_name").val("").trigger("change");
@@ -818,13 +922,14 @@ $("#addProductPurchase").on("click", function () {
                 <input type="hidden" id="product_quantites_${id}" name="product_quantites[]" value="${Currentquantity}">
                 <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
                 <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
-               <input type="hidden" id="product_salerate_${id}" name="product_salerates[]" value="${sale_price}">
-                <input type="hidden" name="batch_nos[]"   value="${batch_no}">
+                <input type="hidden" id="product_salerate_${id}" name="product_salerates[]" value="${sale_price}">
+                <input type="hidden" name="batch_nos[]"   value="${batch_no_text}">
+                <input type="hidden" name="batch_ids[]"   value="${batch_id_val}">
                 <input type="hidden" name="expires[]"     value="${expiry_date}">
                  
               
                 <td>${name}</td>
-                <td>${batch_no || '-'}</td>
+                <td>${batch_no_text || '-'}</td>
                 <td>${expiry_date || '-'}</td>
                 <td>${price}</td>
                 <td>${sale_price}</td>
@@ -832,7 +937,7 @@ $("#addProductPurchase").on("click", function () {
                 <td>${total_price}</td>
                 <td>
                   <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
-                  <button type="button" onclick="editByid(${id}, '${batch_no}','${expiry_date}', '${price}','${sale_price}', '${Currentquantity}')" class="fa fa-edit text-success"></button>
+                  <button type="button" onclick="editPurchaseItem(${id}, '${batch_no_text}','${expiry_date}', '${price}','${sale_price}', '${Currentquantity}', '${batch_id_val}')" class="fa fa-edit text-success"></button>
                 </td>
               </tr>
             `);
@@ -859,12 +964,13 @@ $("#addProductPurchase").on("click", function () {
           <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
           <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
           <input type="hidden" id="product_salerate_${id}" name="product_salerates[]" value="${sale_price}">
-          <input type="hidden" name="batch_nos[]"   value="${batch_no}">
+          <input type="hidden" name="batch_nos[]"   value="${batch_no_text}">
+          <input type="hidden" name="batch_ids[]"   value="${batch_id_val}">
           <input type="hidden" name="expires[]"     value="${expiry_date}">
                 
           
           <td>${name}</td>
-          <td>${batch_no || '-'}</td>
+          <td>${batch_no_text || '-'}</td>
           <td>${expiry_date || '-'}</td>
           <td>${price}</td>
           <td>${sale_price}</td>
@@ -872,7 +978,7 @@ $("#addProductPurchase").on("click", function () {
           <td>${total_price}</td>
           <td>
             <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
-            <button type="button" onclick="editByid(${id}, '${batch_no}','${expiry_date}', '${price}','${sale_price}',  '${product_quantity}','${pro_details}')" class="fa fa-edit text-success"></button>
+            <button type="button" onclick="editPurchaseItem(${id}, '${batch_no_text}','${expiry_date}', '${price}','${sale_price}',  '${product_quantity}','${pro_details}', '${batch_id_val}')" class="fa fa-edit text-success"></button>
           </td>
         </tr>
       `);
@@ -884,6 +990,8 @@ $("#addProductPurchase").on("click", function () {
       sweeetalert("Cannot Add Quantity more than stock", "error", 1500);
     } else if (code === "") {
       sweeetalert("Select The Product first", "error", 1500);
+    } else if (is_purchase_return && batch_id_val === "") {
+      sweeetalert("Select the Batch first", "error", 1500);
     }
   }
 }); // =============================================================================================================================
@@ -954,29 +1062,67 @@ function getOrderTotal() {
   getRemaingAmount();
 }
 
-function editByid(id, batch_no, expiry_date, price, sale_price, qty) {
-  // function editByid(id, code, price, qty, detail) {
-  alert(qty);
-  $(".searchableSelect").val(id);
-  // $("#get_product_code").val(code);
-  $("#get_batch_no").val(batch_no);
-  $("#get_expiry_date").val(expiry_date);
-  $("#get_product_quantity").val(qty);
-  $("#add_pro_type").val("update");
-  // $("#get_product_detail").val(detail);
+function editPurchaseItem(id, batch_no, expiry_date, price, sale_price, qty, batch_id) {
+  // Detect if we are on a return page (purchase return or sale return)
+  // Both return types now use a dropdown for batch selection
+  var is_return_mode = ($("#purchase_return").length > 0 || $("#order_return").length > 0);
 
-  var effect = function () {
-    return $(".searchableSelect").select2().trigger("change");
-  };
+  // 1. Trigger product selection
+  $(".searchableSelect").val(id).trigger('change');
 
-  $.when(effect()).done(function () {
+  // 2. Handle Batch & Expiry
+  if (is_return_mode) {
+    // For Returns, the batch is a dropdown populated by AJAX
     setTimeout(function () {
+      if (batch_id && batch_id != 0) {
+        $("#get_batch_no").val(batch_id).trigger('change');
+      } else if (batch_no) {
+        // Fallback: try to select by text/data-batch-no if ID is missing
+        var found = false;
+        $("#get_batch_no option").each(function () {
+          if ($(this).data('batch-no') == batch_no || $(this).text().indexOf(batch_no) !== -1) {
+            $("#get_batch_no").val($(this).val()).trigger('change');
+            found = true;
+            return false;
+          }
+        });
+        if (!found) $("#get_batch_no").val(batch_no).trigger('change');
+      }
+    }, 1000); // 1s wait for AJAX batch population
+  } else {
+    // For normal purchases, these are text/date inputs
+    setTimeout(function () {
+      $("#get_batch_no").val(batch_no).trigger('change');
+      $("#get_expiry_date").val(expiry_date).trigger('change');
+    }, 100);
+  }
 
-      $("#get_product_price").val(price);
-      $("#sale_product_price").val(sale_price);
+  $("#add_pro_type").val("update");
 
-    }, 600);
-  });
+  // 3. Override quantity and prices after AJAX-driven defaults are set
+  // AJAX for prices has a 500ms timeout, so 1500ms here is safe.
+  setTimeout(function () {
+    $("#get_product_quantity").val(qty).trigger('change').trigger('keyup');
+    $("#get_product_price").val(price).trigger('change').trigger('keyup');
+    $("#sale_product_price").val(sale_price).trigger('change').trigger('keyup');
+  }, 1500);
+}
+
+function editSaleItem(id, code, batch_id, quantity, price, detail) {
+  $(".searchableSelect").val(id).trigger('change');
+  // $("#get_product_code").val(code); // Optional if using name
+  $("#add_pro_type").val("update");
+
+  setTimeout(function () {
+    // Re-select the correct batch
+    if (batch_id) {
+      $("#get_batch_no").val(batch_id).trigger('change');
+    }
+
+    $("#get_product_quantity").val(quantity).trigger('change').trigger('keyup');
+    $("#sale_product_price").val(price).trigger('change').trigger('keyup'); // Sale price
+    $("#get_product_detail").val(detail).trigger('change').trigger('keyup');
+  }, 1500);
 }
 
 function getBalance(val, id) {

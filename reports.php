@@ -226,11 +226,11 @@
 
 
 
-                          <th>Credit</th>
                           <th>Debit</th>
 
 
 
+                          <th>Credit</th>
 
 
 
@@ -397,7 +397,7 @@
                             <?php else: ?>
                               <td colspan="2"></td>
                             <?php endif; ?>
-                            <td colspan="3" align="right">Total Credits</td>
+                            <td colspan="3" align="right">Total Debits</td>
                             <td colspan="4" class='h3 text-info'><?= number_format($total_debit) ?></td>
                           </tr>
                           <tr>
@@ -406,7 +406,7 @@
                             <?php else: ?>
                               <td colspan="2"></td>
                             <?php endif; ?>
-                            <td colspan="3" align="right">Total Debits</td>
+                            <td colspan="3" align="right">Total Credits</td>
                             <td colspan="4" class='h3 text-warning'><?= number_format($total_credit) ?></td>
                           </tr>
 

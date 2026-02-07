@@ -110,24 +110,15 @@ if (!empty($_REQUEST['edit_order_id'])) {
 
                   <?php } ?>
                 </select>
-                <span class="text-center w-100" id="instockQty"></span>
+                <!-- <span class="text-center w-100" id="instockQty"></span> -->
+                   <span class="text-center w-100 badge badge-info mt-1" id="instockQty" style="font-size: 0.85rem;">InstockQty: 0</span>
               </div>
               <div class="col-6 col-md-2">
                 <label>Batch No</label>
-                <input type="hidden" id="add_pro_type" value="add">
                 <select class="form-control searchableSelect" id="get_batch_no" name="get_batch_no">
-                  <option value=" ">Select Batch</option>
-                  <?php
-                  $result = mysqli_query($dbc, "SELECT * FROM product_batches ");
-                  while ($row = mysqli_fetch_array($result)) {
-                    ?>
-                    <option  
-                      value="<?= $row["batch_id"] ?>">
-                      <?= ucwords($row["batch_no"]) ?>
-                    </option>
-                  <?php } ?>
+                  <option value="">Select Batch</option>
                 </select>
-                <span class="text-center w-100" id="instockQty"></span>
+                <span class="text-center w-100 badge badge-info mt-1" id="batchQty" style="font-size: 0.85rem;">Batch Qty: 0</span>
               </div>
               <!-- <div class="col-6 col-sm-2 col-md-2">
                 <label>Purchase Price</label>
@@ -167,7 +158,12 @@ if (!empty($_REQUEST['edit_order_id'])) {
                   </thead>
                   <tbody class="table table-bordered" id="purchase_product_tb">
                     <?php if (isset($_REQUEST['edit_order_id'])):
-                      $q = mysqli_query($dbc, "SELECT  product.*,brands.*,order_item.*,product_batches.* FROM order_item INNER JOIN product ON product.product_id=order_item.product_id INNER JOIN brands ON product.brand_id=brands.brand_id INNER JOIN product_batches ON product_batches.product_id = order_item.product_id   WHERE order_item.order_id='" . base64_decode($_REQUEST['edit_order_id']) . "'");
+                      $q = mysqli_query($dbc, "SELECT product.*, brands.*, order_item.*, product_batches.batch_no, product_batches.batch_id 
+                                               FROM order_item 
+                                               INNER JOIN product ON product.product_id=order_item.product_id 
+                                               INNER JOIN brands ON product.brand_id=brands.brand_id 
+                                               LEFT JOIN product_batches ON product_batches.batch_id = order_item.batch_id   
+                                               WHERE order_item.order_id='" . base64_decode($_REQUEST['edit_order_id']) . "'");
 
                       while ($r = mysqli_fetch_assoc($q)) {
 
@@ -195,7 +191,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                             <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>`)"
                               class="fa fa-trash text-danger" href="#"></button>
                             <button type="button"
-                              onclick="editByid(<?= $r['product_id'] ?>,`<?= $r['product_code'] ?>`,<?= $r['purchase_rate'] ?>,<?= $r['quantity'] ?>,<?= $r['rate'] ?>)"
+                              onclick="editSaleItem(<?= $r['product_id'] ?>,`<?= $r['product_code'] ?>`,'<?= $r['batch_id'] ?>',<?= $r['quantity'] ?>,<?= $r['rate'] ?>,'<?= @$r['product_detail'] ?>')"
                               class="fa fa-edit text-success ml-2 "></button>
 
                           </td>

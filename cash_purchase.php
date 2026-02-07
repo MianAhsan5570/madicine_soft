@@ -125,7 +125,7 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <label for="get_product_name" class="mb-0 form-label ">Products</label>
                   <span id="instockQty" class="badge badge-info font-weight-bold px-3 py-1"
-                    style="font-size: 0.9rem;">In Stock: 0</span>
+                    style="font-size: 0.9rem;">InStock: 0</span>
                 </div>
                 <div class="input-group input-group-sm">
                   <select class="form-control form-control-sm searchableSelect" id="get_product_name" name="product_id">
@@ -143,10 +143,9 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                       </option>
                     <?php } ?>
                   </select>
-                  <button type="button" class="btn btn-danger btn-sm px-2" data-bs-toggle="modal"
-                    data-bs-target="#add_product_modal" title="Add New Product">
-                    <i class="fa fa-plus"></i>
-                  </button>
+                  <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#add_product_modal">
+                  <i class="fa fa-plus"></i>
+                </button>
                 </div>
               </div>
 
@@ -184,10 +183,10 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
               </div>
 
               <!-- Add Button -->
-              <div class="col-6 col-sm-1_5 col-md-1 d-flex align-items-end">
-                <button type="button" class="btn btn-success btn-sm w-100" id="addProductPurchase">
-                  <i class="fa fa-plus"></i>
-                </button>
+              <div class="col-sm-1 mr-auto">
+                <br>
+                <button type="button" class="btn btn-success btn-sm mt-2 float-right" id="addProductPurchase"><i
+                    class="fa fa-plus"></i> <b>Add</b></button>
               </div>
 
             </div>
@@ -247,7 +246,7 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                             <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>`)"
                               class="fa fa-trash text-danger" href="#"></button>
                             <button type="button"
-                              onclick="editByid(<?= $r['product_id'] ?>,<?= $r['batch_no'] ?>,'<?= $r['expiry_date'] ?>',<?= $r['rate'] ?>,<?= $r['sale_rate'] ?>,<?= $r['quantity'] ?>)"
+                              onclick="editPurchaseItem(<?= $r['product_id'] ?>,'<?= $r['batch_no'] ?>','<?= $r['expiry_date'] ?>',<?= $r['rate'] ?>,<?= $r['sale_rate'] ?>,<?= $r['quantity'] ?>,0)"
                               class="fa fa-edit text-success ml-2 "></button>
 
                           </td>

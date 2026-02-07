@@ -49,6 +49,21 @@ if (isset($_REQUEST['delete_bymanually'])) {
 				$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM  product WHERE product_id='" . $proR['product_id'] . "' "));
 				$newqty = (int) $quantity_instock['quantity_instock'] + (int) $proR['quantity'];
 				$quantity_update = mysqli_query($dbc, "UPDATE product SET  quantity_instock='$newqty' WHERE product_id='" . $proR['product_id'] . "' ");
+
+				// ============================================================================
+				// REVERSE BATCH QUANTITIES when deleting sale/order
+				// ============================================================================
+				$batch_id = $proR['batch_id'] ?? null;
+				$quantity = (float) $proR['quantity'];
+
+				if ($batch_id && $quantity > 0) {
+					// Restore the batch quantity (add back what was sold)
+					mysqli_query($dbc, "UPDATE product_batches 
+					                    SET available_qty = available_qty + $quantity,
+					                        qty_out = GREATEST(0, qty_out - $quantity),
+					                        updated_at = NOW()
+					                    WHERE batch_id = '$batch_id'");
+				}
 			}
 		}
 		deleteFromTable($dbc, "transactions", 'transaction_id', $orders['transaction_paid_id']);
@@ -60,6 +75,7 @@ if (isset($_REQUEST['delete_bymanually'])) {
 			$msg = mysqli_error($dbc);
 			$sts = "error";
 		}
+
 
 	} elseif ($table == "purchase") {
 
@@ -74,6 +90,30 @@ if (isset($_REQUEST['delete_bymanually'])) {
 				$newqty = (int) $quantity_instock['quantity_instock'] - (int) $proR['quantity'];
 				$quantity_update = mysqli_query($dbc, "UPDATE product SET  quantity_instock='$newqty' WHERE product_id='" . $proR['product_id'] . "' ");
 
+				// ============================================================================
+				// REVERSE BATCH QUANTITIES when deleting purchase
+				// ============================================================================
+				$batch_no = trim($proR['batch_no'] ?? '');
+				$expiry_date = $proR['expiry_date'] ?? null;
+				$quantity = (float) $proR['quantity'];
+
+				if (!empty($batch_no) && $quantity > 0) {
+					$batch_condition = "product_id = '" . $proR['product_id'] . "' 
+					                    AND batch_no = '" . mysqli_real_escape_string($dbc, $batch_no) . "'";
+					
+					if ($expiry_date) {
+						$batch_condition .= " AND expiry_date = '$expiry_date'";
+					} else {
+						$batch_condition .= " AND expiry_date IS NULL";
+					}
+
+					// Decrease qty_in and available_qty (reverse the purchase)
+					mysqli_query($dbc, "UPDATE product_batches 
+					                    SET qty_in = GREATEST(0, qty_in - $quantity),
+					                        available_qty = GREATEST(0, available_qty - $quantity),
+					                        updated_at = NOW()
+					                    WHERE $batch_condition");
+				}
 
 			}
 		}
@@ -88,6 +128,7 @@ if (isset($_REQUEST['delete_bymanually'])) {
 			$sts = "error";
 		}
 
+
 	} elseif ($table == "purchase_return") {
 		$purchaseReturn = fetchRecord($dbc, 'purchase_return', $row, $id);
 		$get_company = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT * FROM company ORDER BY id DESC LIMIT 1"));
@@ -98,6 +139,31 @@ if (isset($_REQUEST['delete_bymanually'])) {
 				$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id = '" . $proR['product_id'] . "'"));
 				$newqty = (float) $quantity_instock['quantity_instock'] + (float) $proR['quantity']; // Reverse stock for return
 				mysqli_query($dbc, "UPDATE product SET quantity_instock = '$newqty' WHERE product_id = '" . $proR['product_id'] . "'");
+
+				// REVERSE BATCH: Deleting Purchase Return -> Add stock back to batch
+				$batch_id = $proR['batch_id'] ?? null; 
+				$batch_no = trim($proR['batch_no'] ?? '');
+
+				if ($batch_id) {
+					// Restore by ID
+					mysqli_query($dbc, "UPDATE product_batches 
+										SET qty_in = qty_in + {$proR['quantity']},
+											available_qty = available_qty + {$proR['quantity']}
+										WHERE batch_id = '$batch_id'");
+				} elseif (!empty($batch_no)) {
+					// Restore by Name
+					$b_cond = "product_id = '" . $proR['product_id'] . "' AND batch_no = '" . mysqli_real_escape_string($dbc, $batch_no) . "'";
+					$check = mysqli_query($dbc, "SELECT batch_id, available_qty FROM product_batches WHERE $b_cond LIMIT 1");
+					
+					if (mysqli_num_rows($check) > 0) {
+						$b_row = mysqli_fetch_assoc($check);
+						$bid = $b_row['batch_id'];
+						mysqli_query($dbc, "UPDATE product_batches 
+											SET qty_in = qty_in + {$proR['quantity']},
+												available_qty = available_qty + {$proR['quantity']}
+											WHERE batch_id = '$bid'");
+					}
+				}
 			}
 		}
 
@@ -124,9 +190,39 @@ if (isset($_REQUEST['delete_bymanually'])) {
 			$proQ = get($dbc, "order_return_item WHERE order_id='" . $id . "'");
 
 			while ($proR = mysqli_fetch_assoc($proQ)) {
-				$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='" . $proR['product_id'] . "'"));
-				$newqty = (int) $quantity_instock['quantity_instock'] - (int) $proR['quantity']; // Decrease stock since return is being deleted
-				mysqli_query($dbc, "UPDATE product SET quantity_instock='$newqty' WHERE product_id='" . $proR['product_id'] . "'");
+				$p_id = $proR['product_id'];
+				$quantity = (float) $proR['quantity'];
+
+				$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$p_id'"));
+				$newqty = max(0, (float)$quantity_instock['quantity_instock'] - $quantity); // Decrease stock since return is being deleted
+				mysqli_query($dbc, "UPDATE product SET quantity_instock='$newqty' WHERE product_id='$p_id'");
+
+				// REVERSE BATCH: Deleting Sale Return -> Remove stock from batch
+				$batch_id = $proR['batch_id'] ?? null; 
+				$batch_no = trim($proR['batch_no'] ?? '');
+
+				if ($batch_id && $quantity > 0) {
+					$check = mysqli_query($dbc, "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'");
+					if (mysqli_num_rows($check) > 0) {
+						$b_row = mysqli_fetch_assoc($check);
+						$new_avail = max(0, (float)$b_row['available_qty'] - $quantity);
+						
+						mysqli_query($dbc, "UPDATE product_batches 
+											SET qty_out = qty_out + $quantity,
+												available_qty = '$new_avail',
+												updated_at = NOW()
+											WHERE batch_id = '$batch_id'");
+					}
+				} elseif (!empty($batch_no) && $quantity > 0) {
+					$b_cond = "product_id = '$p_id' AND batch_no = '" . mysqli_real_escape_string($dbc, $batch_no) . "'";
+					$check = mysqli_query($dbc, "SELECT batch_id, available_qty FROM product_batches WHERE $b_cond LIMIT 1");
+					if (mysqli_num_rows($check) > 0) {
+						$b_row = mysqli_fetch_assoc($check);
+						$bid = $b_row['batch_id'];
+						$new_avail = max(0, (float)$b_row['available_qty'] - $quantity);
+						mysqli_query($dbc, "UPDATE product_batches SET qty_out = qty_out + $quantity, available_qty = '$new_avail', updated_at = NOW() WHERE batch_id = '$bid'");
+					}
+				}
 			}
 		}
 

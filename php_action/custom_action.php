@@ -543,6 +543,55 @@ if (!empty($_REQUEST['getPrice'])) {
 	echo json_encode($response);
 }
 
+// ============================================================================
+// Get available batches for a product (for sale pages)
+// ============================================================================
+if (isset($_REQUEST['get_product_batches'])) {
+	$product_id = mysqli_real_escape_string($dbc, $_REQUEST['get_product_batches']);
+
+	$query = "SELECT batch_id, batch_no, expiry_date, available_qty 
+	          FROM product_batches 
+	          WHERE product_id = '$product_id' 
+	          AND available_qty > 0 
+	          ORDER BY expiry_date ASC, batch_id ASC";
+
+	$result = mysqli_query($dbc, $query);
+	$batches = [];
+
+	while ($row = mysqli_fetch_assoc($result)) {
+		$batches[] = [
+			'batch_id' => $row['batch_id'],
+			'batch_no' => $row['batch_no'],
+			'expiry_date' => $row['expiry_date'],
+			'available_qty' => $row['available_qty']
+		];
+	}
+
+	echo json_encode(['batches' => $batches, 'sts' => 'success']);
+	exit;
+}
+
+// ============================================================================
+// Get specific batch details
+// ============================================================================
+if (isset($_REQUEST['get_batch_details'])) {
+	$batch_id = mysqli_real_escape_string($dbc, $_REQUEST['get_batch_details']);
+
+	$query = "SELECT batch_id, batch_no, expiry_date, available_qty, product_id 
+	          FROM product_batches 
+	          WHERE batch_id = '$batch_id'";
+
+	$result = mysqli_query($dbc, $query);
+	$batch = mysqli_fetch_assoc($result);
+
+	if ($batch) {
+		echo json_encode($batch);
+	} else {
+		echo json_encode(['error' => 'Batch not found']);
+	}
+	exit;
+}
+
 /*---------------------- cash sale-order   -------------------------------------------------------------------*/
 if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'])) {
 	$get_company = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT * FROM company ORDER BY id DESC LIMIT 1"));
@@ -591,8 +640,12 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 					$product_rates = (float) $_REQUEST['product_rates'][$x];
 					$total = (float) $product_quantites * $product_rates;
 					$total_ammount += (float) $total;
+					// Get batch_id if provided
+					$batch_id = isset($_REQUEST['batch_ids'][$x]) ? $_REQUEST['batch_ids'][$x] : null;
+
 					$order_items = [
 						'product_id' => $_REQUEST['product_ids'][$x],
+						'batch_id' => $batch_id, // NEW: Track which batch this sale came from
 						'rate' => $product_rates,
 						'total' => $total,
 						'order_id' => $last_id,
@@ -602,6 +655,27 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 					];
 					if ($get_company['stock_manage'] == 1) {
 						$product_id = $_REQUEST['product_ids'][$x];
+
+						// ============================================================================
+						// Deduct from specific batch if batch_id is provided
+						// ============================================================================
+						if ($batch_id) {
+							$batch_query = "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'";
+							$batch_result = mysqli_query($dbc, $batch_query);
+							$batch_data = mysqli_fetch_assoc($batch_result);
+
+							if ($batch_data && $batch_data['available_qty'] >= $product_quantites) {
+								$new_available_qty = $batch_data['available_qty'] - $product_quantites;
+
+								mysqli_query($dbc, "UPDATE product_batches 
+								                   SET available_qty = '$new_available_qty', 
+								                       qty_out = qty_out + '$product_quantites',
+								                       updated_at = NOW()
+								                   WHERE batch_id = '$batch_id'");
+							}
+						}
+
+						// Also update total product quantity for backward compatibility
 						$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM  product WHERE product_id='" . $product_id . "' "));
 						@$qty = (float) $quantity_instock['quantity_instock'] - (float) $product_quantites;
 						$quantity_update = mysqli_query($dbc, "UPDATE product SET  quantity_instock='$qty' WHERE product_id='" . $product_id . "' ");
@@ -654,9 +728,25 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 						$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM  product WHERE product_id='" . $proR['product_id'] . "' "));
 						$newqty = (float) $quantity_instock['quantity_instock'] + (float) $proR['quantity'];
 						$quantity_update = mysqli_query($dbc, "UPDATE product SET  quantity_instock='$newqty' WHERE product_id='" . $proR['product_id'] . "' ");
+
+						// ============================================================================
+						// REVERSE BATCH QUANTITIES when editing sale
+						// ============================================================================
+						$batch_id = $proR['batch_id'] ?? null;
+						$quantity = (float) $proR['quantity'];
+
+						if ($batch_id && $quantity > 0) {
+							// Restore the batch quantity (add back what was sold)
+							mysqli_query($dbc, "UPDATE product_batches 
+							                    SET available_qty = available_qty + $quantity,
+							                        qty_out = GREATEST(0, qty_out - $quantity),
+							                        updated_at = NOW()
+							                    WHERE batch_id = '$batch_id'");
+						}
 					}
 				}
 				deleteFromTable($dbc, "order_item", 'order_id', $_REQUEST['product_order_id']);
+
 
 				$x = 0;
 				foreach ($_REQUEST['product_ids'] as $key => $value) {
@@ -666,8 +756,12 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 					$total = $product_quantites * $product_rates;
 					$total_ammount += (float) $total;
 
+					// Get batch_id if provided
+					$batch_id = isset($_REQUEST['batch_ids'][$x]) ? $_REQUEST['batch_ids'][$x] : null;
+
 					$order_items = [
 						'product_id' => $_REQUEST['product_ids'][$x],
+						'batch_id' => $batch_id,
 						'rate' => $product_rates,
 						'total' => $total,
 						'order_id' => $_REQUEST['product_order_id'],
@@ -677,6 +771,24 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 					];
 					if ($get_company['stock_manage'] == 1) {
 						$product_id = $_REQUEST['product_ids'][$x];
+
+						// Deduct from specific batch if batch_id is provided
+						if ($batch_id) {
+							$batch_query = "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'";
+							$batch_result = mysqli_query($dbc, $batch_query);
+							$batch_data = mysqli_fetch_assoc($batch_result);
+
+							if ($batch_data && $batch_data['available_qty'] >= $product_quantites) {
+								$new_available_qty = $batch_data['available_qty'] - $product_quantites;
+
+								mysqli_query($dbc, "UPDATE product_batches 
+								                   SET available_qty = '$new_available_qty', 
+								                       qty_out = qty_out + '$product_quantites',
+								                       updated_at = NOW()
+								                   WHERE batch_id = '$batch_id'");
+							}
+						}
+
 						$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM  product WHERE product_id='" . $product_id . "' "));
 						$qty = (float) $quantity_instock['quantity_instock'] - $product_quantites;
 						$quantity_update = mysqli_query($dbc, "UPDATE product SET  quantity_instock='$qty' WHERE product_id='" . $product_id . "' ");
@@ -767,8 +879,13 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 					$product_rates = (float) $_REQUEST['product_rates'][$x];
 					$total = $product_quantites * $product_rates;
 					$total_ammount += (float) $total;
+
+					// Get batch_id if provided
+					$batch_id = isset($_REQUEST['batch_ids'][$x]) ? $_REQUEST['batch_ids'][$x] : null;
+
 					$order_items = [
 						'product_id' => $_REQUEST['product_ids'][$x],
+						'batch_id' => $batch_id,
 						'rate' => $product_rates,
 						'total' => $total,
 						'order_id' => $last_id,
@@ -779,6 +896,24 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 
 					if ($get_company['stock_manage'] == 1) {
 						$product_id = $_REQUEST['product_ids'][$x];
+
+						// Deduct from specific batch if batch_id is provided
+						if ($batch_id) {
+							$batch_query = "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'";
+							$batch_result = mysqli_query($dbc, $batch_query);
+							$batch_data = mysqli_fetch_assoc($batch_result);
+
+							if ($batch_data && $batch_data['available_qty'] >= $product_quantites) {
+								$new_available_qty = $batch_data['available_qty'] - $product_quantites;
+
+								mysqli_query($dbc, "UPDATE product_batches 
+								                   SET available_qty = '$new_available_qty', 
+								                       qty_out = qty_out + '$product_quantites',
+								                       updated_at = NOW()
+								                   WHERE batch_id = '$batch_id'");
+							}
+						}
+
 						$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM  product WHERE product_id='" . $product_id . "' "));
 						$qty = (float) $quantity_instock['quantity_instock'] - $product_quantites;
 						$quantity_update = mysqli_query($dbc, "UPDATE product SET  quantity_instock='$qty' WHERE product_id='" . $product_id . "' ");
@@ -858,9 +993,25 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 						$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM  product WHERE product_id='" . $proR['product_id'] . "' "));
 						$newqty = (float) $quantity_instock['quantity_instock'] + (float) $proR['quantity'];
 						$quantity_update = mysqli_query($dbc, "UPDATE product SET  quantity_instock='$newqty' WHERE product_id='" . $proR['product_id'] . "' ");
+
+						// ============================================================================
+						// REVERSE BATCH QUANTITIES when editing credit sale
+						// ============================================================================
+						$batch_id = $proR['batch_id'] ?? null;
+						$quantity = (float) $proR['quantity'];
+
+						if ($batch_id && $quantity > 0) {
+							// Restore the batch quantity (add back what was sold)
+							mysqli_query($dbc, "UPDATE product_batches 
+							                    SET available_qty = available_qty + $quantity,
+							                        qty_out = GREATEST(0, qty_out - $quantity),
+							                        updated_at = NOW()
+							                    WHERE batch_id = '$batch_id'");
+						}
 					}
 				}
 				deleteFromTable($dbc, "order_item", 'order_id', $_REQUEST['product_order_id']);
+
 
 				$x = 0;
 				foreach ($_REQUEST['product_ids'] as $key => $value) {
@@ -869,8 +1020,13 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 					$product_rates = (float) $_REQUEST['product_rates'][$x];
 					$total = $product_quantites * $product_rates;
 					$total_ammount += (float) $total;
+
+					// Get batch_id if provided
+					$batch_id = isset($_REQUEST['batch_ids'][$x]) ? $_REQUEST['batch_ids'][$x] : null;
+
 					$order_items = [
 						'product_id' => $_REQUEST['product_ids'][$x],
+						'batch_id' => $batch_id,
 						'rate' => $product_rates,
 						'total' => $total,
 						'order_id' => $_REQUEST['product_order_id'],
@@ -880,6 +1036,24 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 					];
 					if ($get_company['stock_manage'] == 1) {
 						$product_id = $_REQUEST['product_ids'][$x];
+
+						// Deduct from specific batch if batch_id is provided
+						if ($batch_id) {
+							$batch_query = "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'";
+							$batch_result = mysqli_query($dbc, $batch_query);
+							$batch_data = mysqli_fetch_assoc($batch_result);
+
+							if ($batch_data && $batch_data['available_qty'] >= $product_quantites) {
+								$new_available_qty = $batch_data['available_qty'] - $product_quantites;
+
+								mysqli_query($dbc, "UPDATE product_batches 
+								                   SET available_qty = '$new_available_qty', 
+								                       qty_out = qty_out + '$product_quantites',
+								                       updated_at = NOW()
+								                   WHERE batch_id = '$batch_id'");
+							}
+						}
+
 						$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM  product WHERE product_id='" . $product_id . "' "));
 						$qty = (float) $quantity_instock['quantity_instock'] - $product_quantites;
 						$quantity_update = mysqli_query($dbc, "UPDATE product SET  quantity_instock='$qty' WHERE product_id='" . $product_id . "' ");
@@ -1742,6 +1916,10 @@ if (isset($_REQUEST['credit_order_client_name']) && isset($_REQUEST['order_retur
 			$total = $product_quantities * $product_rates;
 			$total_amount += $total;
 
+
+			// Capture Batch ID for return
+			$batch_id = $_REQUEST['batch_ids'][$x] ?? null;
+			$batch_no = $_REQUEST['batch_nos'][$x] ?? null;
 			$order_items = [
 				'product_id' => $product_id,
 				'final_rate' => @$_REQUEST['product_final_rates'][$x],
@@ -1752,12 +1930,45 @@ if (isset($_REQUEST['credit_order_client_name']) && isset($_REQUEST['order_retur
 				'product_detail' => $_REQUEST['product_detail'][$x],
 				'order_item_status' => 1,
 				'user_id' => @$_REQUEST['user_id'],
+				'batch_no' => $batch_no,
+				'expiry_date' => $_REQUEST['expires'][$x] ?? null,
+				'batch_id' => $batch_id, // Save Batch ID
 			];
 
 			if ($get_company['stock_manage'] == 1) {
 				$stock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$product_id'"));
 				$new_qty = (float) $stock['quantity_instock'] + $product_quantities;
 				mysqli_query($dbc, "UPDATE product SET quantity_instock='$new_qty' WHERE product_id='$product_id'");
+
+				// Update Batch Stock (Return means we get stock BACK)
+				$batch_id = $_REQUEST['batch_ids'][$x] ?? null;
+				$batch_no = $_REQUEST['batch_nos'][$x] ?? null;
+
+				if (!empty($batch_id)) {
+					$check = mysqli_query($dbc, "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'");
+					if (mysqli_num_rows($check) > 0) {
+						$b_row = mysqli_fetch_assoc($check);
+						$new_avail = (float) $b_row['available_qty'] + $product_quantities;
+
+						mysqli_query($dbc, "UPDATE product_batches 
+											SET qty_out = GREATEST(0, qty_out - $product_quantities),
+												available_qty = '$new_avail'
+											WHERE batch_id = '$batch_id'");
+					}
+				} elseif (!empty($batch_no)) {
+					$b_cond = "product_id = '$product_id' AND batch_no = '$batch_no'";
+					$check = mysqli_query($dbc, "SELECT batch_id, available_qty FROM product_batches WHERE $b_cond LIMIT 1");
+					if (mysqli_num_rows($check) > 0) {
+						$b_row = mysqli_fetch_assoc($check);
+						$bid = $b_row['batch_id'];
+						$new_avail = (float) $b_row['available_qty'] + $product_quantities;
+
+						mysqli_query($dbc, "UPDATE product_batches 
+											SET qty_out = GREATEST(0, qty_out - $product_quantities),
+												available_qty = '$new_avail'
+											WHERE batch_id = '$bid'");
+					}
+				}
 			}
 
 			insert_data($dbc, 'order_return_item', $order_items);
@@ -1922,6 +2133,10 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					$total = $qty * $rate;
 					$total_amount += $total;
 
+					// Capture Batch ID for return
+					$batch_id = $_REQUEST['batch_ids'][$i] ?? null;
+					$batch_no = $_REQUEST['batch_nos'][$i] ?? null;
+
 					$item = [
 						'product_id' => $product_id,
 						'final_rate' => @$_REQUEST['product_final_rates'][$i],
@@ -1932,12 +2147,42 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 						'product_detail' => @$_REQUEST['product_detail'][$i],
 						'order_item_status' => 1,
 						'user_id' => @$_REQUEST['user_id'],
+						'batch_no' => $batch_no,
+						'expiry_date' => $_REQUEST['expires'][$i] ?? null,
+						'batch_id' => $batch_id, // Save Batch ID
 					];
 					insert_data($dbc, 'order_return_item', $item);
 
 					// Stock update (increment)
 					if ($get_company['stock_manage'] == 1) {
 						mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock + $qty WHERE product_id = '$product_id'");
+
+						// Update Batch Stock (Return means we get stock BACK)
+						if (!empty($batch_id)) {
+							$check = mysqli_query($dbc, "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'");
+							if (mysqli_num_rows($check) > 0) {
+								$b_row = mysqli_fetch_assoc($check);
+								$new_avail = (float) $b_row['available_qty'] + $qty;
+
+								mysqli_query($dbc, "UPDATE product_batches 
+													SET qty_out = GREATEST(0, qty_out - $qty),
+														available_qty = '$new_avail'
+													WHERE batch_id = '$batch_id'");
+							}
+						} elseif (!empty($batch_no)) {
+							$b_cond = "product_id = '$product_id' AND batch_no = '$batch_no'";
+							$check = mysqli_query($dbc, "SELECT batch_id, available_qty FROM product_batches WHERE $b_cond LIMIT 1");
+							if (mysqli_num_rows($check) > 0) {
+								$b_row = mysqli_fetch_assoc($check);
+								$bid = $b_row['batch_id'];
+								$new_avail = (float) $b_row['available_qty'] + $qty;
+
+								mysqli_query($dbc, "UPDATE product_batches 
+													SET qty_out = GREATEST(0, qty_out - $qty),
+														available_qty = '$new_avail'
+													WHERE batch_id = '$bid'");
+							}
+						}
 					}
 				}
 
@@ -1980,7 +2225,20 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 				if ($get_company['stock_manage'] == 1) {
 					$prevItems = get($dbc, "order_return_item WHERE order_id = '$last_id'");
 					while ($row = mysqli_fetch_assoc($prevItems)) {
-						mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock - {$row['quantity']} WHERE product_id = '{$row['product_id']}'");
+						$p_id = $row['product_id'];
+						$o_qty = (float) $row['quantity'];
+						$o_batch_id = $row['batch_id'];
+						$o_batch_no = $row['batch_no'];
+
+						// Return reversal: subtract quantity (since return added it)
+						mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock - $o_qty WHERE product_id = '$p_id'");
+
+						// Reverse Batch Stock
+						if (!empty($o_batch_id)) {
+							mysqli_query($dbc, "UPDATE product_batches SET qty_out = qty_out + $o_qty, available_qty = available_qty - $o_qty WHERE batch_id = '$o_batch_id'");
+						} elseif (!empty($o_batch_no)) {
+							mysqli_query($dbc, "UPDATE product_batches SET qty_out = qty_out + $o_qty, available_qty = available_qty - $o_qty WHERE product_id = '$p_id' AND batch_no = '$o_batch_no'");
+						}
 					}
 				}
 
@@ -1994,6 +2252,9 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					$total = $qty * $rate;
 					$total_amount += $total;
 
+					$batch_id = $_REQUEST['batch_ids'][$i] ?? null;
+					$batch_no = $_REQUEST['batch_nos'][$i] ?? null;
+
 					$item = [
 						'product_id' => $product_id,
 						'rate' => $rate,
@@ -2003,11 +2264,33 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 						'product_detail' => @$_REQUEST['product_detail'][$i],
 						'order_item_status' => 1,
 						'user_id' => @$_REQUEST['user_id'],
+						'batch_no' => $batch_no,
+						'expiry_date' => $_REQUEST['expires'][$i] ?? null,
+						'batch_id' => $batch_id,
 					];
 					insert_data($dbc, 'order_return_item', $item);
 
 					if ($get_company['stock_manage'] == 1) {
 						mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock + $qty WHERE product_id = '$product_id'");
+
+						// Update Batch Stock
+						if (!empty($batch_id)) {
+							$check = mysqli_query($dbc, "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'");
+							if (mysqli_num_rows($check) > 0) {
+								$b_row = mysqli_fetch_assoc($check);
+								$new_avail = (float) $b_row['available_qty'] + $qty;
+								mysqli_query($dbc, "UPDATE product_batches SET qty_out = GREATEST(0, qty_out - $qty), available_qty = '$new_avail' WHERE batch_id = '$batch_id'");
+							}
+						} elseif (!empty($batch_no)) {
+							$b_cond = "product_id = '$product_id' AND batch_no = '$batch_no'";
+							$check = mysqli_query($dbc, "SELECT batch_id, available_qty FROM product_batches WHERE $b_cond LIMIT 1");
+							if (mysqli_num_rows($check) > 0) {
+								$b_row = mysqli_fetch_assoc($check);
+								$bid = $b_row['batch_id'];
+								$new_avail = (float) $b_row['available_qty'] + $qty;
+								mysqli_query($dbc, "UPDATE product_batches SET qty_out = GREATEST(0, qty_out - $qty), available_qty = '$new_avail' WHERE batch_id = '$bid'");
+							}
+						}
 					}
 				}
 
@@ -2108,10 +2391,20 @@ if (isset($_REQUEST['cash_purchase_supplier']) && isset($_REQUEST['purchase_retu
 		if (!$isNew && $get_company['stock_manage'] == 1) {
 			$oldItems = get($dbc, "purchase_return_item WHERE purchase_id='$last_id'");
 			while ($row = mysqli_fetch_assoc($oldItems)) {
-				$product_id = $row['product_id'];
-				$current_stock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$product_id'"));
-				$new_stock = (float) $current_stock['quantity_instock'] + (float) $row['quantity'];
-				mysqli_query($dbc, "UPDATE product SET quantity_instock='$new_stock' WHERE product_id='$product_id'");
+				$p_id = $row['product_id'];
+				$o_qty = (float) $row['quantity'];
+				$o_batch_id = $row['batch_id'];
+				$o_batch_no = $row['batch_no'];
+
+				// Add back to total stock
+				mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock + $o_qty WHERE product_id = '$p_id'");
+
+				// Add back to batch stock
+				if (!empty($o_batch_id)) {
+					mysqli_query($dbc, "UPDATE product_batches SET qty_in = qty_in + $o_qty, available_qty = available_qty + $o_qty WHERE batch_id = '$o_batch_id'");
+				} elseif (!empty($o_batch_no)) {
+					mysqli_query($dbc, "UPDATE product_batches SET qty_in = qty_in + $o_qty, available_qty = available_qty + $o_qty WHERE product_id = '$p_id' AND batch_no = '$o_batch_no'");
+				}
 			}
 		}
 
@@ -2138,13 +2431,53 @@ if (isset($_REQUEST['cash_purchase_supplier']) && isset($_REQUEST['purchase_retu
 				'quantity' => $qty,
 				'purchase_item_status' => 1,
 				'user_id' => $_REQUEST['user_id'] ?? null,
+				'batch_no' => $_REQUEST['batch_nos'][$x] ?? '',
+				'expiry_date' => $_REQUEST['expires'][$x] ?? null,
+				'batch_id' => $_REQUEST['batch_ids'][$x] ?? 0,
 			];
+
 			insert_data($dbc, 'purchase_return_item', $item);
 
 			if ($get_company['stock_manage'] == 1) {
+				// Update Total Stock
 				$stock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$product_id'"));
 				$new_stock = (float) $stock['quantity_instock'] - $qty;
 				mysqli_query($dbc, "UPDATE product SET quantity_instock='$new_stock' WHERE product_id='$product_id'");
+
+				// Update Batch Stock
+				$batch_id = $_REQUEST['batch_ids'][$x] ?? null;
+				$batch_no = $_REQUEST['batch_nos'][$x] ?? null;
+
+				if (!empty($batch_id)) {
+					// Use Batch ID provided
+					$check = mysqli_query($dbc, "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'");
+					if (mysqli_num_rows($check) > 0) {
+						$b_row = mysqli_fetch_assoc($check);
+						$new_avail = max(0, (float) $b_row['available_qty'] - $qty);
+
+						mysqli_query($dbc, "UPDATE product_batches 
+											SET qty_in = GREATEST(0, qty_in - $qty),
+												available_qty = '$new_avail'
+											WHERE batch_id = '$batch_id'");
+					}
+				} elseif (!empty($batch_no)) {
+					// Fallback to Batch Number
+					$expiry = $_REQUEST['expires'][$x] ?? null; // Make sure expires is passed if needed
+					$b_cond = "product_id = '$product_id' AND batch_no = '$batch_no'";
+					// (Simple match since we might not have expiry)
+
+					$check = mysqli_query($dbc, "SELECT batch_id, available_qty FROM product_batches WHERE $b_cond LIMIT 1");
+					if (mysqli_num_rows($check) > 0) {
+						$b_row = mysqli_fetch_assoc($check);
+						$bid = $b_row['batch_id'];
+						$new_avail = max(0, (float) $b_row['available_qty'] - $qty);
+
+						mysqli_query($dbc, "UPDATE product_batches 
+											SET qty_in = GREATEST(0, qty_in - $qty),
+												available_qty = '$new_avail'
+											WHERE batch_id = '$bid'");
+					}
+				}
 			}
 		}
 

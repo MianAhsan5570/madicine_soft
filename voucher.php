@@ -93,7 +93,7 @@ if (isset($_REQUEST['id'])) {
                       </div>
                       </div>
                       <div class="col-sm-2 text-right">
-                        Credit
+                        Debit
                       </div>
 
                       <div class="col-sm-4">
@@ -133,7 +133,7 @@ if (isset($_REQUEST['id'])) {
                         </div>
                       </div>
                       </div>
-                      <div class="col-sm-2 text-right">Debit
+                      <div class="col-sm-2 text-right">Credit
                       </div>
 
                       <div class="col-sm-4">
@@ -278,7 +278,7 @@ if (isset($_REQUEST['id'])) {
                       </div>
                       </div>
                       <div class="col-sm-2 text-right">
-                        Credit
+                        Debit
                       </div>
 
                       <div class="col-sm-4">
@@ -318,7 +318,7 @@ if (isset($_REQUEST['id'])) {
                         </div>
                       </div>
                       </div>
-                      <div class="col-sm-2 text-right">                        Debit
+                      <div class="col-sm-2 text-right">                        Credit
                       </div>
 
                       <div class="col-sm-4">
@@ -400,14 +400,14 @@ if (isset($_REQUEST['id'])) {
                       </div>
                     </div>
                     <div class="form-group row">
-                       <div class="col-sm-2 text-right">                        Debit
+                       <div class="col-sm-2 text-right">                        Credit
                       </div>
 
                       <div class="col-sm-4">
                         <input type="number" onkeyup="readonlyIt(this.value,'voucher_sin_debit')"   value="<?=@$transactions['credit']?>" id="voucher_sin_credit" name="voucher_credit" class="form-control">
                       </div>
                       <div class="col-sm-2 text-right">
-                        Credit
+                        Debit
                       </div>
 
                       <div class="col-sm-4">

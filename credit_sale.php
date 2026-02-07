@@ -111,10 +111,10 @@ if (!empty($_REQUEST['edit_order_id'])) {
               </div>
             </div> <!-- end of form-group -->
             <div class="form-group row">
-              <div class="col-6 col-md-2">
+              <!-- <div class="col-6 col-md-2">
                 <label>Product Code</label>
                 <input type="text" name="product_code" autocomplete="off" id="get_product_code" class="form-control" placeholder="Code">
-              </div>
+              </div> -->
               <div class="col-6 col-md-4">
                 <label>Products</label>
                 <input type="hidden" id="add_pro_type" value="add">
@@ -134,12 +134,20 @@ if (!empty($_REQUEST['edit_order_id'])) {
 
                   <?php } ?>
                 </select>
-                <span class="text-center w-100" id="instockQty"></span>
+                <!-- <span class="text-center w-100" id="instockQty"></span> -->
+                     <span class="text-center w-100 badge badge-info mt-1" id="instockQty" style="font-size: 0.85rem;">InstockQty: 0</span>
               </div>
-              <div class="col-6 col-sm-2 col-md-2">
+              <div class="col-6 col-md-2">
+                <label>Batch No</label>
+                <select class="form-control searchableSelect" id="get_batch_no" name="get_batch_no">
+                  <option value="">Select Batch</option>
+                </select>
+                <span class="text-center w-100 badge badge-info mt-1" id="batchQty" style="font-size: 0.85rem;">Batch Qty: 0</span>
+              </div>
+              <!-- <div class="col-6 col-sm-2 col-md-2">
                  <label>Purchase Price</label>
                  <input type="number" min="0" class="form-control" placeholder="Purchase Price" id="get_product_price">
-               </div>
+               </div> -->
                <div class="col-6 col-sm-2 col-md-2">
                  <label>Sale Price</label>
                  <input type="number" min="0" class="form-control" placeholder="Sale Price" id="sale_product_price">
@@ -161,10 +169,10 @@ if (!empty($_REQUEST['edit_order_id'])) {
                 <table class="table  saleTable" id="myDiv">
                   <thead class="table-bordered">
                     <tr>
-                      <th>Code</th>
+                      <!-- <th>Code</th> -->
                       <th>Product Name</th>
-                      <!-- <th>Product Details</th> -->
-                      <th>Unit Price</th>
+                      <th>Batch No</th>
+                      <th>Sale Price</th>
                       <th>Quantity</th>
                       <th>Total Price</th>
                       <th>Action</th>
@@ -172,26 +180,30 @@ if (!empty($_REQUEST['edit_order_id'])) {
                   </thead>
                   <tbody class="table table-bordered" id="purchase_product_tb">
                     <?php if (isset($_REQUEST['edit_order_id'])):
-                      $q = mysqli_query($dbc, "SELECT  product.*,brands.*,order_item.* FROM order_item INNER JOIN product ON product.product_id=order_item.product_id INNER JOIN brands ON product.brand_id=brands.brand_id   WHERE order_item.order_id='" . base64_decode($_REQUEST['edit_order_id']) . "'");
+                      $q = mysqli_query($dbc, "SELECT product.*, brands.*, order_item.*, product_batches.batch_no, product_batches.batch_id 
+                                               FROM order_item 
+                                               INNER JOIN product ON product.product_id=order_item.product_id 
+                                               INNER JOIN brands ON product.brand_id=brands.brand_id 
+                                               LEFT JOIN product_batches ON product_batches.batch_id = order_item.batch_id   
+                                               WHERE order_item.order_id='" . base64_decode($_REQUEST['edit_order_id']) . "'");
 
                       while ($r = mysqli_fetch_assoc($q)) {
 
                         ?>
                         <tr id="product_idN_<?= $r['product_id'] ?>">
+                          <!-- <input type="hidden" data-price="<?= $r['rate'] ?>" data-quantity="<?= $r['quantity'] ?>" id="product_ids_<?= $r['product_id'] ?>" class="product_ids" name="product_ids[]" value="<?= $r['product_id'] ?>"> -->
                           <input type="hidden" data-price="<?= $r['rate'] ?>" data-quantity="<?= $r['quantity'] ?>"
                             id="product_ids_<?= $r['product_id'] ?>" class="product_ids" name="product_ids[]"
                             value="<?= $r['product_id'] ?>">
                           <input type="hidden" id="product_quantites_<?= $r['product_id'] ?>" name="product_quantites[]"
                             value="<?= $r['quantity'] ?>">
-                          <!-- <input type="hidden" id="product_detail_<?= $r['product_id'] ?>" name="product_detail[]"
-                            value="<?= $r['product_detail'] ?>"> -->
                           <input type="hidden" id="product_rate_<?= $r['product_id'] ?>" name="product_rates[]"
                             value="<?= $r['rate'] ?>">
                           <input type="hidden" id="product_totalrate_<?= $r['product_id'] ?>" name="product_totalrates[]"
                             value="<?= $r['rate'] ?>">
-                          <td><?= $r['product_code'] ?></td>
+                          <!-- <td><?= $r['product_code'] ?></td> -->
                           <td><?= $r['product_name'] ?></td>
-                          <!-- <td><?= $r['product_detail'] ?></td> -->
+                          <td><?= $r['batch_no'] ?></td>
                           <td><?= $r['rate'] ?></td>
                           <td><?= $r['quantity'] ?></td>
                           <td><?= (float) $r['rate'] * (float) $r['quantity'] ?></?>
@@ -201,7 +213,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                             <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>`)"
                               class="fa fa-trash text-danger" href="#"></button>
                             <button type="button"
-                              onclick="editByid(<?= $r['product_id'] ?>,`<?= $r['product_code'] ?>`,<?= $r['purchase_rate'] ?>,<?= $r['quantity'] ?>,<?= $r['rate'] ?>, `<?= $r['product_detail'] ?>`)"
+                              onclick="editSaleItem(<?= $r['product_id'] ?>,`<?= $r['product_code'] ?>`,'<?= $r['batch_id'] ?>',<?= $r['quantity'] ?>,<?= $r['rate'] ?>,'<?= @$r['product_detail'] ?>')"
                               class="fa fa-edit text-success ml-2 "></button>
 
                           </td>
