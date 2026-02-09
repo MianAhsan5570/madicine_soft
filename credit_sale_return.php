@@ -211,7 +211,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                             value="<?= (float)$r['rate'] * (float)$r['quantity'] ?>">
                           <input type="hidden" name="batch_ids[]" value="<?= $r['batch_id'] ?>">
                           <input type="hidden" name="batch_nos[]" value="<?= $r['batch_no'] ?>">
-                          <input type="hidden" name="expires[]" value="<?= $r['expiry_date'] ?>">
+                          <input type="hidden" name="expires[]" value="<?= @$r['expiry_date'] ?>">
 
                           <!-- <td><?= $r['product_code'] ?></td> -->
                           <td><?= $r['product_name'] ?></td>
@@ -224,7 +224,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                             <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>`)"
                               class="fa fa-trash text-danger" href="#"></button>
                              <button type="button"
-                               onclick="editPurchaseItem(<?= $r['product_id'] ?>,`<?= $r['batch_no'] ?>`,`<?= $r['expiry_date'] ?>`,<?= $r['rate'] ?>,<?= $r['purchase_rate'] ?>,<?= $r['quantity'] ?>,<?= $r['batch_id'] ?>)"
+                               onclick="editPurchaseItem(<?= $r['product_id'] ?>,`<?= $r['batch_no'] ?>`,`<?= @$r['expiry_date'] ?>`,<?= $r['rate'] ?>,<?= $r['purchase_rate'] ?>,<?= $r['quantity'] ?>,<?= $r['batch_id'] ?>)"
                                class="fa fa-edit text-success ml-2 "></button>
                           </td>
                         </tr>

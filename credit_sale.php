@@ -197,17 +197,18 @@ if (!empty($_REQUEST['edit_order_id'])) {
                             value="<?= $r['product_id'] ?>">
                           <input type="hidden" id="product_quantites_<?= $r['product_id'] ?>" name="product_quantites[]"
                             value="<?= $r['quantity'] ?>">
-                          <input type="hidden" id="product_rate_<?= $r['product_id'] ?>" name="product_rates[]"
-                            value="<?= $r['rate'] ?>">
-                          <input type="hidden" id="product_totalrate_<?= $r['product_id'] ?>" name="product_totalrates[]"
-                            value="<?= $r['rate'] ?>">
+                          <input type="hidden" id="product_totalrate_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" name="product_totalrates[]"
+                            value="<?= (float) $r['rate'] * (float) $r['quantity'] ?>">
+                          <input type="hidden" id="product_detail_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" name="product_detail[]"
+                            value="<?= htmlspecialchars($r['product_description'] ?? '') ?>">
+                          <input type="hidden" name="batch_ids[]" value="<?= $r['batch_id'] ?>">
+                          <input type="hidden" name="batch_nos[]" value="<?= $r['batch_no'] ?>">
                           <!-- <td><?= $r['product_code'] ?></td> -->
                           <td><?= $r['product_name'] ?></td>
                           <td><?= $r['batch_no'] ?></td>
                           <td><?= $r['rate'] ?></td>
                           <td><?= $r['quantity'] ?></td>
-                          <td><?= (float) $r['rate'] * (float) $r['quantity'] ?></?>
-                          </td>
+                          <td><?= (float) $r['rate'] * (float) $r['quantity'] ?></td>
                           <td>
 
                             <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>`)"

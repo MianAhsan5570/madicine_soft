@@ -1031,7 +1031,7 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 						'total' => $total,
 						'order_id' => $_REQUEST['product_order_id'],
 						'quantity' => $product_quantites,
-						'product_detail' => $_REQUEST['product_detail'][$x],
+						'product_detail' => @$_REQUEST['product_detail'][$x],
 						'order_item_status' => 1,
 					];
 					if ($get_company['stock_manage'] == 1) {
@@ -1898,7 +1898,7 @@ if (isset($_REQUEST['credit_order_client_name']) && isset($_REQUEST['order_retur
 				$product_id = $proR['product_id'];
 				$o_qty = (float) $proR['quantity'];
 				$o_batch_id = $proR['batch_id'];
-				$o_batch_no = $proR['batch_no'];
+
 
 				$stock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$product_id'"));
 				$new_qty = (float) $stock['quantity_instock'] - $o_qty;
@@ -1947,8 +1947,6 @@ if (isset($_REQUEST['credit_order_client_name']) && isset($_REQUEST['order_retur
 				'product_detail' => $_REQUEST['product_detail'][$x],
 				'order_item_status' => 1,
 				'user_id' => @$_REQUEST['user_id'],
-				'batch_no' => $batch_no,
-				'expiry_date' => $_REQUEST['expires'][$x] ?? null,
 				'batch_id' => $batch_id, // Save Batch ID
 			];
 
@@ -2164,8 +2162,6 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 						'product_detail' => @$_REQUEST['product_detail'][$i],
 						'order_item_status' => 1,
 						'user_id' => @$_REQUEST['user_id'],
-						'batch_no' => $batch_no,
-						'expiry_date' => $_REQUEST['expires'][$i] ?? null,
 						'batch_id' => $batch_id, // Save Batch ID
 					];
 					insert_data($dbc, 'order_return_item', $item);
@@ -2245,7 +2241,7 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 						$p_id = $row['product_id'];
 						$o_qty = (float) $row['quantity'];
 						$o_batch_id = $row['batch_id'];
-						$o_batch_no = $row['batch_no'];
+
 
 						// Return reversal: subtract quantity (since return added it)
 						mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock - $o_qty WHERE product_id = '$p_id'");
@@ -2281,8 +2277,6 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 						'product_detail' => @$_REQUEST['product_detail'][$i],
 						'order_item_status' => 1,
 						'user_id' => @$_REQUEST['user_id'],
-						'batch_no' => $batch_no,
-						'expiry_date' => $_REQUEST['expires'][$i] ?? null,
 						'batch_id' => $batch_id,
 					];
 					insert_data($dbc, 'order_return_item', $item);
@@ -2411,7 +2405,6 @@ if (isset($_REQUEST['cash_purchase_supplier']) && isset($_REQUEST['purchase_retu
 				$p_id = $row['product_id'];
 				$o_qty = (float) $row['quantity'];
 				$o_batch_id = $row['batch_id'];
-				$o_batch_no = $row['batch_no'];
 
 				// Add back to total stock
 				mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock + $o_qty WHERE product_id = '$p_id'");
@@ -2448,8 +2441,6 @@ if (isset($_REQUEST['cash_purchase_supplier']) && isset($_REQUEST['purchase_retu
 				'quantity' => $qty,
 				'purchase_item_status' => 1,
 				'user_id' => $_REQUEST['user_id'] ?? null,
-				'batch_no' => $_REQUEST['batch_nos'][$x] ?? '',
-				'expiry_date' => $_REQUEST['expires'][$x] ?? null,
 				'batch_id' => $_REQUEST['batch_ids'][$x] ?? 0,
 			];
 

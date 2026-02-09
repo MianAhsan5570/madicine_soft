@@ -774,6 +774,8 @@ $("#addProductSale").on("click", function () {
                 <input type="hidden" id="product_totalrate_${id}_${batch_id}" name="product_totalrates[]" value="${total_price}">
                 <input type="hidden" id="product_detail_${id}_${batch_id}" name="product_detail[]" value="${detail}">
                 <input type="hidden" name="batch_ids[]" value="${batch_id}">
+                <input type="hidden" name="batch_nos[]" value="${batch_no}">
+                <input type="hidden" name="expires[]" value="${expiry_date}">
                 
 
                 <td>${name}</td>
@@ -983,7 +985,7 @@ $("#addProductPurchase").on("click", function () {
           <td>${total_price}</td>
           <td>
             <button type="button" onclick="removeByid('#${rowId}')" class="fa fa-trash text-danger"></button>
-            <button type="button" onclick="editPurchaseItem(${id}, '${batch_no_text}','${expiry_date}', '${price}','${sale_price}',  '${product_quantity}','${pro_details}', '${batch_id_val}')" class="fa fa-edit text-success"></button>
+            <button type="button" onclick="editPurchaseItem(${id}, '${batch_no_text}','${expiry_date}', '${price}','${sale_price}',  '${product_quantity}', '${batch_id_val}')" class="fa fa-edit text-success"></button>
           </td>
         </tr>
       `);

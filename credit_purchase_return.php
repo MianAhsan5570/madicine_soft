@@ -178,7 +178,7 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                   </thead>
                   <tbody class="table table-bordered" id="purchase_product_tb">
                     <?php if (isset($_REQUEST['edit_purchase_id'])):
-                      $q = mysqli_query($dbc, "SELECT  product.*,brands.*,purchase_return_item.*, product_batches.batch_no, product_batches.expiry_date  FROM purchase_return_item INNER JOIN product ON product.product_id=purchase_return_item.product_id INNER JOIN brands ON product.brand_id=brands.brand_id LEFT JOIN product_batches ON purchase_return_item.batch_no = product_batches.batch_no WHERE purchase_return_item.purchase_id='" . base64_decode($_REQUEST['edit_purchase_id']) . "'");
+                      $q = mysqli_query($dbc, "SELECT  product.*,brands.*,purchase_return_item.*, product_batches.batch_no, product_batches.expiry_date  FROM purchase_return_item INNER JOIN product ON product.product_id=purchase_return_item.product_id INNER JOIN brands ON product.brand_id=brands.brand_id LEFT JOIN product_batches ON purchase_return_item.batch_id = product_batches.batch_id WHERE purchase_return_item.purchase_id='" . base64_decode($_REQUEST['edit_purchase_id']) . "'");
 
                       while ($r = mysqli_fetch_assoc($q)) {
 
@@ -208,8 +208,7 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                           <td><?= $r['rate'] ?></td>
                           <td><?= $r['sale_rate'] ?></td>
                           <td><?= $r['quantity'] ?></td>
-                          <td><?= (float) $r['rate'] * (float) $r['quantity'] ?></?>
-                          </td>
+                          <td><?= (float) $r['rate'] * (float) $r['quantity'] ?></td>
                           <td>
 
                             <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>_<?= !empty($r['batch_id']) ? $r['batch_id'] : (!empty($r['batch_no']) ? preg_replace('/[^a-zA-Z0-9_]/', '', $r['batch_no']) : '0') ?>`)"

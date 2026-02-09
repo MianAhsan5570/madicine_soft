@@ -341,9 +341,10 @@
             $order_type = ($order['payment_type'] == "credit_purchase") ? "Credit Purchase" : "Cash Purchase";
 
             $order_item = mysqli_query($dbc, "
-        SELECT purchase_return_item.*, product.* 
+        SELECT purchase_return_item.*, product.*, product_batches.batch_no, product_batches.expiry_date 
         FROM purchase_return_item 
         INNER JOIN product ON purchase_return_item.product_id = product.product_id 
+        LEFT JOIN product_batches ON purchase_return_item.batch_id = product_batches.batch_id 
         WHERE purchase_return_item.purchase_id = '" . $_REQUEST['id'] . "'
     ");
 
@@ -354,9 +355,10 @@
             $getDate = $order['return_date'] ?? ''; // optional
     
             $order_item = mysqli_query($dbc, "
-        SELECT order_return_item.*, product.* 
+        SELECT order_return_item.*, product.*, product_batches.batch_no, product_batches.expiry_date 
         FROM order_return_item 
         INNER JOIN product ON order_return_item.product_id = product.product_id 
+        LEFT JOIN product_batches ON order_return_item.batch_id = product_batches.batch_id 
         WHERE order_return_item.order_id = '" . $_REQUEST['id'] . "'
     ");
 
