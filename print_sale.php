@@ -1,303 +1,373 @@
 <!DOCTYPE html>
-<html>
-<?php include_once 'includes/head.php';
+<html lang="en">
+<?php include_once 'includes/head.php'; ?>
+<head>
+    <meta charset="UTF-8">
+    <title>Sale Invoice - Form 2A</title>
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
 
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #000;
+            background-color: #f1f1f1;
+            font-size: 11pt;
+            line-height: 1.2;
+        }
 
-?>
-<style type="text/css">
-    .container {
-        height: 100% !important;
-        background-color: #fff;
-        border-bottom: 1px dashed #000 !important;
-    }
+        .container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 10mm auto;
+            background: #fff;
+            padding: 10mm;
+            box-sizing: border-box;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
 
-    .border {
+        @media print {
+            body { background: none; margin: 0; padding: 0; }
+            .container { 
+                margin: 0; 
+                box-shadow: none; 
+                page-break-after: always;
+            }
+            .no-print { display: none; }
+        }
 
-        border: 1px solid #000 !important;
-    }
+        /* Header Layout: Customer on Left, Company on Right */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
 
-    .thead_row th {
-        color: #000 !important;
-        font-size: 18px !important;
-        border: 1px solid #000;
-        text-align: center;
-    }
+        .customer-info {
+            width: 50%;
+        }
 
-    tbody td {
+        .customer-info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-        border: 1px solid #000;
-        text-align: center;
-    }
+        .customer-info th {
+            text-align: left;
+            width: 80px;
+            font-weight: 700;
+            padding: 2px 0;
+        }
+        
+        .customer-info td {
+            text-align: left;
+            padding: 2px 0;
+        }
 
-    table {
-        width: 100%;
+        .company-branding {
+            text-align: right;
+            width: 50%;
+        }
 
+        .company-name {
+            font-size: 26pt;
+            font-weight: 900;
+            color: #000;
+            margin: 0;
+            line-height: 1;
+        }
 
-    }
+        .company-details {
+            font-size: 9pt;
+            margin-top: 5px;
+            font-weight: 500;
+        }
 
-    .table_row {
+        /* Meta Section (Date/Invoice) */
+        .meta-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+            font-weight: 700;
+        }
 
-        border: 1px solid #000;
-        padding: 0px;
-    }
+        .meta-row span {
+            margin-left: 20px;
+        }
 
-    .tbody_row tr td {
-        font-size: 17px;
-        font-weight: bolder;
-        text-align: center;
-        color: #000;
+        /* Legal Context */
+        .legal-context {
+            margin-top: 20px;
+            font-size: 9pt;
+            border-top: 1px solid #000;
+            padding-top: 10px;
+        }
 
-    }
+        .legal-title {
+            font-weight: 700;
+            text-decoration: underline;
+            margin-bottom: 5px;
+            display: block;
+        }
 
-    .tfoot_row tr td {
-        font-size: 17px;
-        font-weight: bolder;
-        color: #000;
-        text-align: center;
+        .warranty-text {
+            font-size: 8pt;
+            line-height: 1.3;
+            text-align: justify;
+        }
 
-    }
-</style>
+        /* Table Design */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
 
+        .items-table th {
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+            padding: 8px 5px;
+            font-size: 10pt;
+            text-transform: uppercase;
+        }
+
+        .items-table td {
+            padding: 10px 5px;
+            border-bottom: 1px dotted #ccc;
+            font-size: 10pt;
+        }
+
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+
+        /* Totals / Net Payable */
+        .totals-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .count-info {
+            font-weight: 700;
+        }
+
+        .net-payable-box {
+            text-align: right;
+        }
+
+        .net-payable-title {
+            font-size: 18pt;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+
+        .totals-table {
+            margin-left: auto;
+            width: 250px;
+        }
+
+        .totals-table td {
+            padding: 5px 0;
+            font-weight: 700;
+        }
+
+        /* Footer */
+        .footer-notes {
+            margin-top: 40px;
+            font-size: 9pt;
+            border-top: 1px solid #000;
+            padding-top: 10px;
+        }
+
+        .note-item {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .footer-bottom {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .signature-area {
+            width: 200px;
+            border-top: 1px solid #000;
+            text-align: center;
+            padding-top: 5px;
+            font-weight: 700;
+        }
+
+        .computerized-note {
+            font-size: 8pt;
+            color: #555;
+            width: 60%;
+        }
+
+        .copy-tag {
+            position: absolute;
+            top: 5mm;
+            left: 5mm;
+            font-size: 8pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #888;
+        }
+    </style>
+</head>
 <body>
     <?php for ($i = 0; $i < 2; $i++) :
         $totalQTY = 0;
-        if ($i > 0) {
-            $margin = "margin-top:-270px !important";
-            $copy = "Company Copy";
-        } else {
-            $margin = "";
-            $copy = "Customer Copy";
-        }
+        $copy = ($i > 0) ? "Company Copy" : "Customer Copy";
 
         if ($_REQUEST['type'] == "purchase") {
             $nameSHow = 'Supplier';
             $order = fetchRecord($dbc, "purchase", "purchase_id", $_REQUEST['id']);
             $comment = $order['purchase_narration'];
-            $table_row = "390px";
             $getDate = $order['purchase_date'];
-            if ($order['payment_type'] == "credit_purchase") {
-
-                $order_type = "credit purchase";
-            } else {
-                $order_type = "cash purchase";
-            }
+            $order_type = ($order['payment_type'] == "credit_purchase") ? "Credit Purchase" : "Cash Purchase";
             $order_item = mysqli_query($dbc, "SELECT purchase_item.*,product.* FROM purchase_item INNER JOIN product ON purchase_item.product_id=product.product_id WHERE purchase_item.purchase_id='" . $_REQUEST['id'] . "'");
-        } 
-        else {
+        } else {
             $nameSHow = 'Customer';
             $order = fetchRecord($dbc, "orders", "order_id", $_REQUEST['id']);
             $getDate = $order['order_date'];
             $comment = $order['order_narration'];
-            $order_item = mysqli_query($dbc, "SELECT order_item.*,product.* FROM order_item INNER JOIN product ON order_item.product_id=product.product_id WHERE order_item.order_id='" . $_REQUEST['id'] . "'");
+            $order_item = mysqli_query($dbc, "SELECT order_item.*, product.*, product_batches.batch_no as b_no, product_batches.expiry_date as b_exp 
+                                              FROM order_item 
+                                              INNER JOIN product ON order_item.product_id=product.product_id 
+                                              LEFT JOIN product_batches ON order_item.batch_id=product_batches.batch_id 
+                                              WHERE order_item.order_id='" . $_REQUEST['id'] . "'");
             if ($order['payment_type'] == "credit_sale") {
-                $table_row = "300px";
-                if ($order['payment_type'] == "none") {
-                    $order_type = "credit sale";
-                } else {
-                    $order_type = $order['credit_sale_type'] . " (Credit)";
-                }
+                $order_type = ($order['payment_type'] == "none") ? "Credit Sale" : $order['credit_sale_type'] . " (Credit)";
             } else {
-                $order_type = "cash sale";
-                $table_row = "350px";
+                $order_type = "Cash Sale";
             }
         }
     ?>
 
-        <div class="container">
-            <?php //if ($order['payment_type']!="cash_in_hand"): 
-            ?>
-
-
-            <header>
-                <div class="row">
-                    <div class="col-sm-5">
-                        <!-- <img src="img/logo/<?= $get_company['logo'] ?>" width="90" height="90" class="img-fluid float-right" style="margin-top: 10px"> -->
-                    </div>
-                    <div class="col-sm-12 text-center">
-                        <h1 style="margin-left: 0px; color: red;font-weight: bold;font-size: 30px"><?= $get_company['name'] ?></h1>
-                        <p style="margin-top: -18px;font-size: 20px;"><u>Mechanical & Electronic Parts</u> </p>
-                        <p style="margin-top: -10px; font-weight: bolder;font-size: 15px">PH No. :<?= $get_company['company_phone'] ?> - <?= $get_company['personal_phone'] ?></p>
-                        <p style="margin-top: -15px; font-weight: bolder;font-size: 18px;"><?= $get_company['email'] ?></p>
-                        <p style="margin-top: -15px; font-weight: bolder;font-size: 15px"><?= $get_company['address'] ?> </p>
-
-
-
-
-
-                    </div>
-                    <center style="width: 100%;margin-top: -5px;"></center>
-                </div>
-            </header>
-            <?php //endif 
-            ?>
-            <div class="row">
-                <div class="pt-2  col-sm-6  ">
-                    <p class="h4 border p-2 font-weight-bold float-left"> Invoice # <b><?= $_REQUEST['id'] ?></b></p>
-                </div>
-                <div class="pt-2   col-sm-6">
-
-                    <p class="h4 border p-2 font-weight-bold float-right"> Date : <b>
-                            <?php //getDateFormat("D d-M-Y h:i a",($order['timestamp']))
-                            ?>
-                            <?php
-                            echo $date = date('D d-M-Y h:i A', strtotime($order['timestamp'] . " +10 hours"));
-                            ?>
-
-
-                        </b></p>
+    <div class="container">
+        <span class="copy-tag"><?= $copy ?></span>
+        
+        <div class="header">
+            <div class="customer-info">
+                <table>
+                    <tr><th>CUSTOMER</th><td>: <?= strtoupper($order['client_name']) ?></td></tr>
+                    <tr><th>ADDRESS</th><td>: <?= !empty($order['client_address']) ? strtoupper($order['client_address']) : '---' ?></td></tr>
+                    <tr><th>CITY</th><td>: <?= !empty($order['client_city']) ? strtoupper($order['client_city']) : 'FSD' ?></td></tr>
+                </table>
+            </div>
+            <div class="company-branding">
+                <h1 class="company-name"><?= $get_company['name'] ?></h1>
+                <div class="company-details">
+                    PH: <?= $get_company['company_phone'] ?> | <?= $get_company['personal_phone'] ?><br>
+                    <?= $get_company['address'] ?>
                 </div>
             </div>
-            <div class="row">
-                <div class="  col-sm-3  ">
-                    <p class="h4 border border-bottom-0 text-center p-0 m-0 font-weight-bold"> <?= $nameSHow ?> Name </p>
-                    <p class="h4 border p-0 m-0 font-weight-bold text-center"><b><?= ucwords($order['client_name']) ?></b></p>
-                </div>
-                <div class="col-sm-5">
-                    <h2 class="text-center p-0 m-0">Bill</h2>
-                    <h4 class="text-center p-0 m-0"><?= @$order_type ?></h4>
-                </div>
-                <div class="  col-sm-4 ">
-                    <p class="h4 border border-bottom-0 text-center p-0 m-0 font-weight-bold"> <?= $nameSHow ?> Phone </p>
-                    <p class="h4 border p-0 m-0 font-weight-bold text-center"><b><?= $order['client_contact'] ?></b></p>
-                </div>
+        </div>
 
+        <div class="meta-row">
+            <span>DATE: <?= date('d/m/Y', strtotime($order['timestamp'])) ?></span>
+            <span>INVOICE NO: <?= sprintf("%05d", $_REQUEST['id']) ?></span>
+        </div>
+
+        <div class="legal-context">
+            <span class="legal-title">Form 2A (See Rule 19 and 30)</span>
+            <span class="legal-title">WARRANTY Under section 23(1) of Drugs Act 1976.</span>
+            <div class="warranty-text">
+                I MUHAMMAD IDREES being a person resident in Pakistan carrying on business at Doctor plaza main satyana road Main bazar Jaddah market Faisalabd, under the 
+                name of ADNAN MEDICINE CO. and being an authorised agent do hereby give this warranty that drugs here-under described and/sold by me. specified and contained in 
+                the bill of sale, invoices, bill of lading or other documents describing goods referred to here in do not contravenes in any way the provision of section 23 of drugs Act 1976.
+                <br><br>
+                WARRANTY UNDER ALTERNATIVE MEDICINES & HEALTH PRODUCTS(Enlistment) Rules. 2014. [See rule 10 (3) & (5)]
+                I MUHAMMAD IDREES, as the authorized distributors / agents and on behalf of the principals / Manufacturers / Importers hereby give warranty that the supplied alternative 
+                medicines and health products mentioned here in do not contravene any provision of the prevailing DRAP Act and rules framed thereunder.
+                Confirm that I have read and I agree with Terms & Conditions printed overleaf
             </div>
-            <div class="row table_row mt-4" style="min-height: <?= $table_row ?>;">
-                <div class="col-sm-12 p-0">
-                    <table class="w-100">
-                        <thead class="thead_row">
-                            <th>Sr</th>
-                            <th>DESCRIPTION</th>
-                            <th>PRICE</th>
-                            <th>QUANTITY</th>
-                            <th>TOTAL</th>
-                        </thead>
-                        <tbody class="tbody_row">
-                            <?php $c = 0;
-                            while ($r = mysqli_fetch_assoc($order_item)) {
-                                $c++;
+        </div>
 
-                            ?>
-                                <tr>
-                                    <td><?= $c ?></td>
-                                    <td><?= strtoupper($r['product_name']) ?>
-                                        <?php
-                                        if ($r['product_detail']) {
-                                        ?>
-                                            (<?= $r['product_detail'] ?>)
-                                        <?php
-                                        }
-                                        ?>
-                                    </td>
-                                    <td><?= $r['rate'] ?></td>
-                                    <td><?= $r['quantity'] ?></td>
-                                    <td><?= $r['rate'] * $r['quantity'] ?></td>
-                                </tr>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th width="50" class="text-center">QTY</th>
+                    <th class="text-left">PRODUCTS</th>
+                    <th width="120" class="text-left">FORM PACK</th>
+                    <th width="100" class="text-left">BATCH NO.</th>
+                    <th width="80" class="text-right">RATE</th>
+                    <th width="60" class="text-right">%AGE</th>
+                    <th width="100" class="text-right">AMOUNT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php $c = 0;
+                $rowCount = mysqli_num_rows($order_item);
+                while ($r = mysqli_fetch_assoc($order_item)) {
+                    $c++;
+                    $totalQTY += $r['quantity'];
+                    $item_discount = ($order['total_amount'] > 0) ? ($order['discount'] / $order['total_amount'] * 100) : 0;
+                    // Note: %AGE in ref image is product-wise, but we use order-wise discount usually. 
+                    // Showing 0 if not explicitly defined per product.
+                ?>
+                <tr>
+                    <td class="text-center"><?= $r['quantity'] ?></td>
+                    <td class="text-left"><?= strtoupper($r['product_name']) ?></td>
+                    <td class="text-left"><?= !empty($r['product_detail']) ? $r['product_detail'] : '---' ?></td>
+                    <td class="text-center"><?= $r['b_no'] ?? '---' ?></td>
+                    <td class="text-right"><?= number_format($r['rate'], 2) ?></td>
+                    <td class="text-right">0.00</td>
+                    <td class="text-right"><?= number_format($r['rate'] * $r['quantity'], 2) ?></td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
 
-                            <?php
-                                $totalQTY += $r['quantity'];
-                            } ?>
-                        </tbody>
-                        <tfoot class="tfoot_row">
-
-                            <tr>
-                                <td colspan="3"></td>
-                                <td class="border"><b>Sub Total</b></td>
-                                <td class="border"><?= $order['total_amount'] ?></td>
-                            </tr>
-                            <tr>
-                                <td colspan="3"></td>
-                                <td class="border"><b>Total Quantity</b></td>
-                                <td class="border"><?= $totalQTY ?></td>
-                            </tr>
-                            <?php
-                            if ($order['discount'] > 0) {
-
-
-                            ?>
-                                <tr>
-                                    <td colspan="3"></td>
-                                    <td class="border">DISCOUNT%</td>
-                                    <td class="border"><?= $order['discount'] ?>%</td>
-                                </tr>
-                            <?php
-                            }
-                            ?>
-                            <tr>
-                                <td colspan="3"></td>
-                                <td class="border">FREIGHT</td>
-
-                                <td class="border"><b><?= empty($order['freight']) ? "0" : $order['freight'] ?></b></td>
-                            </tr>
-                            <tr>
-                                <td colspan="3"></td>
-                                <td class="border">GRAND TOTAL</td>
-
-                                <td class="border"><b><?= number_format($order['grand_total'], 2) ?></b></td>
-                            </tr>
-                            <?php if ($_REQUEST['type'] == "order" and $order['payment_type'] == "credit_sale"): ?>
-
-                                <tr>
-                                    <td colspan="3"></td>
-                                    <td class="border">Previous Balance</td>
-
-                                    <td class="border"><b><?= getcustomerBlance($dbc, $order['customer_account']) - $order['due'] ?></b></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3"></td>
-                                    <td class="border">Current Balance</td>
-
-                                    <td class="border"><b><?= getcustomerBlance($dbc, $order['customer_account']) ?></b></td>
-                                </tr>
-
-                            <?php endif; ?>
-                        </tfoot>
-                    </table>
-                </div>
+        <div class="totals-container">
+            <div class="count-info">
+                ITEMS: &nbsp;&nbsp; <?= $rowCount ?>
             </div>
-            <?php
-            if ($comment):
-            ?>
-                <div class="row">
-                    <table border="1" class="table table-responsive w-100">
-                        <tr>
-                            <th class="h4">Comment</th>
-                            <td class="h5"><?= $comment ?></td>
-                        </tr>
-                    </table>
-                </div>
-            <?php
-            endif;
-            ?>
-            <div class="row" style="font-size: 18px">
-                <div class="col-sm-3 h4">
-                    Prepared By : __________________
-                </div>
-                <div class="col-sm-6 ">
-                    <?php
-                    if (isset($order['vehicle_no'])) {
-                        // code...
-
-                    ?>
-                        <p class="4 mt-1 text-center"> Vehicle No : <b><u><?= strtoupper($order['vehicle_no']) ?></u></b></p>
-
-                    <?php
-                    }
-                    ?>
-                    <p class="mt-1 text-dark text-center"> Software Developed By :<b>Samz Creation (0345-7573667)</b> </p>
-                    <p class="text-dark text-center p-0 m-0"><?= $copy ?></p>
-                </div>
-                <div class="col-sm-3 h4">
-                    Recevied By : _________________
-                </div>
+            <div class="net-payable-box">
+                <div class="net-payable-title">Net Payable &nbsp;&nbsp;&nbsp;&nbsp; <?= number_format($order['grand_total'], 0) ?></div>
+                <table class="totals-table">
+                    <tr>
+                        <td class="text-left">Total value</td>
+                        <td class="text-right"><?= number_format($order['total_amount'], 2) ?></td>
+                    </tr>
+                    <?php if($order['freight'] > 0): ?>
+                    <tr>
+                        <td class="text-left">Freight</td>
+                        <td class="text-right"><?= number_format($order['freight'], 2) ?></td>
+                    </tr>
+                    <?php endif; ?>
+                    <tr>
+                        <td class="text-left">Amount</td>
+                        <td class="text-right"><?= number_format($order['grand_total'], 2) ?></td>
+                    </tr>
+                </table>
             </div>
-        </div> <!-- end of container -->
+        </div>
+
+        <div class="footer-notes">
+            <div class="note-item">NOTE: Date items must be informed 6 months before expiry</div>
+            <div class="note-item">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No claim will be accepted for leakage, breakage or shortage</div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="computerized-note">
+                Computerized By Punjab Computer Center Sargodha 0333-6796415
+            </div>
+            <div class="signature-area">
+                Signature
+            </div>
+        </div>
+    </div>
     <?php endfor; ?>
 
-
+    <script type="text/javascript">
+        window.print();
+    </script>
 </body>
-
 </html>
-<script type="text/javascript">
-    window.print();
-</script>

@@ -190,7 +190,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                       while ($r = mysqli_fetch_assoc($q)) {
 
                         ?>
-                        <tr id="product_idN_<?= $r['product_id'] ?>">
+                        <tr id="product_idN_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>">
                           <!-- <input type="hidden" data-price="<?= $r['rate'] ?>" data-quantity="<?= $r['quantity'] ?>" id="product_ids_<?= $r['product_id'] ?>" class="product_ids" name="product_ids[]" value="<?= $r['product_id'] ?>"> -->
                           <input type="hidden" data-price="<?= $r['rate'] ?>" data-quantity="<?= $r['quantity'] ?>"
                             id="product_ids_<?= $r['product_id'] ?>" class="product_ids" name="product_ids[]"
@@ -210,7 +210,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                           </td>
                           <td>
 
-                            <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>`)"
+                            <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>`)"
                               class="fa fa-trash text-danger" href="#"></button>
                             <button type="button"
                               onclick="editSaleItem(<?= $r['product_id'] ?>,`<?= $r['product_code'] ?>`,'<?= $r['batch_id'] ?>',<?= $r['quantity'] ?>,<?= $r['rate'] ?>,'<?= @$r['product_detail'] ?>')"

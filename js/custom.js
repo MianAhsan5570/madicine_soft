@@ -747,13 +747,15 @@ $("#addProductSale").on("click", function () {
 
 
 
-    if ($("#product_idN_" + id).length) {
+    var rowId = "product_idN_" + id + "_" + (batch_id || "0");
+    if ($("#" + rowId).length) {
       $(".product_ids").each(function () {
         var quantity = $(this).data("quantity");
         total_price = 0;
         var val = $(this).val();
+        var current_batch = $(this).closest('tr').find('input[name="batch_ids[]"]').val();
 
-        if (val == id) {
+        if (val == id && current_batch == batch_id) {
           var Currentquantity =
             pro_type === "add"
               ? parseInt(quantity) + parseInt(product_quantity)
@@ -763,14 +765,14 @@ $("#addProductSale").on("click", function () {
             parseFloat(price) * parseFloat(Currentquantity);
 
           if (Currentquantity <= max_qty) {
-            $("#product_idN_" + id).replaceWith(`
-              <tr id="product_idN_${id}">
+            $("#" + rowId).replaceWith(`
+              <tr id="${rowId}">
                 <input type="hidden" data-price="${price}" data-quantity="${Currentquantity}"
-                       id="product_ids_${id}" class="product_ids" name="product_ids[]" value="${id}">
-                <input type="hidden" id="product_quantites_${id}" name="product_quantites[]" value="${Currentquantity}">
-                <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
-                <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
-                <input type="hidden" id="product_detail_${id}" name="product_detail[]" value="${detail}">
+                       id="product_ids_${id}_${batch_id}" class="product_ids" name="product_ids[]" value="${id}">
+                <input type="hidden" id="product_quantites_${id}_${batch_id}" name="product_quantites[]" value="${Currentquantity}">
+                <input type="hidden" id="product_rate_${id}_${batch_id}" name="product_rates[]" value="${price}">
+                <input type="hidden" id="product_totalrate_${id}_${batch_id}" name="product_totalrates[]" value="${total_price}">
+                <input type="hidden" id="product_detail_${id}_${batch_id}" name="product_detail[]" value="${detail}">
                 <input type="hidden" name="batch_ids[]" value="${batch_id}">
                 
 
@@ -780,8 +782,8 @@ $("#addProductSale").on("click", function () {
                 <td>${Currentquantity}</td>
                 <td>${total_price}</td>
                 <td>
-                  <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
-                  <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${product_quantity},'${price}', '${detail}')" class="fa fa-edit text-success"></button>
+                  <button type="button" onclick="removeByid('#${rowId}')" class="fa fa-trash text-danger"></button>
+                  <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${Currentquantity},'${price}', '${detail}')" class="fa fa-edit text-success"></button>
                 </td>
               </tr>
             `);
@@ -795,13 +797,13 @@ $("#addProductSale").on("click", function () {
       total_price = parseFloat(price) * parseFloat(product_quantity);
 
       $("#purchase_product_tb").append(`
-        <tr id="product_idN_${id}">
+        <tr id="${rowId}">
           <input type="hidden" data-price="${price}" data-quantity="${product_quantity}"
-                 id="product_ids_${id}" class="product_ids" name="product_ids[]" value="${id}">
-          <input type="hidden" id="product_quantites_${id}" name="product_quantites[]" value="${product_quantity}">
-          <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
-          <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
-          <input type="hidden" id="product_detail_${id}" name="product_detail[]" value="${detail}">
+                 id="product_ids_${id}_${batch_id}" class="product_ids" name="product_ids[]" value="${id}">
+          <input type="hidden" id="product_quantites_${id}_${batch_id}" name="product_quantites[]" value="${product_quantity}">
+          <input type="hidden" id="product_rate_${id}_${batch_id}" name="product_rates[]" value="${price}">
+          <input type="hidden" id="product_totalrate_${id}_${batch_id}" name="product_totalrates[]" value="${total_price}">
+          <input type="hidden" id="product_detail_${id}_${batch_id}" name="product_detail[]" value="${detail}">
           <input type="hidden" name="batch_nos[]"     value="${batch_no}">
           <input type="hidden" name="batch_ids[]"     value="${batch_id}">
           <input type="hidden" name="expires[]"       value="${expiry_date}">
@@ -812,7 +814,7 @@ $("#addProductSale").on("click", function () {
           <td>${product_quantity}</td>
           <td>${total_price}</td>
           <td>
-            <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
+            <button type="button" onclick="removeByid('#${rowId}')" class="fa fa-trash text-danger"></button>
             <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${product_quantity},'${price}', '${detail}')" class="fa fa-edit text-success"></button>
           </td>
         </tr>
@@ -898,14 +900,17 @@ $("#addProductPurchase").on("click", function () {
     $("#get_batch_no").val("");
 
 
-    if ($("#product_idN_" + id).length) {
+    var rowId = "product_idN_" + id + "_" + (batch_id_val || batch_no || "0");
+    if ($("#" + rowId.replace(/[^a-zA-Z0-9_]/g, "")).length) {
       // Product already exists in list
       $(".product_ids").each(function () {
         var quantity = parseInt($(this).data("quantity")) || 0;
         total_price = 0;
         var val = $(this).val();
+        var current_batch_id = $(this).closest('tr').find('input[name="batch_ids[]"]').val();
+        var current_batch_no = $(this).closest('tr').find('input[name="batch_nos[]"]').val();
 
-        if (val == id) {
+        if (val == id && (current_batch_id == batch_id_val || current_batch_no == batch_no)) {
           var Currentquantity =
             pro_type === "add" ? quantity + product_quantity : product_quantity;
 
@@ -915,14 +920,14 @@ $("#addProductPurchase").on("click", function () {
           ) {
             total_price = price * Currentquantity;
 
-            $("#product_idN_" + id).replaceWith(`
-              <tr id="product_idN_${id}">
+            $("#" + rowId).replaceWith(`
+              <tr id="${rowId}">
                 <input type="hidden" data-price="${price}" data-quantity="${Currentquantity}"
-                       id="product_ids_${id}" class="product_ids" name="product_ids[]" value="${id}">
-                <input type="hidden" id="product_quantites_${id}" name="product_quantites[]" value="${Currentquantity}">
-                <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
-                <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
-                <input type="hidden" id="product_salerate_${id}" name="product_salerates[]" value="${sale_price}">
+                       id="product_ids_${id}_${batch_id_val}" class="product_ids" name="product_ids[]" value="${id}">
+                <input type="hidden" id="product_quantites_${id}_${batch_id_val}" name="product_quantites[]" value="${Currentquantity}">
+                <input type="hidden" id="product_rate_${id}_${batch_id_val}" name="product_rates[]" value="${price}">
+                <input type="hidden" id="product_totalrate_${id}_${batch_id_val}" name="product_totalrates[]" value="${total_price}">
+                <input type="hidden" id="product_salerate_${id}_${batch_id_val}" name="product_salerates[]" value="${sale_price}">
                 <input type="hidden" name="batch_nos[]"   value="${batch_no_text}">
                 <input type="hidden" name="batch_ids[]"   value="${batch_id_val}">
                 <input type="hidden" name="expires[]"     value="${expiry_date}">
@@ -936,7 +941,7 @@ $("#addProductPurchase").on("click", function () {
                 <td>${Currentquantity}</td>
                 <td>${total_price}</td>
                 <td>
-                  <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
+                  <button type="button" onclick="removeByid('#${rowId}')" class="fa fa-trash text-danger"></button>
                   <button type="button" onclick="editPurchaseItem(${id}, '${batch_no_text}','${expiry_date}', '${price}','${sale_price}', '${Currentquantity}', '${batch_id_val}')" class="fa fa-edit text-success"></button>
                 </td>
               </tr>
@@ -957,13 +962,13 @@ $("#addProductPurchase").on("click", function () {
       total_price = price * product_quantity;
 
       $("#purchase_product_tb").append(`
-        <tr id="product_idN_${id}">
+        <tr id="${rowId}">
           <input type="hidden" data-price="${price}" data-quantity="${product_quantity}"
-                 id="product_ids_${id}" class="product_ids" name="product_ids[]" value="${id}">
-          <input type="hidden" id="product_quantites_${id}" name="product_quantites[]" value="${product_quantity}">
-          <input type="hidden" id="product_rate_${id}" name="product_rates[]" value="${price}">
-          <input type="hidden" id="product_totalrate_${id}" name="product_totalrates[]" value="${total_price}">
-          <input type="hidden" id="product_salerate_${id}" name="product_salerates[]" value="${sale_price}">
+                 id="product_ids_${id}_${batch_id_val}" class="product_ids" name="product_ids[]" value="${id}">
+          <input type="hidden" id="product_quantites_${id}_${batch_id_val}" name="product_quantites[]" value="${product_quantity}">
+          <input type="hidden" id="product_rate_${id}_${batch_id_val}" name="product_rates[]" value="${price}">
+          <input type="hidden" id="product_totalrate_${id}_${batch_id_val}" name="product_totalrates[]" value="${total_price}">
+          <input type="hidden" id="product_salerate_${id}_${batch_id_val}" name="product_salerates[]" value="${sale_price}">
           <input type="hidden" name="batch_nos[]"   value="${batch_no_text}">
           <input type="hidden" name="batch_ids[]"   value="${batch_id_val}">
           <input type="hidden" name="expires[]"     value="${expiry_date}">
@@ -977,7 +982,7 @@ $("#addProductPurchase").on("click", function () {
           <td>${product_quantity}</td>
           <td>${total_price}</td>
           <td>
-            <button type="button" onclick="removeByid('#product_idN_${id}')" class="fa fa-trash text-danger"></button>
+            <button type="button" onclick="removeByid('#${rowId}')" class="fa fa-trash text-danger"></button>
             <button type="button" onclick="editPurchaseItem(${id}, '${batch_no_text}','${expiry_date}', '${price}','${sale_price}',  '${product_quantity}','${pro_details}', '${batch_id_val}')" class="fa fa-edit text-success"></button>
           </td>
         </tr>
