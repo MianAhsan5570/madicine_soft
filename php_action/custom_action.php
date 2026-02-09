@@ -403,10 +403,10 @@ if (!empty($_REQUEST['action']) and $_REQUEST['action'] == "product_module") {
 	} else {
 		// Update existing product
 		if (update_data($dbc, "product", $data_array, "product_id", base64_decode($_REQUEST['product_id']))) {
-			$last_id = $_REQUEST['product_id'];
+			$last_id = base64_decode($_REQUEST['product_id']);
 
-			if ($_FILES['product_image']['tmp_name']) {
-				upload_pic($_FILES['product_image'], '../img/uploads/');
+			if (@$_FILES['product_image']['tmp_name']) {
+				upload_pic(@$_FILES['product_image'], '../img/uploads/');
 				$product_image = $_SESSION['pic_name'];
 				$data_image = [
 					'product_image' => $product_image,

@@ -547,7 +547,8 @@ $("#get_product_name").on("change", function () {
         } else {
           $("#addProductPurchase").prop("disabled", false);
         }
-        if (response.qty <= 0 && $("#order_return").val() !== "order_return") {
+        var isOrderReturn = $("#order_return").length && $("#order_return").val() === "order_return";
+        if (response.qty <= 0 && !isOrderReturn) {
           $("#addProductSale").prop("disabled", true);
         } else {
           $("#addProductSale").prop("disabled", false);
@@ -583,7 +584,11 @@ $("#get_product_name").on("change", function () {
         });
       } else {
         $("#get_batch_no").append('<option value="">No batches available</option>');
-        $("#addProductSale").prop("disabled", true);
+        // Don't disable button for returns - they can still add products
+        var isOrderReturn = $("#order_return").length && $("#order_return").val() === "order_return";
+        if (!isOrderReturn) {
+          $("#addProductSale").prop("disabled", true);
+        }
       }
     },
     error: function () {
@@ -635,14 +640,14 @@ $("#get_batch_no").on("change", function () {
   var selectedOption = $(this).find(":selected");
   var batchQty = parseInt(selectedOption.data("qty")) || 0;
   var payment_type = $("#payment_type").val();
-  var order_return = $("#order_return").val();
+  var order_return = $("#order_return").length && $("#order_return").val() === "order_return";
 
   $("#batchQty").text("Batch Qty: " + batchQty);
   $("#get_expiry_date").val(selectedOption.data("expiry") || "");
 
   // Set max quantity based on batch availability
   if (payment_type === "cash_in_hand" || payment_type === "credit_sale") {
-    if (order_return !== "order_return") {
+    if (!order_return) {
       $("#get_product_quantity").attr("max", batchQty);
 
       if (batchQty <= 0) {
@@ -873,6 +878,9 @@ $("#addProductPurchase").on("click", function () {
   if (is_purchase_return) {
     batch_id_val = $("#get_batch_no").val();
     batch_no_text = $("#get_batch_no option:selected").data("batch-no") || batch_no;
+    // Get batch-specific quantity for validation
+    var batch_qty = parseInt($("#get_batch_no option:selected").data("qty")) || 0;
+    max_qty = batch_qty; // For purchase returns, limit to batch quantity
     // Fallback if data attribute is missing
     if (!batch_no_text && batch_id_val) batch_no_text = batch_id_val;
   }
@@ -994,7 +1002,11 @@ $("#addProductPurchase").on("click", function () {
     }
   } else {
     if (max_qty < product_quantity) {
-      sweeetalert("Cannot Add Quantity more than stock", "error", 1500);
+      if (is_purchase_return) {
+        sweeetalert("Cannot return more than available batch quantity (" + max_qty + ")", "error", 2000);
+      } else {
+        sweeetalert("Cannot Add Quantity more than stock", "error", 1500);
+      }
     } else if (code === "") {
       sweeetalert("Select The Product first", "error", 1500);
     } else if (is_purchase_return && batch_id_val === "") {

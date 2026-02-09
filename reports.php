@@ -114,12 +114,14 @@
 
 
 
-                  <button class="mt-2 ml-1 btn btn-admin float-right" name="genealledger" type="submit">Ledger Detials</button>
+                  <button class="mt-2 ml-1 btn btn-admin float-right" name="genealledger" type="submit">Ledger
+                    Detials</button>
 
                   <button class="mt-2  btn btn-admin2 float-right" name="fullledger" type="submit">Full Details</button>
                   <?php
-                  if (isset($_POST['genealledger']) or isset($_POST['fullledger'])):  ?>
-                    <button class="mt-2 btn btn-primary float-right" onclick="window.print();" style="margin-right: 15px;">Print Report</button>
+                  if (isset($_POST['genealledger']) or isset($_POST['fullledger'])): ?>
+                    <button class="mt-2 btn btn-primary float-right" onclick="window.print();"
+                      style="margin-right: 15px;">Print Report</button>
                   <?php endif ?>
 
                 </div><!-- group -->
@@ -142,7 +144,7 @@
 
 
 
-            if (isset($_POST['genealledger']) or isset($_POST['fullledger'])) :
+            if (isset($_POST['genealledger']) or isset($_POST['fullledger'])):
 
 
 
@@ -152,16 +154,19 @@
 
 
 
-            ?>
+              ?>
               <hr>
               <header class="">
                 <div class="row">
                   <div class="col-sm-1">
-                    <img src="img/logo/<?= $get_company['logo'] ?>" width="90" height="90" class="img-fluid float-left" style="margin-top: 10px">
+                    <img src="img/logo/<?= $get_company['logo'] ?>" width="90" height="90" class="img-fluid float-left"
+                      style="margin-top: 10px">
                   </div>
                   <div class="col-sm-5 mt-3">
-                    <h1 style="margin-left: -20px; color: red;font-weight: bold;font-size: 30px"><?= $get_company['name'] ?></h1>
-                    <p style="margin-left: -10px; font-weight: bolder;font-size: 15px">PH No. :<?= $get_company['company_phone'] ?></p>
+                    <h1 style="margin-left: -20px; color: red;font-weight: bold;font-size: 30px">
+                      <?= $get_company['name'] ?></h1>
+                    <p style="margin-left: -10px; font-weight: bolder;font-size: 15px">PH No.
+                      :<?= $get_company['company_phone'] ?></p>
 
 
 
@@ -182,7 +187,7 @@
               <?php
 
               if (!empty($customer)) {
-              ?>
+                ?>
                 <?php
                 if (!empty($_REQUEST['from_date']) and !empty($_REQUEST['to_date'])) {
                   $sql = "SELECT * FROM transactions WHERE  customer_id='$customer' AND transaction_add_date BETWEEN '" . $_REQUEST['from_date'] . "' AND '" . $_REQUEST['to_date'] . "' ";
@@ -265,7 +270,7 @@
 
                         $debitTotal = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT sum(debit) AS debitTotal FROM transactions WHERE customer_id = '$customer'"));
                         $check_remaing_balance = $debitTotal['debitTotal'];
-                        if (mysqli_num_rows($result) > 0) :
+                        if (mysqli_num_rows($result) > 0):
                           while ($row = mysqli_fetch_array($result)):
                             @$total_debit += $row['debit'];
                             $invoice_type = $comment = '';
@@ -278,7 +283,7 @@
 
                               $invoice_id = filter_var($row['transaction_remarks'], FILTER_SANITIZE_NUMBER_INT);
                               $fetchinvoive = fetchRecord($dbc, "orders", "order_id", $invoice_id);
-                              $invoice_type = $fetchinvoive['credit_sale_type'];
+                              $invoice_type = @$fetchinvoive['credit_sale_type'];
                               if ($check_remaing_balance < 0) {
 
                                 $Date = date('Y-m-d');
@@ -320,14 +325,14 @@
 
                               $invoice_type2 = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT * FROM vouchers WHERE transaction_id1 = '$row[transaction_id]' "));
                               //echo "SELECT * FROM vouchers WHERE transaction_id1 = '$row[transaction_id]'";
-
+                    
                               if ($invoice_type2 > 0) {
-                                $invoice_type =  $invoice_type2['voucher_id'];
+                                $invoice_type = $invoice_type2['voucher_id'];
                               }
                             }
                             @$total_credit += $row['credit'];
                             if ($row['debit'] !== 0 and $row['credit'] !== 0):
-                        ?>
+                              ?>
                               <tr>
                                 <td><?= $row['transaction_id'] ?></td>
 
@@ -342,11 +347,14 @@
 
 
                                 <?php if ($check_remaing_balance < 0 and $row['transaction_from'] == "invoice"): ?>
-                                  <td class="text-danger"><?= number_format(((int)$row['credit'] - (int)$row['debit']) + (int)$temp) ?></td>
+                                  <td class="text-danger">
+                                    <?= number_format(((int) $row['credit'] - (int) $row['debit']) + (int) $temp) ?></td>
                                 <?php elseif ($row['transaction_from'] == "voucher"): ?>
-                                  <td class="text-info"><?= number_format(((int)$row['credit'] - (int)$row['debit']) + (int)$temp) ?></td>
+                                  <td class="text-info">
+                                    <?= number_format(((int) $row['credit'] - (int) $row['debit']) + (int) $temp) ?></td>
                                 <?php else: ?>
-                                  <td class="text-success"><?= number_format(((int)$row['credit'] - (int)$row['debit']) + (int)$temp) ?></td>
+                                  <td class="text-success">
+                                    <?= number_format(((int) $row['credit'] - (int) $row['debit']) + (int) $temp) ?></td>
                                 <?php endif ?>
                                 <?php if (isset($_POST['fullledger'])): ?>
 
@@ -355,14 +363,14 @@
                                   <td><?= $comment ?></td>
                                 <?php endif; ?>
                               </tr>
-                            <?php
+                              <?php
                             endif;
 
 
 
 
 
-                            $temp = ((int)$row['credit'] - (int)$row['debit']) + $temp; ?>
+                            $temp = ((int) $row['credit'] - (int) $row['debit']) + $temp; ?>
 
 
 
@@ -375,9 +383,9 @@
                           <?php
                           $open_b = mysqli_fetch_assoc(mysqli_query($dbc, $opening_sql));
                           if (@$open_b['debit'] == 0) {
-                            $opening_balance = (int)@$open_b['credit'];
+                            $opening_balance = (int) @$open_b['credit'];
                           } else {
-                            $opening_balance = (int)@$open_b['debit'];
+                            $opening_balance = (int) @$open_b['debit'];
                           }
 
 
@@ -437,22 +445,22 @@
 
 
 
-                      </tbody>
+                        </tbody>
 
 
-                    <?php else: ?>
-                      <tr>
-                        <td colspan="7" class="text-center">No Transaction Found</td>
-                      </tr>
+                      <?php else: ?>
+                        <tr>
+                          <td colspan="7" class="text-center">No Transaction Found</td>
+                        </tr>
 
 
 
 
-                    <?php endif;
+                      <?php endif;
 
-                    ?>
+                        ?>
 
-                    <hr />
+                      <hr />
                     </table>
                   </div>
                 </div>
