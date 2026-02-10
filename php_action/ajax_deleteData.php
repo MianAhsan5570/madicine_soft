@@ -120,8 +120,12 @@ if (isset($_REQUEST['delete_bymanually'])) {
 		$vouchers = fetchRecord($dbc, 'purchase', $row, $id);
 		@deleteFromTable($dbc, "transactions", 'transaction_id', $vouchers['transaction_paid_id']);
 		@deleteFromTable($dbc, "transactions", 'transaction_id', $vouchers['transaction_id']);
-		if (mysqli_query($dbc, "DELETE FROM purchase WHERE $row='$id'")) {
-			$msg = "Data Has been deleted...";
+		// Delete purchase return and items
+		$delete_return = mysqli_query($dbc, "DELETE FROM purchase WHERE $row = '$id'");
+		$delete_items = mysqli_query($dbc, "DELETE FROM purchase_item WHERE purchase_id = '$id'");
+
+		if ($delete_return && $delete_items) {
+			$msg = "Purchase return has been deleted...";
 			$sts = "success";
 		} else {
 			$msg = mysqli_error($dbc);

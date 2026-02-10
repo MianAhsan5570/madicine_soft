@@ -177,6 +177,8 @@ if (!empty($_REQUEST['edit_order_id'])) {
                             value="<?= $r['quantity'] ?>">
                           <input type="hidden" id="product_totalrate_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" name="product_totalrates[]"
                             value="<?= (float) $r['rate'] * (float) $r['quantity'] ?>">
+                            <input type="hidden" id="product_rates<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" name="product_rates[]"
+                            value="<?= (float) $r['rate']?>">
                           <input type="hidden" id="product_detail_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" name="product_detail[]"
                             value="<?= htmlspecialchars($r['product_description'] ?? '') ?>">
                           <input type="hidden" name="batch_ids[]" value="<?= $r['batch_id'] ?>">
