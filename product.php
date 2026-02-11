@@ -54,6 +54,11 @@ $btn_name = isset($_REQUEST['edit_product_id']) ? "Update" : "Add";
                     <input type="text" class="form-control" id="product_code" placeholder="Product Code"
                       name="product_code" required value="<?= @$fetchproduct['product_code'] ?>">
                   </div>
+                  <div class="col-sm-2 mb-3 mb-sm-0">
+                    <label for="">Pack Of</label>
+                    <input type="text" class="form-control" id="product_pack" placeholder="Product Pack"
+                      name="product_pack" required value="<?= @$fetchproduct['product_pack'] ?>">
+                  </div>
                   <div class="col-sm-2">
                     <label for="">Product Brand</label>
                     <div id="brandDropdownContainer">

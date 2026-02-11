@@ -123,6 +123,7 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
               <div class="col-6 col-sm-4 col-md-3 col-lg-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <label for="get_product_name" class="mb-0 form-label ">Products</label>
+                  <input type="hidden" id="add_pro_type" value="add">
                   <span id="instockQty" class="badge badge-info font-weight-bold px-3 py-1"
                     style="font-size: 0.9rem;">InStock: 0</span>
                 </div>

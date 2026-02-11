@@ -359,6 +359,7 @@ if (!empty($_REQUEST['action']) and $_REQUEST['action'] == "product_module") {
 	$data_array = [
 		'product_name' => $_REQUEST['product_name'],
 		'product_code' => @$_REQUEST['product_code'],
+		'product_pack' => @$_REQUEST['product_pack'],
 		'brand_id' => $brand_id,
 		'category_id' => $category_id,
 		'product_mm' => @$_REQUEST['product_mm'],

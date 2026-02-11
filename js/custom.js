@@ -859,7 +859,7 @@ $("#addProductPurchase").on("click", function () {
   var product_quantity = parseInt($("#get_product_quantity").val()) || 0;
   var pro_type = $("#add_pro_type").val();
   var max_qty = parseInt($("#get_product_quantity").attr("max")) || 0;
-  var batch_no = $("#get_batch_no").val().trim();
+  var batch_no = $("#get_batch_no").val().trim().toLowerCase();
   var expiry_date = $("#get_expiry_date").val();
   // For non-purchase returns (cash/credit), allow unlimited quantities
   if (

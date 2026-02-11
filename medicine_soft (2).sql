@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 09, 2026 at 12:12 PM
+-- Generation Time: Feb 10, 2026 at 10:31 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -495,6 +495,19 @@ CREATE TABLE `order_item` (
   `width` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
+--
+-- Dumping data for table `order_item`
+--
+
+INSERT INTO `order_item` (`order_item_id`, `order_id`, `product_id`, `batch_id`, `product_detail`, `quantity`, `rate`, `total`, `order_item_status`, `discount`, `gauge`, `width`) VALUES
+(18, 2, 2, 8, NULL, 100, 0, 0, 1, NULL, NULL, NULL),
+(22, 1, 2, 8, NULL, 300, 0, 0, 1, NULL, NULL, NULL),
+(25, 3, 2, 8, NULL, 100, 31000, 3100000, 1, NULL, NULL, NULL),
+(29, 4, 2, 8, 'undefined', 300, 31000, 9300000, 1, NULL, NULL, NULL),
+(30, 4, 2, 10, 'undefined', 300, 31000, 9300000, 1, NULL, NULL, NULL),
+(31, 5, 2, 8, NULL, 100, 31000, 3100000, 1, NULL, NULL, NULL),
+(32, 5, 2, 10, NULL, 100, 31000, 3100000, 1, NULL, NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -669,8 +682,8 @@ CREATE TABLE `product` (
 
 INSERT INTO `product` (`product_id`, `product_name`, `product_code`, `product_image`, `brand_id`, `category_id`, `quantity_instock`, `purchased`, `current_rate`, `f_days`, `t_days`, `purchase_rate`, `status`, `availability`, `alert_at`, `weight`, `actual_rate`, `product_description`, `product_mm`, `product_inch`, `product_meter`, `adddatetime`, `inventory`) VALUES
 (1, 'rooma doble bedsheet', '035', '', 1, 1, 0, 0, 0, '', '', 1100, 0, 1, 20, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(2, 'super select double ', '155', '', 1, 2, 200, 0, 31000, '', '', 51000, 1, 1, 5, '', '', '', '', '', '', '2026-02-09 11:05:30', 0),
-(3, 'master pillow', '001', '', 1, 3, 2000, 0, 400, '', '', 335, 1, 1, 30, '', '', '', '', '', '', '2026-02-09 11:08:28', 0),
+(2, 'super select double ', '155', '', 1, 2, 8400, 0, 31000, '', '', 51000, 1, 1, 5, '', '', '', '', '', '', '2026-02-10 09:23:01', 0),
+(3, 'master pillow', '001', '', 1, 3, 2000, 0, 400, '', '', 335, 1, 1, 30, '', '', '', '', '', '', '2026-02-10 06:42:54', 0),
 (4, 'nishat pillow', '002', '', 1, 3, 0, 0, 500, '', '', 415, 1, 1, 30, '', '', '', '', '', '', '2026-02-06 09:39:06', 0),
 (5, 'korean open pillow', '003', '', 1, 3, 0, 0, 0, '', '', 515, 1, 1, 30, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
 (6, 'voli pillow', '005', '', 1, 3, 0, 0, 0, '', '', 190, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
@@ -840,7 +853,10 @@ INSERT INTO `product` (`product_id`, `product_name`, `product_code`, `product_im
 (170, 'bedsheets', '345', '', 7, 96, 0, 0, 0, '', '', 4000, 1, 1, 5, '', '', 'waterproof bedsheets', '', '', '', '2026-01-27 11:03:24', 0),
 (171, 'pillow', '10', '', 1, 3, 0, 0, 0, '', '', 200, 1, 1, 5, '', '', 'abc', '', '', '', '2026-01-27 11:03:24', 0),
 (172, 'razai 1', '12', '', 8, 13, 0, 0, 0, '', '', 250, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(173, 'cover', '333', '', 1, 98, 0, 0, 300, '', '', 250, 1, 0, 0, '', '', 'cover open', '', '', '', '2026-01-27 11:03:24', 0);
+(173, 'cover', '333', '', 1, 98, 0, 0, 300, '', '', 250, 1, 0, 0, '', '', 'cover open', '', '', '', '2026-01-27 11:03:24', 0),
+(174, 'cover', '842824337', '', 1, 2, 0, 0, 0, '', '', 270, 1, 1, 5, '', '', '', '', '', '', '2026-02-09 12:06:09', 1),
+(175, 'testing', '34424', '', 1, 2, 0, 0, 0, '', '', 40000, 1, 1, 5, '', '', 'dfsdfgdf', '', '', '', '2026-02-09 12:24:49', 0),
+(176, 'testing', '985033246', '', 0, 0, 0, 0, 40000, NULL, NULL, 40000, 1, 1, 5, '', NULL, NULL, '0', '0', '0', '2026-02-09 12:25:23', 1);
 
 -- --------------------------------------------------------
 
@@ -860,6 +876,26 @@ CREATE TABLE `product_batches` (
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `product_batches`
+--
+
+INSERT INTO `product_batches` (`batch_id`, `product_id`, `batch_no`, `expiry_date`, `qty_in`, `qty_out`, `available_qty`, `purchase_id`, `created_at`, `updated_at`) VALUES
+(1, 2, 'fd454', '2026-02-24', 0, 0, 0, 1, '2026-02-10 06:25:41', '2026-02-10 06:29:22'),
+(2, 2, 'dfdsf343', '2026-02-25', 0, 0, 0, 1, '2026-02-10 06:25:41', '2026-02-10 06:29:22'),
+(3, 2, 'fd454', '2026-02-25', 0, 0, 0, 1, '2026-02-10 06:29:22', '2026-02-10 06:33:40'),
+(4, 3, 'fd454', '2026-02-24', 0, 0, 0, 1, '2026-02-10 06:29:22', '2026-02-10 06:33:40'),
+(5, 2, '123a', '2026-02-24', 0, 0, 0, 2, '2026-02-10 06:37:24', '2026-02-10 07:41:06'),
+(6, 3, '3456a', '2026-02-20', 0, 0, 0, 2, '2026-02-10 06:37:24', '2026-02-10 06:42:54'),
+(7, 2, '123a', '2026-02-24', 0, 0, 0, 2, '2026-02-10 06:39:28', '2026-02-10 07:41:06'),
+(8, 2, '123a', '2026-02-24', 0, 0, 0, 3, '2026-02-10 06:43:46', '2026-02-10 07:42:37'),
+(9, 2, '123a', '2026-02-27', 0, 0, 0, 4, '2026-02-10 06:57:34', '2026-02-10 07:42:43'),
+(10, 2, 'fd45', '2026-02-26', 0, 0, 0, 5, '2026-02-10 07:20:34', '2026-02-10 07:41:03'),
+(11, 2, 'sd567', '2026-02-28', 0, 0, 0, 6, '2026-02-10 07:43:06', '2026-02-10 07:43:16'),
+(12, 2, '123a', '2026-02-25', 0, 0, 0, 7, '2026-02-10 09:17:50', '2026-02-10 09:23:01'),
+(13, 2, '3456a', '2026-02-25', 0, 0, 0, 7, '2026-02-10 09:17:50', '2026-02-10 09:23:01'),
+(14, 2, '123a', '2026-02-22', 1100, 0, 1100, 7, '2026-02-10 09:23:01', '2026-02-10 09:23:01');
 
 -- --------------------------------------------------------
 
@@ -890,6 +926,13 @@ CREATE TABLE `purchase` (
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
+--
+-- Dumping data for table `purchase`
+--
+
+INSERT INTO `purchase` (`purchase_id`, `purchase_date`, `client_name`, `bill_no`, `client_contact`, `sub_total`, `vat`, `total_amount`, `discount`, `grand_total`, `paid`, `due`, `payment_type`, `payment_account`, `customer_account`, `payment_status`, `transaction_id`, `transaction_paid_id`, `purchase_narration`, `timestamp`) VALUES
+(7, '2026-02-10', 'asif fiber', '', '03004607278', '', '', '56100000', '0', '56100000', '56100000.00', '0', 'cash_purchase', 1, 5, 1, 0, 25, '', '2026-02-10 09:17:50');
+
 -- --------------------------------------------------------
 
 --
@@ -909,6 +952,13 @@ CREATE TABLE `purchase_item` (
   `total` varchar(255) NOT NULL,
   `purchase_item_status` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `purchase_item`
+--
+
+INSERT INTO `purchase_item` (`purchase_item_id`, `purchase_id`, `product_id`, `batch_no`, `expiry_date`, `product_detail`, `quantity`, `rate`, `sale_rate`, `total`, `purchase_item_status`) VALUES
+(4, 7, 2, '123a', '2026-02-22', '', '1100', '51000', '31000', '56100000', 1);
 
 -- --------------------------------------------------------
 
@@ -981,6 +1031,13 @@ CREATE TABLE `transactions` (
   `transaction_type` text DEFAULT NULL,
   `transaction_from` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `transactions`
+--
+
+INSERT INTO `transactions` (`transaction_id`, `debit`, `credit`, `balance`, `customer_id`, `transaction_remarks`, `transaction_add_date`, `transaction_date`, `transaction_type`, `transaction_from`) VALUES
+(25, '56100000.00', '0', '', 1, 'purchased by purchased id#7', '2026-02-10 09:23:01', '2026-02-10', 'cash_purchase', 'purchase');
 
 -- --------------------------------------------------------
 
@@ -1255,25 +1312,25 @@ ALTER TABLE `menus`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `orders_return`
 --
 ALTER TABLE `orders_return`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `order_item`
 --
 ALTER TABLE `order_item`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `order_return_item`
 --
 ALTER TABLE `order_return_item`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `privileges`
@@ -1285,43 +1342,43 @@ ALTER TABLE `privileges`
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `product_id` int(200) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=174;
+  MODIFY `product_id` int(200) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=177;
 
 --
 -- AUTO_INCREMENT for table `product_batches`
 --
 ALTER TABLE `product_batches`
-  MODIFY `batch_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `batch_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `purchase_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `purchase_item`
 --
 ALTER TABLE `purchase_item`
-  MODIFY `purchase_item_id` int(255) NOT NULL AUTO_INCREMENT;
+  MODIFY `purchase_item_id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `purchase_return`
 --
 ALTER TABLE `purchase_return`
-  MODIFY `purchase_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `purchase_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `purchase_return_item`
 --
 ALTER TABLE `purchase_return_item`
-  MODIFY `purchase_item_id` int(255) NOT NULL AUTO_INCREMENT;
+  MODIFY `purchase_item_id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `users`
