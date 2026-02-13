@@ -61,6 +61,12 @@
     $finaltotal = 0;
     while($r=mysqli_fetch_assoc($query)):
     @$categoryFetched=fetchRecord($dbc,"categories","categories_id",$r['category_id']);
+    
+    $stockSql = "SELECT SUM(available_qty) as total_stock FROM product_batches WHERE product_id = '".$r['product_id']."'";
+    $stockResult = mysqli_query($dbc, $stockSql);
+    $stockRow = mysqli_fetch_assoc($stockResult);
+    $r['quantity_instock'] = $stockRow['total_stock'] ? $stockRow['total_stock'] : 0;
+
 
       $c++;
   ?>

@@ -54,34 +54,34 @@ if (!empty($_REQUEST['edit_order_id'])) {
                 <input type="text" placeholder="Bill #" name="bill_no" autocomplete="off" id="get_bill_no"
                   value="<?= @$fetchOrder['bill_no'] ?>" class="form-control">
               </div>
-              <div class="col-sm-3">
-                <label>Customer Number</label>
-                <input type="number" placeholder="Customer No." onchange="getCustomer_name(this.value)"
-                  value="<?= @$fetchOrder['client_contact'] ?>" autocomplete="off" min="0" class="form-control"
-                  name="client_contact" list="phone">
-                <datalist id="phone">
-                  <?php
-                  $q = mysqli_query($dbc, "SELECT DISTINCT client_contact from orders");
-                  while ($r = mysqli_fetch_assoc($q)) {
-                    ?>
-                    <option value="<?= $r['client_contact'] ?>"><?= $r['client_contact'] ?></option>
-                  <?php } ?>
+              <div class="col-sm-6">
+                <label>Customer Account</label>
+                <div class="input-group">
 
-                </datalist>
-              </div>
-              <div class="col-sm-3 mr-auto">
-                <label>Customer Name</label>
-                <input type="text" id="sale_order_client_name" placeholder="Customer name"
-                  value="<?= @$fetchOrder['client_name'] ?>" class="form-control" autocomplete="off"
-                  name="sale_order_client_name" list="client_name">
-                <datalist id="client_name">
-                  <?php
-                  $q = mysqli_query($dbc, "SELECT DISTINCT client_name FROM orders");
-                  while ($r = mysqli_fetch_assoc($q)) {
-                    ?>
-                    <option value="<?= $r['client_name'] ?>"><?= $r['client_name'] ?></option>
-                  <?php } ?>
-                </datalist>
+                  <select class="form-control" onchange="getBalance(this.value,'customer_account_exp')"
+                    name="sale_order_client_name" id="sale_order_client_name" required aria-label="Username"
+                    aria-describedby="basic-addon1">
+                    <option value="">Customer Account</option>
+                    <?php
+                    $q = mysqli_query($dbc, "SELECT * FROM customers WHERE customer_status =1 AND customer_type='customer'");
+                    while ($r = mysqli_fetch_assoc($q)) {
+                      ?>
+                      <option <?= @($fetchOrder['customer_account'] == $r['customer_id']) ? "selected" : "" ?>
+                        data-id="<?= $r['customer_id'] ?>" data-contact="<?= $r['customer_phone'] ?>"
+                        value="<?= $r['customer_name'] ?>"><?= $r['customer_name'] ?></option>
+                    <?php } ?>
+                  </select><br />
+                </div>
+                <!-- <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon1">Balance : <span id="customer_account_exp">0</span>
+                  </span>
+                  <span class="input-group-text" id="basic-addon1">Limit : <span id="customer_Limit">0</span> </span>
+                  <span class="input-group-text" id="basic-addon1">R Limit : <span id="R_Limit">0</span> </span>
+                </div> -->
+                <input type="hidden" name="customer_account" id="customer_account"
+                  value="<?= @$fetchOrder['customer_account'] ?>">
+                  <input type="hidden" name="client_contact" id="client_contact"
+                  value="<?= @$fetchOrder['client_contact'] ?>">
               </div>
             </div> <!-- end of form-group -->
             <div class="form-group row mt-3 mb-3">
@@ -111,14 +111,16 @@ if (!empty($_REQUEST['edit_order_id'])) {
                   <?php } ?>
                 </select>
                 <!-- <span class="text-center w-100" id="instockQty"></span> -->
-                   <span class="text-center w-100 badge badge-info mt-1" id="instockQty" style="font-size: 0.85rem;">InstockQty: 0</span>
+                <span class="text-center w-100 badge badge-info mt-1" id="instockQty"
+                  style="font-size: 0.85rem;">InstockQty: 0</span>
               </div>
               <div class="col-6 col-md-2">
                 <label>Batch No</label>
                 <select class="form-control searchableSelect" id="get_batch_no" name="get_batch_no">
                   <option value="">Select Batch</option>
                 </select>
-                <span class="text-center w-100 badge badge-info mt-1" id="batchQty" style="font-size: 0.85rem;">Batch Qty: 0</span>
+                <span class="text-center w-100 badge badge-info mt-1" id="batchQty" style="font-size: 0.85rem;">Batch
+                  Qty: 0</span>
               </div>
               <!-- <div class="col-6 col-sm-2 col-md-2">
                 <label>Purchase Price</label>
@@ -175,12 +177,12 @@ if (!empty($_REQUEST['edit_order_id'])) {
                             value="<?= $r['product_id'] ?>">
                           <input type="hidden" id="product_quantites_<?= $r['product_id'] ?>" name="product_quantites[]"
                             value="<?= $r['quantity'] ?>">
-                          <input type="hidden" id="product_totalrate_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" name="product_totalrates[]"
-                            value="<?= (float) $r['rate'] * (float) $r['quantity'] ?>">
-                            <input type="hidden" id="product_rates<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" name="product_rates[]"
-                            value="<?= (float) $r['rate']?>">
-                          <input type="hidden" id="product_detail_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" name="product_detail[]"
-                            value="<?= htmlspecialchars($r['product_description'] ?? '') ?>">
+                          <input type="hidden" id="product_totalrate_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>"
+                            name="product_totalrates[]" value="<?= (float) $r['rate'] * (float) $r['quantity'] ?>">
+                          <input type="hidden" id="product_rates<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>"
+                            name="product_rates[]" value="<?= (float) $r['rate'] ?>">
+                          <input type="hidden" id="product_detail_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>"
+                            name="product_detail[]" value="<?= htmlspecialchars($r['product_description'] ?? '') ?>">
                           <input type="hidden" name="batch_ids[]" value="<?= $r['batch_id'] ?>">
                           <input type="hidden" name="batch_nos[]" value="<?= $r['batch_no'] ?>">
                           <!-- <td><?= $r['product_code'] ?></td> -->
@@ -191,7 +193,8 @@ if (!empty($_REQUEST['edit_order_id'])) {
                           <td><?= (float) $r['rate'] * (float) $r['quantity'] ?></td>
                           <td>
 
-                            <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>`)"
+                            <button type="button"
+                              onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>`)"
                               class="fa fa-trash text-danger" href="#"></button>
                             <button type="button"
                               onclick="editSaleItem(<?= $r['product_id'] ?>,`<?= $r['product_code'] ?>`,'<?= $r['batch_id'] ?>',<?= $r['quantity'] ?>,<?= $r['rate'] ?>,'<?= @$r['product_detail'] ?>')"
@@ -216,7 +219,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                             <input onkeyup="getOrderTotal()" type="number" id="ordered_discount"
                               class="form-control form-control-sm "
                               value="<?= @empty($_REQUEST['edit_order_id']) ? "0" : $fetchOrder['discount'] ?>" min="0"
-                               name="ordered_discount">
+                              name="ordered_discount">
                           </div>
                           <!-- <div class="col-sm-6 pl-0">
                              <input onkeyup="getOrderTotal()" type="number" id="freight" class="form-control form-control-sm " placeholder="Freight" value="<?= @$fetchOrder['freight'] ?>" min="0" name="freight">

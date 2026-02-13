@@ -27,8 +27,8 @@ if (isset($_REQUEST['delete_bymanually'])) {
 
 	if ($table == "vouchers") {
 		$vouchers = fetchRecord($dbc, "vouchers", "voucher_id", $id);
-		@deleteFromTable($dbc, "transactions", 'transaction_id', $vouchers['transaction_id1']);
-		@deleteFromTable($dbc, "transactions", 'transaction_id', $vouchers['transaction_id2']);
+		@deleteFromTable($dbc, "transactions", $vouchers['transaction_id1'], 'transaction_id');
+		@deleteFromTable($dbc, "transactions", $vouchers['transaction_id2'], 'transaction_id');
 		if (mysqli_query($dbc, "DELETE FROM vouchers WHERE voucher_id='$id'")) {
 			$msg = "Data Has been deleted...";
 			$sts = "success";
@@ -66,8 +66,8 @@ if (isset($_REQUEST['delete_bymanually'])) {
 				}
 			}
 		}
-		deleteFromTable($dbc, "transactions", 'transaction_id', $orders['transaction_paid_id']);
-		deleteFromTable($dbc, "transactions", 'transaction_id', $orders['transaction_id']);
+		deleteFromTable($dbc, "transactions", $orders['transaction_paid_id'], 'transaction_id');
+		deleteFromTable($dbc, "transactions", $orders['transaction_id'], 'transaction_id');
 		if (mysqli_query($dbc, "DELETE FROM orders WHERE $row='$id'")) {
 			$msg = "Data Has been deleted...";
 			$sts = "success";
@@ -118,8 +118,8 @@ if (isset($_REQUEST['delete_bymanually'])) {
 			}
 		}
 		$vouchers = fetchRecord($dbc, 'purchase', $row, $id);
-		@deleteFromTable($dbc, "transactions", 'transaction_id', $vouchers['transaction_paid_id']);
-		@deleteFromTable($dbc, "transactions", 'transaction_id', $vouchers['transaction_id']);
+		@deleteFromTable($dbc, "transactions", $vouchers['transaction_paid_id'], 'transaction_id');
+		@deleteFromTable($dbc, "transactions", $vouchers['transaction_id'], 'transaction_id');
 		// Delete purchase return and items
 		$delete_return = mysqli_query($dbc, "DELETE FROM purchase WHERE $row = '$id'");
 		$delete_items = mysqli_query($dbc, "DELETE FROM purchase_item WHERE purchase_id = '$id'");
@@ -172,8 +172,8 @@ if (isset($_REQUEST['delete_bymanually'])) {
 		}
 
 		// Delete related transactions
-		deleteFromTable($dbc, "transactions", 'transaction_id', $purchaseReturn['transaction_paid_id']);
-		deleteFromTable($dbc, "transactions", 'transaction_id', $purchaseReturn['transaction_id']);
+		deleteFromTable($dbc, "transactions", $purchaseReturn['transaction_paid_id'], 'transaction_id');
+		deleteFromTable($dbc, "transactions", $purchaseReturn['transaction_id'], 'transaction_id');
 
 		// Delete purchase return and items
 		$delete_return = mysqli_query($dbc, "DELETE FROM purchase_return WHERE $row = '$id'");
@@ -230,8 +230,8 @@ if (isset($_REQUEST['delete_bymanually'])) {
 			}
 		}
 
-		deleteFromTable($dbc, "transactions", 'transaction_id', $orderReturn['transaction_paid_id']);
-		deleteFromTable($dbc, "transactions", 'transaction_id', $orderReturn['transaction_id']);
+		deleteFromTable($dbc, "transactions", $orderReturn['transaction_paid_id'], 'transaction_id');
+		deleteFromTable($dbc, "transactions", $orderReturn['transaction_id'], 'transaction_id');
 
 		$delete_order = mysqli_query($dbc, "DELETE FROM orders_return WHERE $row='$id'");
 		$delete_items = mysqli_query($dbc, "DELETE FROM order_return_item WHERE $row='$id'");
@@ -252,7 +252,7 @@ if (isset($_REQUEST['delete_bymanually'])) {
 			$sts = "error";
 		}
 	} else {
-		if (deleteFromTable($dbc, $table, $row, $id)) {
+		if (deleteFromTable($dbc, $table, $id, $row)) {
 			$msg = $table . "Has been deleted...";
 			$sts = "success";
 		} else {

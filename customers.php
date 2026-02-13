@@ -81,11 +81,22 @@ if (@$getCustomer) {
 
 
 
-									<div class="form-group">
-										<label for="address">Address:</label>
-										<textarea name="customer_address" id="customer_address" cols="30" rows="4"
-											placeholder="Address"
-											class="form-control"><?= @$Getdata['customer_address'] ?></textarea>
+									<div class="form-group row">
+										<div class="col-sm-6">
+											<label for="address">Address:</label>
+											<textarea name="customer_address" id="customer_address" cols="30" rows="4"
+												placeholder="Address"
+												class="form-control"><?= @$Getdata['customer_address'] ?></textarea>
+
+										</div>
+										<!-- <div class="col-sm-6">
+											<?php if ($_REQUEST['type'] == "customer" || $_REQUEST['type'] == "supplier"): ?>
+												<label for="area">Area:</label>
+												<input type="text" class="form-control" id="customer_area"
+													name="customer_area" required autofocus="true" placeholder="Area"
+													value="<?= @$Getdata['customer_area'] ?>">
+											<?php endif ?>
+										</div> -->
 									</div>
 
 									<div class="modal-footer">

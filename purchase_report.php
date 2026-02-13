@@ -1,208 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
 <?php include_once 'includes/head.php'; ?>
-  <body class="horizontal light  ">
-    <div class="wrapper">
-  <?php include_once 'includes/header.php'; ?>
-      <main role="main" class="main-content">
-        <div class="container-fluid">
-          <div class="card">
-            <div class="card-header card-bg" align="center">
 
-            <div class="row">
-              <div class="col-12 mx-auto h4">
-                <b class="text-center card-text">Purchase Report</b>
-           
-             
-              </div>
-            </div>
-  
-          </div>
-           <div class="card-body">
-    			<form action="" method="post" class=" print_hide" >
-				<div class="row">
-					<div class="col-sm-4">
-						<div class="form-group">
-				<label for="">Customer Account</label>
-				<select class="form-control"  name="customer_id" autofocus="true">
-		      	<option value="">~~SELECT~~</option>
-		      	<?php 
-		      	$sql = "SELECT * FROM customers WHERE customer_status = 1 AND customer_type='supplier'";
-						$result = $connect->query($sql);
+<style type="text/css">
+	thead tr th {
+		font-size: 19px !important;
+		font-weight: bolder !important;
+		color: #000 !important;
+	}
 
-						while($row = $result->fetch_array()) {
-							echo "<option value='".$row[0]."'>".$row[1]."</option>";
-						} // while
-						
-		      	?>
-		      </select>	
-			</div><!-- group -->
+	tbody tr th,
+	tbody tr th p {
+		font-size: 18px !important;
+		font-weight: bolder !important;
+		color: #000 !important;
+	}
+
+	.total-row td {
+		font-weight: bold !important;
+		font-size: 18px !important;
+		background-color: #f8f9fa;
+	}
+</style>
+
+<body class="horizontal light">
+	<div class="wrapper">
+		<?php include_once 'includes/header.php'; ?>
+
+		<main role="main" class="main-content">
+			<div class="container-fluid">
+
+				<!-- ================= FILTER FORM ================= -->
+				<div class="card d-print-none">
+					<div class="card-header card-bg text-center">
+						<h4 style="color:white"><b>Purchase Report</b></h4>
 					</div>
-					<div class="col-sm-3">
-						<div class="form-group">
-				<label for="">From</label>
-				<input type="text" class="form-control" autocomplete="off" name="from_date" id="from" placeholder="From Date">
-			</div><!-- group -->
-					</div>
-					<div class="col-sm-3">
-							<div class="form-group">
-				<label for="">To</label>
-				<input type="text" class="form-control" autocomplete="off" name="to_date" id="to" placeholder="To Date">
-			</div><!-- group -->
-					</div>
-					<div class="col-sm-2">
-						<label style="visibility: hidden;">a</label><br>
-						<button class="btn btn-admin2" name="search_sale" type="submit">Search</button>
-						
+
+					<div class="card-body">
+						<form method="get">
+							<div class="row">
+
+								<div class="col-sm-3">
+									<label>Supplier Account</label>
+									<select class="form-control searchableSelect" name="customer_id">
+										<option value="">All</option>
+										<?php
+										$res = mysqli_query($dbc, "SELECT * FROM customers WHERE customer_status=1 AND customer_type='supplier'");
+										while ($c = mysqli_fetch_assoc($res)) {
+											$sel = (@$_REQUEST['customer_id'] == $c['customer_id']) ? 'selected' : '';
+											echo "<option value='{$c['customer_id']}' $sel>{$c['customer_name']}</option>";
+										}
+										?>
+									</select>
+								</div>
+
+								<div class="col-sm-3">
+									<label>From</label>
+									<input type="text" class="form-control" id="from" name="from_date"
+										value="<?= @$_REQUEST['from_date'] ?>" autocomplete="off"
+										placeholder="Start Date">
+								</div>
+
+								<div class="col-sm-3">
+									<label>To</label>
+									<input type="text" class="form-control" id="to" name="to_date"
+										value="<?= @$_REQUEST['to_date'] ?>" autocomplete="off" placeholder="End Date">
+								</div>
+
+								<div class="col-sm-2">
+									<label>Purchase Type</label>
+									<select class="form-control" name="purchase_type">
+										<option value="all">All</option>
+										<option value="cash_purchase" <?= (@$_REQUEST['purchase_type'] == 'cash_purchase') ? 'selected' : '' ?>>Cash Purchase</option>
+										<option value="credit_purchase"
+											<?= (@$_REQUEST['purchase_type'] == 'credit_purchase') ? 'selected' : '' ?>>
+											Credit Purchase</option>
+									</select>
+								</div>
+
+								<div class="col-sm-1">
+									<label style="visibility:hidden">a</label><br>
+									<button class="btn btn-admin2" name="search_purchase">Search</button>
+								</div>
+
+							</div>
+						</form>
 					</div>
 				</div>
-			
-		
-			
-		</form>
-           </div>
-          </div> <!-- .card -->
-          <?php if(isset($_REQUEST['search_sale'])): 
-			$qty=0;
-			 $f_date=$_REQUEST['from_date'];
-			 $t_date = $_REQUEST['to_date'];
-			 $customer_id = $_REQUEST['customer_id'];
-			?>
-          <div class="card">
-          	 <div class="card-header card-bg" align="center">
 
-            <div class="row">
-              <div class="col-12 mx-auto h4">
-                <b class="text-center card-text">Purchase Report</b>
-			<button onclick="window.print();"  class="btn btn-admin btn-sm float-right print_btn print_hide">Print Report</button>
-           	
-             
-              </div>
-            </div>
-  
-          </div>
-          	<div class="card-body">
+				<!-- ================= REPORT ================= -->
+				<?php if (isset($_REQUEST['search_purchase'])): ?>
 
-    			<table  class="table table-bordered">
-    				
-			<thead>
-				<tr>
-					<th>Sr.No</th>
-					<th>Dated</th>
-					<th>Bill#</th>
-					<th>Item</th>
-					<th>purchased Qty</th>
-					<th>Rate</th>
-					<th>Grand Total</th>
-					<th>Party Detail</th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php $i=1; 
-				if($f_date>0 AND $t_date > 0  AND $customer_id>0 ){
-				$q = mysqli_query($dbc,"SELECT * FROM purchase WHERE (purchase_date BETWEEN '$f_date' AND '$t_date') AND customer_account='$customer_id'"); 
-			}elseif($f_date > 0 AND $t_date>0){
+					<?php
+					$where = [];
 
-				$q = mysqli_query($dbc,"SELECT * FROM purchase WHERE (purchase_date BETWEEN '$f_date' AND '$t_date') "); 
-			}else{
+					/* Supplier */
+					if (!empty($_REQUEST['customer_id'])) {
+						$where[] = "customer_account='" . mysqli_real_escape_string($dbc, $_REQUEST['customer_id']) . "'";
+					}
 
-				$q = mysqli_query($dbc,"SELECT * FROM purchase WHERE customer_account='$customer_id' "); 
-			}?>
-				<?php while($r=mysqli_fetch_assoc($q)):
+					/* Purchase Type */
+					if (!empty($_REQUEST['purchase_type']) && $_REQUEST['purchase_type'] != 'all') {
+						$where[] = "payment_type='" . mysqli_real_escape_string($dbc, $_REQUEST['purchase_type']) . "'";
+					}
 
-					$fetchCustomer = fetchRecord($dbc,"customers","customer_id",$r['customer_account']);
-					$getItem = mysqli_query($dbc,"SELECT * FROM purchase_item WHERE purchase_id='$r[purchase_id]'");
+					/* Date */
+					if (!empty($_REQUEST['from_date']) && !empty($_REQUEST['to_date'])) {
+						$where[] = "purchase_date BETWEEN '{$_REQUEST['from_date']}' AND '{$_REQUEST['to_date']}'";
+					}
 
+					$whereSql = (!empty($where)) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+					$q = "SELECT * FROM purchase $whereSql ORDER BY purchase_date DESC";
+					$query = mysqli_query($dbc, $q);
+
+					$cashTotal = 0;
+					$creditTotal = 0;
+					$grandTotal = 0;
+					$i = 1;
 					?>
 
-				<tr>
-					<th><?=$i?></th>
-					<th><?=date('D, d-M-Y',strtotime($r['purchase_date']))?></th>
-					<th><?=$r['purchase_id']?></th>
-					<th>
-						<?php 
+					<div class="card">
+						<div class="card-header card-bg text-center">
+							<h4 style="color:white">
+								<b>Purchase Report</b>
+								<button onclick="window.print()" class="btn btn-admin btn-sm float-right">Print</button>
+							</h4>
+							<?php
+							$dateDisplay = '';
+							if (!empty($_GET['from_date']) && !empty($_GET['to_date'])) {
+								$dateDisplay = "From <b>" . date('d-m-Y', strtotime($_GET['from_date'])) . "</b> 
+                                               To <b>" . date('d-m-Y', strtotime($_GET['to_date'])) . "</b>";
+							} else {
+								$dateDisplay = "<i>Showing all available records (no date filter applied)</i>";
+							}
+							?>
+							<div class="report-subtitle mt-2"><?= $dateDisplay ?></div>
+						</div>
 
-					while($fetchItem=mysqli_fetch_assoc($getItem)):
-						$fetchProduct = fetchRecord($dbc,"product",'product_id',$fetchItem['product_id']);
-						$fetchCategory = fetchRecord($dbc,"categories","categories_id",$fetchProduct['category_id']);?>
-						<p><?=$fetchProduct['product_name']?> <small><?=$fetchCategory['categories_name']?></small></p>
-					<?php endwhile; ?>
-						</th>
-					<th>
-					<?php 
-					$getItem = mysqli_query($dbc,"SELECT * FROM purchase_item WHERE purchase_id='$r[purchase_id]'");
-					while($fetchItem=mysqli_fetch_assoc($getItem)):
-						$fetchProduct = fetchRecord($dbc,"product",'product_id',$fetchItem['product_id']);
-						$fetchCategory = fetchRecord($dbc,"categories","categories_id",$fetchProduct['category_id']);?>
-						<p><?=$fetchItem['quantity']?> <span class="text-right">x</span></p>
-					<?php endwhile; ?>
-						</th>
-					<th>
-					<?php 
-					$getItem = mysqli_query($dbc,"SELECT * FROM purchase_item WHERE purchase_id='$r[purchase_id]'");
-					while($fetchItem=mysqli_fetch_assoc($getItem)):
-						$fetchProduct = fetchRecord($dbc,"product",'product_id',$fetchItem['product_id']);
-						$fetchCategory = fetchRecord($dbc,"categories","categories_id",$fetchProduct['category_id']);?>
-						<p><?=$fetchItem['rate']?></p>
-					<?php endwhile; ?>
-						</th>
-					<th>
-					<?php 
-					$getItem = mysqli_query($dbc,"SELECT * FROM purchase_item WHERE purchase_id='$r[purchase_id]'");
-					while($fetchItem=mysqli_fetch_assoc($getItem)):
-						$fetchProduct = fetchRecord($dbc,"product",'product_id',$fetchItem['product_id']);
-						$fetchCategory = fetchRecord($dbc,"categories","categories_id",$fetchProduct['category_id']);?>
-						<p><?=$fetchItem['total']?></p>
-					<?php endwhile; ?>
-						</th>
-					<th><?=$fetchCustomer['customer_name']?> <br><?=$r['client_contact']?></th>
-				</tr>
-			<?php $i++;endwhile; ?>
-			</tbody>
-		
-    			</table>
-           </div>
-          </div>
-          <?php endif; ?>
+						<div class="card-body">
+							<table class="table table-bordered">
+								<thead>
+									<tr>
+										<th>#</th>
+										<th>Date</th>
+										<th>Bill#</th>
+										<th>Item</th>
+										<th>Qty</th>
+										<th>Rate</th>
+										<th>Total</th>
+										<th>Supplier</th>
+										<th>Type</th>
+									</tr>
+								</thead>
 
-        </div> <!-- .container-fluid -->
-       
-      </main> <!-- main -->
-    </div> <!-- .wrapper -->
-    
-  </body>
-</html>
-<?php include_once 'includes/foot.php'; ?>
-<script>
-	$( function() {
-		var dateFormat = "yy-mm-dd";
-			from = $( "#from" )
-				.datepicker({
-					changeMonth: true,
-					numberOfMonths: 1,
-					dateFormat : "yy-mm-dd",
-				})
-				.on( "change", function() {
-					to.datepicker( "option", "minDate", getDate( this ) );
-				}),
-			to = $( "#to" ).datepicker({
+								<tbody>
+									<?php while ($r = mysqli_fetch_assoc($query)): ?>
+
+										<?php
+										// Accumulate totals
+										$grandTotal += $r['grand_total']; // assuming column name is grand_total (change if different)
+								
+										if ($r['payment_type'] == 'cash_purchase') {
+											$cashTotal += $r['grand_total'];
+										} else if ($r['payment_type'] == 'credit_purchase') {
+											$creditTotal += $r['grand_total'];
+										}
+
+										$supplier = fetchRecord($dbc, 'customers', 'customer_id', $r['customer_account']);
+										?>
+
+										<tr>
+											<th><?= $i++ ?></th>
+											<th><?= date('d-m-Y', strtotime($r['purchase_date'])) ?></th>
+											<th><?= $r['purchase_id'] ?></th>
+
+											<th>
+												<?php
+												$items = mysqli_query($dbc, "SELECT * FROM purchase_item WHERE purchase_id='{$r['purchase_id']}'");
+												while ($it = mysqli_fetch_assoc($items)) {
+													$p = fetchRecord($dbc, 'product', 'product_id', $it['product_id']);
+													echo "<p>{$p['product_name']}</p>";
+												}
+												?>
+											</th>
+
+											<th>
+												<?php
+												$items = mysqli_query($dbc, "SELECT * FROM purchase_item WHERE purchase_id='{$r['purchase_id']}'");
+												while ($it = mysqli_fetch_assoc($items)) {
+													echo "<p>{$it['quantity']}</p>";
+												}
+												?>
+											</th>
+
+											<th>
+												<?php
+												$items = mysqli_query($dbc, "SELECT * FROM purchase_item WHERE purchase_id='{$r['purchase_id']}'");
+												while ($it = mysqli_fetch_assoc($items)) {
+													echo "<p>{$it['rate']}</p>";
+												}
+												?>
+											</th>
+
+											<th>
+												<?php
+												$items = mysqli_query($dbc, "SELECT * FROM purchase_item WHERE purchase_id='{$r['purchase_id']}'");
+												while ($it = mysqli_fetch_assoc($items)) {
+													echo "<p>{$it['total']}</p>";
+												}
+												?>
+											</th>
+
+											<th><?= $supplier['customer_name'] ?? 'N/A' ?></th>
+											<th><?= $r['payment_type'] ?></th>
+										</tr>
+
+									<?php endwhile; ?>
+								</tbody>
+
+								<!-- TOTALS ROW -->
+								<tfoot>
+
+									<tr class="total-row">
+										<td colspan="6" class="text-center">
+											<h4>Cash Purchase</h4>
+										</td>
+										<td>
+											<h4><?= number_format($cashTotal, 2) ?></h4>
+										</td>
+										<td>
+											<h4>Credit Purchase</h4>
+										</td>
+										<td>
+											<h4><?= number_format($creditTotal, 2) ?></h4>
+										</td>
+									</tr>
+									<tr class="total-row">
+										<td colspan="6" class="text-center">
+											<h4>Total Purchase Amount</h4>
+										</td>
+										<td>
+											<h4><?= number_format($grandTotal, 2) ?></h4>
+										</td>
+										<td colspan="2"></td>
+									</tr>
+								</tfoot>
+
+							</table>
+						</div>
+					</div>
+
+				<?php endif; ?>
+
+			</div>
+		</main>
+	</div>
+
+	<?php include_once 'includes/foot.php'; ?>
+
+	<script>
+		$(function () {
+			$("#from,#to").datepicker({
+				dateFormat: "yy-mm-dd",
 				changeMonth: true,
-				numberOfMonths: 1,
-				dateFormat : "yy-mm-dd",
-			})
-			.on( "change", function() {
-				from.datepicker( "option", "maxDate", getDate( this ) );
+				changeYear: true
 			});
-
-		function getDate( element ) {
-			var date;
-			try {
-				date = $.datepicker.parseDate( dateFormat, element.value );
-			} catch( error ) {
-				date = null;
-			}
-
-			return date;
-		}
-	} );
+		});
 	</script>
+
+</body>
+
+</html>

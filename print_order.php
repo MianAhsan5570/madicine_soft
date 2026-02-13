@@ -8,10 +8,9 @@
     <style type="text/css">
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @page {
+            size: A4;
+            margin: 10mm;
         }
 
         body {
@@ -343,7 +342,16 @@
 
         if ($_REQUEST['type'] == "purchase") {
             $nameSHow = 'Supplier';
-            $order = fetchRecord($dbc, "purchase", "purchase_id", $_REQUEST['id']);
+            $id = $_REQUEST['id'];
+
+            $sql = "SELECT p.*, c.*
+                    FROM purchase p
+                    INNER JOIN customers c 
+                    ON p.customer_account = c.customer_id
+                    WHERE p.purchase_id = '$id'
+                  ";
+
+            $order = mysqli_fetch_assoc(mysqli_query($dbc, $sql));
             $comment = $order['purchase_narration'];
             $getDate = $order['purchase_date'];
             $order_type = ($order['payment_type'] == "credit_purchase") ? "Credit Purchase" : "Cash Purchase";
@@ -357,7 +365,16 @@
 
         } else if ($_REQUEST['type'] == "purchase_return") {
             $nameSHow = 'Supplier';
-            $order = fetchRecord($dbc, "purchase_return", "purchase_id", $_REQUEST['id']);
+           $id = $_REQUEST['id'];
+
+            $sql = "SELECT p.*, c.*
+                    FROM purchase_return p
+                    INNER JOIN customers c 
+                    ON p.customer_account = c.customer_id
+                    WHERE p.purchase_id = '$id'
+                   ";
+
+            $order = mysqli_fetch_assoc(mysqli_query($dbc, $sql));
             $comment = $order['narration'] ?? '';
             $getDate = $order['return_date'] ?? '';
             $order_type = ($order['payment_type'] == "credit_purchase") ? "Credit Purchase" : "Cash Purchase";
@@ -372,7 +389,14 @@
 
         } else if ($_REQUEST['type'] == "order_return") {
             $nameSHow = 'Customer';
-            $order = fetchRecord($dbc, "orders_return", "order_id", $_REQUEST['id']);
+            $id = (int) $_REQUEST['id'];
+            $sql = "SELECT o.*, c.*
+                    FROM orders_return o
+                    INNER JOIN customers c
+                    ON o.customer_account = c.customer_id
+                    WHERE o.order_id = '$id'
+                  ";
+            $order = mysqli_fetch_assoc(mysqli_query($dbc, $sql));
             $comment = $order['narration'] ?? '';
             $getDate = $order['return_date'] ?? '';
 
@@ -388,7 +412,15 @@
 
         } else {
             $nameSHow = 'Customer';
-            $order = fetchRecord($dbc, "orders", "order_id", $_REQUEST['id']);
+            $id = (int) $_REQUEST['id'];
+            $sql = "SELECT o.*, c.*
+                    FROM orders o
+                    INNER JOIN customers c
+                    ON o.customer_account = c.customer_id
+                    WHERE o.order_id = '$id'
+                  ";
+
+            $order = mysqli_fetch_assoc(mysqli_query($dbc, $sql));
             $getDate = $order['order_date'];
             $comment = $order['order_narration'];
 
@@ -432,19 +464,25 @@
                     <table>
                         <tr>
                             <th><?= strtoupper($nameSHow) ?></th>
-                            <td style="font-weight: 900;">: <?= strtoupper($order['client_name']) ?></td>
+                            <td style="font-weight: 900;">: <?= strtoupper($order['customer_name']) ?></td>
 
                         </tr>
                         <tr>
-                            <th>Phone</th>
-                            <td>: <?= !empty($order['client_contact']) ? strtoupper($order['client_contact']) : '_____' ?>
+                            <th>PHONE</th>
+                            <td>: <?= !empty($order['customer_phone']) ? strtoupper($order['customer_phone']) : '_____' ?>
                             </td>
                         </tr>
                         <tr>
                             <th>ADDRESS</th>
-                            <td>: <?= !empty($order['client_address']) ? strtoupper($order['client_address']) : '____' ?>
+                            <td>:
+                                <?= !empty($order['customer_address']) ? strtoupper($order['customer_address']) : '____' ?>
                             </td>
                         </tr>
+                        <!-- <tr>
+                            <th>AREA</th>
+                            <td>: <?= !empty($order['customer_area']) ? strtoupper($order['customer_area']) : '____' ?>
+                            </td>
+                        </tr> -->
                     </table>
                 </div>
                 <div class="invoice-meta-right">

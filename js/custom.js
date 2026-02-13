@@ -162,6 +162,12 @@ $(document).ready(function () {
     $("#client_contact").val(contact);
   });
 
+  $("#sale_order_client_name").on("change", function () {
+    var value = $("#sale_order_client_name :selected").data("id");
+    var contact = $("#sale_order_client_name :selected").data("contact");
+    $("#customer_account").val(value);
+    $("#client_contact").val(contact);
+  });
   $("#add_product_fm").on("submit", function (e) {
     e.preventDefault();
     var form = $(this);

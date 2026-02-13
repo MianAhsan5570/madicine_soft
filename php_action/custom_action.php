@@ -10,6 +10,7 @@ if (isset($_REQUEST['add_manually_user'])) {
 		'customer_type' => @$_REQUEST['customer_type'],
 		'customer_status' => @$_REQUEST['customer_status'],
 		'customer_type' => @$_REQUEST['add_manually_user'],
+		'customer_area' => @$_REQUEST['customer_area'],
 	];
 	if ($_REQUEST['customer_id'] == "") {
 
@@ -606,9 +607,10 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 			'order_date' => $_REQUEST['order_date'],
 			'client_name' => $_REQUEST['sale_order_client_name'],
 			'bill_no' => @$_REQUEST['bill_no'],
-			'client_contact' => $_REQUEST['client_contact'],
+			'client_contact' => @$_REQUEST['client_contact'],
 			'paid' => $_REQUEST['paid_ammount'],
 			'payment_account' => @$_REQUEST['payment_account'],
+			'customer_account' => @$_REQUEST['customer_account'],
 			'payment_type' => 'cash_in_hand',
 			'vehicle_no' => @$_REQUEST['vehicle_no'],
 			'order_narration' => @$_REQUEST['order_narration'],
@@ -747,7 +749,7 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 						}
 					}
 				}
-				deleteFromTable($dbc, "order_item", 'order_id', $_REQUEST['product_order_id']);
+				deleteFromTable($dbc, "order_item", $_REQUEST['product_order_id'], 'order_id');
 
 // print_r($_REQUEST);
 				$x = 0;
@@ -1012,7 +1014,7 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 						}
 					}
 				}
-				deleteFromTable($dbc, "order_item", 'order_id', $_REQUEST['product_order_id']);
+				deleteFromTable($dbc, "order_item", $_REQUEST['product_order_id'], 'order_id');
 
 
 				$x = 0;
@@ -1068,8 +1070,8 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 				$due_amount = (float) $total_grand - @(float) $_REQUEST['paid_ammount'];
 
 				$transactions = fetchRecord($dbc, "orders", "order_id", $_REQUEST['product_order_id']);
-				@deleteFromTable($dbc, "transactions", 'transaction_id', $transactions['transaction_id']);
-				@deleteFromTable($dbc, "transactions", 'transaction_id', $transactions['transaction_paid_id']);
+				@deleteFromTable($dbc, "transactions", $transactions['transaction_id'], 'transaction_id');
+				@deleteFromTable($dbc, "transactions", $transactions['transaction_paid_id'], 'transaction_id');
 
 				$credit = [
 					'credit' => $due_amount,
@@ -1407,7 +1409,7 @@ if (isset($_REQUEST['cash_purchase_supplier']) && empty($_REQUEST['purchase_retu
 				}
 
 				// ─── 2. Delete old purchase items ───
-				deleteFromTable($dbc, "purchase_item", 'purchase_id', $purchase_id);
+				deleteFromTable($dbc, "purchase_item", $purchase_id, 'purchase_id');
 
 				// ─── 3. Insert new items + update batches + stock ───
 				$total_ammount = 0;
@@ -1527,8 +1529,8 @@ if (isset($_REQUEST['cash_purchase_supplier']) && empty($_REQUEST['purchase_retu
 
 
 				$transactions = fetchRecord($dbc, "purchase", "purchase_id", $_REQUEST['product_purchase_id']);
-				@deleteFromTable($dbc, "transactions", 'transaction_id', $transactions['transaction_id']);
-				@deleteFromTable($dbc, "transactions", 'transaction_id', $transactions['transaction_paid_id']);
+				@deleteFromTable($dbc, "transactions", $transactions['transaction_id'], 'transaction_id');
+				@deleteFromTable($dbc, "transactions", $transactions['transaction_paid_id'], 'transaction_id');
 
 
 				if ($_REQUEST['payment_type'] == "credit_purchase"):
@@ -2106,6 +2108,7 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 			'paid' => $paidAmount,
 			'payment_account' => @$_REQUEST['payment_account'],
 			'payment_type' => 'cash_in_hand',
+			'customer_account' => @$_REQUEST['customer_account'],
 			'vehicle_no' => @$_REQUEST['vehicle_no'],
 			'order_narration' => @$_REQUEST['order_narration'],
 			'freight' => @$_REQUEST['freight'],

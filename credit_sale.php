@@ -74,12 +74,12 @@ if (!empty($_REQUEST['edit_order_id'])) {
                     <?php } ?>
                   </select><br />
                 </div>
-                <div class="input-group-prepend">
+                <!-- <div class="input-group-prepend">
                   <span class="input-group-text" id="basic-addon1">Balance : <span id="customer_account_exp">0</span>
                   </span>
                   <span class="input-group-text" id="basic-addon1">Limit : <span id="customer_Limit">0</span> </span>
                   <span class="input-group-text" id="basic-addon1">R Limit : <span id="R_Limit">0</span> </span>
-                </div>
+                </div> -->
 
 
 
