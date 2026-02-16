@@ -15,30 +15,53 @@ $(document).ready(function () {
     }
   };
   $("#formData").on("submit", function (e) {
-    //console.log('click');
     e.preventDefault();
+
     var form = $("#formData");
+    var submitBtn = $("#formData_btn");
+    var originalBtnHtml = submitBtn.html(); // save original text
+
     $.ajax({
       type: "POST",
       url: form.attr("action"),
       data: form.serialize(),
       dataType: "json",
       beforeSend: function () {
-        $("#formData_btn").prop("disabled", true);
+        submitBtn.prop("disabled", true);
+        // show loader (Tailwind spinner)
+        submitBtn.html(`<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> Processing...`);
       },
       success: function (response) {
-        if (response.sts == "success") {
-          $("#formData").each(function () {
-            this.reset();
-          });
+        if (response.sts === "success") {
+          form[0].reset();
           $("#tableData").load(location.href + " #tableData > *");
           $(".modal").modal("hide");
+
+          Swal.fire({
+            icon: "success",
+            title: response.msg,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: response.msg,
+            showConfirmButton: false,
+            timer: 1500,
+          });
         }
-        $("#formData_btn").prop("disabled", false);
-        console.log(response.sts);
-        sweeetalert(response.msg, response.sts, 1500);
+
+        // restore button
+        submitBtn.prop("disabled", false).html(originalBtnHtml);
       },
-    }); //ajax call
+      error: function () {
+        submitBtn.prop("disabled", false).html(originalBtnHtml);
+        Swal.fire("Error", "Something went wrong", "error");
+      },
+    });
   }); //main
   $("#formData1").on("submit", function (e) {
     e.stopPropagation();

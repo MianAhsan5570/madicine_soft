@@ -66,7 +66,7 @@ if (@$getCustomer) {
 
 									</div>
 
-									<div class="form-group row">
+									<!-- <div class="form-group row">
 										<div class="col-sm-12">
 											<?php if ($_REQUEST['type'] == 'customer') { ?>
 												<div class="col-sm-12 my-3 mx-0 px-0">
@@ -77,7 +77,7 @@ if (@$getCustomer) {
 												</div>
 											<?php } ?>
 										</div>
-									</div>
+									</div> -->
 
 
 
@@ -89,14 +89,27 @@ if (@$getCustomer) {
 												class="form-control"><?= @$Getdata['customer_address'] ?></textarea>
 
 										</div>
-										<!-- <div class="col-sm-6">
-											<?php if ($_REQUEST['type'] == "customer" || $_REQUEST['type'] == "supplier"): ?>
+										<div class="col-sm-6">
+											<?php if ($_REQUEST['type'] == "customer"): ?>
 												<label for="area">Area:</label>
-												<input type="text" class="form-control" id="customer_area"
-													name="customer_area" required autofocus="true" placeholder="Area"
-													value="<?= @$Getdata['customer_area'] ?>">
+												<select class="form-control searchableSelect" id="customer_area"
+													name="customer_area">
+													<option value=" ">Select Product</option>
+													<?php
+													$result = mysqli_query($dbc, "SELECT * FROM areas WHERE area_status=1 ");
+													while ($row = mysqli_fetch_array($result)) {
+														?>
+
+														<option 
+															<?= empty($r['area_id']) ? "" : "selected" ?>
+															value="<?= $row["area_id"] ?>">
+															<?= ucwords($row["area_name"]) ?>
+														</option>
+
+													<?php } ?>
+												</select>
 											<?php endif ?>
-										</div> -->
+										</div>
 									</div>
 
 									<div class="modal-footer">
@@ -140,9 +153,9 @@ if (@$getCustomer) {
 											<th>Phone</th>
 
 											<th>Created Date</th>
-											<?php if ($_REQUEST['type'] == 'customer'): ?>
+											<!-- <?php if ($_REQUEST['type'] == 'customer'): ?>
 												<th> Creadit LIMIT</th>
-											<?php endif; ?>
+											<?php endif; ?> -->
 											<th>Action</th>
 
 
@@ -161,13 +174,13 @@ if (@$getCustomer) {
 												<td><?= $r['customer_phone'] ?></td>
 
 												<td><?= $r['customer_add_date'] ?></td>
-												<?php if ($_REQUEST['type'] == 'customer'): ?>
+												<!-- <?php if ($_REQUEST['type'] == 'customer'): ?>
 													<td><?= $r['customer_limit'] ?></td>
-												<?php endif; ?>
+												<?php endif; ?> -->
 												<td class="d-flex">
-													<button class="btn btn-admin btn-sm float-right mr-1"
+													<!-- <button class="btn btn-admin btn-sm float-right mr-1"
 														onclick="SetLimit(<?= $r['customer_id'] ?>,'<?= $r['customer_name'] ?>')"
-														id="limit">Limit</button>
+														id="limit">Limit</button> -->
 													<?php if (@$userPrivileges['nav_edit'] == 1 || $fetchedUserRole == "admin"): ?>
 														<form action="customers.php?type=<?= $_REQUEST['type'] ?>"
 															method="POST">

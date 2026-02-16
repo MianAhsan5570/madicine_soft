@@ -56,7 +56,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                 <input type="text" name="bill_no" autocomplete="off" id="get_bill_no"
                   value="<?= @$fetchOrder['bill_no'] ?>" class="form-control" placeholder="Bill No">
               </div>
-              <div class="col-sm-3">
+              <div class="col-sm-6">
                 <label>Customer Account</label>
                 <div class="input-group">
 
@@ -90,13 +90,13 @@ if (!empty($_REQUEST['edit_order_id'])) {
                 <input type="hidden" name="R_Limit" id="R_LimitInput" />
 
               </div>
-              <div class="col-sm-2">
+              <!-- <div class="col-sm-2">
                 <label>Comment</label>
                 <input type="text" autocomplete="off" name="order_narration" id="order_narration"
                   value="<?= @$fetchOrder['order_narration'] ?>" class="form-control" placeholder="Comment">
 
-              </div>
-              <div class="col-sm-1">
+              </div> -->
+              <!-- <div class="col-sm-1">
                 <label>Vehicle NO </label>
                 <input type="text" id="vehicle_no" value="<?= @$fetchOrder['vehicle_no'] ?>" class="form-control"
                   autocomplete="off" name="vehicle_no" list="vehicle_no_list" placeholder="Number">
@@ -108,7 +108,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                     <option value="<?= $r['vehicle_no'] ?>"><?= $r['vehicle_no'] ?></option>
                   <?php } ?>
                 </datalist>
-              </div>
+              </div> -->
             </div> <!-- end of form-group -->
             <div class="form-group row">
               <!-- <div class="col-6 col-md-2">
@@ -152,7 +152,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                  <label>Sale Price</label>
                  <input type="number" min="0" class="form-control" placeholder="Sale Price" id="sale_product_price">
                </div>
-              <div class="col-6 col-sm-2 col-md-1">
+              <div class="col-6 col-sm-2 col-md-2">
                 <label>Quantity</label>
                 <input type="text" class="form-control" id="get_product_quantity" value="1" min="1" name="quantity" placeholder="Qty">
               </div>

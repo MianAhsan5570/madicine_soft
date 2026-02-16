@@ -130,7 +130,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                 <label>Sale Price</label>
                 <input type="number" min="0" class="form-control" placeholder="Sale Price" id="sale_product_price">
               </div>
-              <div class="col-6 col-sm-2 col-md-1">
+              <div class="col-6 col-sm-2 col-md-2">
                 <label>Quantity</label>
                 <input type="number" data-max="" class="form-control" placeholder="Quantity" id="get_product_quantity"
                   value="1" min="1" name="quantity">
