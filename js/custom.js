@@ -722,6 +722,10 @@ $("#addProductSale").on("click", function () {
   var pro_type = $("#add_pro_type").val();
   var max_qty = parseInt($("#get_product_quantity").attr("max"));
 
+  // NEW: Discount % and Bonus Qty
+  var disc_percent = parseFloat($("#get_product_discount").val()) || 0;
+  var bonus_qty = parseInt($("#get_bonus_qty").val()) || 0;
+
   // ============================================================================
   // Batch-related variables
   // ============================================================================
@@ -739,8 +743,9 @@ $("#addProductSale").on("click", function () {
       return;
     }
 
-    if (product_quantity > batch_qty) {
-      sweeetalert("Quantity cannot exceed batch quantity (" + batch_qty + ")", "error", 1500);
+    // Check total qty including bonus against batch
+    if ((product_quantity + bonus_qty) > batch_qty) {
+      sweeetalert("Quantity + Bonus (" + (product_quantity + bonus_qty) + ") cannot exceed batch quantity (" + batch_qty + ")", "error", 1500);
       return;
     }
   }
@@ -762,10 +767,10 @@ $("#addProductSale").on("click", function () {
     id !== "" &&
     product_quantity !== "" &&
     max_qty >= product_quantity &&
-    (!order_return || (order_return && batch_id !== "" && batch_id !== null)) && // Require batch for returns
+    (!order_return || (order_return && batch_id !== "" && batch_id !== null)) &&
     code !== ""
   ) {
-    // $("#get_product_name").prop("selectedIndex", 0);
+    // Reset input fields
     $("#get_product_name").val("").trigger("change");
     $("#add_pro_type").val("add");
     $("#get_product_code").val("");
@@ -778,6 +783,8 @@ $("#addProductSale").on("click", function () {
     $("#get_batch_no").val("");
     $("#get_product_code").focus();
     $("#get_batch_no").val("").trigger("change");
+    $("#get_product_discount").val("0");
+    $("#get_bonus_qty").val("0");
 
 
 
@@ -795,13 +802,17 @@ $("#addProductSale").on("click", function () {
               ? parseInt(quantity) + parseInt(product_quantity)
               : parseInt(product_quantity);
 
-          total_price =
-            parseFloat(price) * parseFloat(Currentquantity);
+          var currentBonus = pro_type === "add"
+            ? parseInt($(this).data("bonus") || 0) + bonus_qty
+            : bonus_qty;
+
+          // Apply discount to total
+          total_price = parseFloat(price) * parseFloat(Currentquantity) * (1 - disc_percent / 100);
 
           if (Currentquantity <= max_qty) {
             $("#" + rowId).replaceWith(`
               <tr id="${rowId}">
-                <input type="hidden" data-price="${price}" data-quantity="${Currentquantity}"
+                <input type="hidden" data-price="${price}" data-quantity="${Currentquantity}" data-discount="${disc_percent}" data-bonus="${currentBonus}"
                        id="product_ids_${id}_${batch_id}" class="product_ids" name="product_ids[]" value="${id}">
                 <input type="hidden" id="product_quantites_${id}_${batch_id}" name="product_quantites[]" value="${Currentquantity}">
                 <input type="hidden" id="product_rate_${id}_${batch_id}" name="product_rates[]" value="${price}">
@@ -810,16 +821,19 @@ $("#addProductSale").on("click", function () {
                 <input type="hidden" name="batch_ids[]" value="${batch_id}">
                 <input type="hidden" name="batch_nos[]" value="${batch_no}">
                 <input type="hidden" name="expires[]" value="${expiry_date}">
-                
+                <input type="hidden" name="product_discounts[]" value="${disc_percent}">
+                <input type="hidden" name="product_bonus_qtys[]" value="${currentBonus}">
 
                 <td>${name}</td>
                 <td>${batch_no || '-'}</td>
                 <td>${price}</td>
                 <td>${Currentquantity}</td>
-                <td>${total_price}</td>
+                <td>${currentBonus}</td>
+                <td>${disc_percent}%</td>
+                <td>${total_price.toFixed(2)}</td>
                 <td>
                   <button type="button" onclick="removeByid('#${rowId}')" class="fa fa-trash text-danger"></button>
-                  <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${Currentquantity},'${price}', '${detail}')" class="fa fa-edit text-success"></button>
+                  <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${Currentquantity},'${price}', '${detail}', ${disc_percent}, ${currentBonus})" class="fa fa-edit text-success"></button>
                 </td>
               </tr>
             `);
@@ -830,11 +844,12 @@ $("#addProductSale").on("click", function () {
         getOrderTotal();
       });
     } else {
-      total_price = parseFloat(price) * parseFloat(product_quantity);
+      // Apply discount to total for new row
+      total_price = parseFloat(price) * parseFloat(product_quantity) * (1 - disc_percent / 100);
 
       $("#purchase_product_tb").append(`
         <tr id="${rowId}">
-          <input type="hidden" data-price="${price}" data-quantity="${product_quantity}"
+          <input type="hidden" data-price="${price}" data-quantity="${product_quantity}" data-discount="${disc_percent}" data-bonus="${bonus_qty}"
                  id="product_ids_${id}_${batch_id}" class="product_ids" name="product_ids[]" value="${id}">
           <input type="hidden" id="product_quantites_${id}_${batch_id}" name="product_quantites[]" value="${product_quantity}">
           <input type="hidden" id="product_rate_${id}_${batch_id}" name="product_rates[]" value="${price}">
@@ -843,15 +858,18 @@ $("#addProductSale").on("click", function () {
           <input type="hidden" name="batch_nos[]"     value="${batch_no}">
           <input type="hidden" name="batch_ids[]"     value="${batch_id}">
           <input type="hidden" name="expires[]"       value="${expiry_date}">
+          <input type="hidden" name="product_discounts[]" value="${disc_percent}">
+          <input type="hidden" name="product_bonus_qtys[]" value="${bonus_qty}">
           <td>${name}</td>
           <td>${batch_no || "-"}</td>
-         
           <td>${price}</td>
           <td>${product_quantity}</td>
-          <td>${total_price}</td>
+          <td>${bonus_qty}</td>
+          <td>${disc_percent}%</td>
+          <td>${total_price.toFixed(2)}</td>
           <td>
             <button type="button" onclick="removeByid('#${rowId}')" class="fa fa-trash text-danger"></button>
-            <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${product_quantity},'${price}', '${detail}')" class="fa fa-edit text-success"></button>
+            <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${product_quantity},'${price}', '${detail}', ${disc_percent}, ${bonus_qty})" class="fa fa-edit text-success"></button>
           </td>
         </tr>
       `);
@@ -1056,12 +1074,14 @@ function getOrderTotal() {
   $(".product_ids").each(function () {
     var quantity = parseFloat($(this).data("quantity"));
     var rates = parseFloat($(this).data("price"));
+    var item_disc = parseFloat($(this).data("discount")) || 0;
 
     // Validate and fallback to 0 if NaN
     quantity = isNaN(quantity) ? 0 : quantity;
     rates = isNaN(rates) ? 0 : rates;
 
-    total_bill += rates * quantity;
+    // Apply per-item discount
+    total_bill += rates * quantity * (1 - item_disc / 100);
   });
 
   // Parse discount and freight values safely
@@ -1156,7 +1176,7 @@ function editPurchaseItem(id, batch_no, expiry_date, price, sale_price, qty, bat
   }, 1500);
 }
 
-function editSaleItem(id, code, batch_id, quantity, price, detail) {
+function editSaleItem(id, code, batch_id, quantity, price, detail, disc, bonus) {
   $(".searchableSelect").val(id).trigger('change');
   // $("#get_product_code").val(code); // Optional if using name
   $("#add_pro_type").val("update");
@@ -1170,6 +1190,8 @@ function editSaleItem(id, code, batch_id, quantity, price, detail) {
     $("#get_product_quantity").val(quantity).trigger('change').trigger('keyup');
     $("#sale_product_price").val(price).trigger('change').trigger('keyup'); // Sale price
     $("#get_product_detail").val(detail).trigger('change').trigger('keyup');
+    $("#get_product_discount").val(disc || 0);
+    $("#get_bonus_qty").val(bonus || 0);
   }, 1500);
 }
 

@@ -54,7 +54,7 @@ if (isset($_REQUEST['delete_bymanually'])) {
 				// REVERSE BATCH QUANTITIES when deleting sale/order
 				// ============================================================================
 				$batch_id = $proR['batch_id'] ?? null;
-				$quantity = (float) $proR['quantity'];
+				$quantity = (float) $proR['quantity'] + (float) $proR['bonus_qty'];
 
 				if ($batch_id && $quantity > 0) {
 					// Restore the batch quantity (add back what was sold)
@@ -68,8 +68,11 @@ if (isset($_REQUEST['delete_bymanually'])) {
 		}
 		deleteFromTable($dbc, "transactions", $orders['transaction_paid_id'], 'transaction_id');
 		deleteFromTable($dbc, "transactions", $orders['transaction_id'], 'transaction_id');
-		if (mysqli_query($dbc, "DELETE FROM orders WHERE $row='$id'")) {
-			$msg = "Data Has been deleted...";
+		$delete_order = mysqli_query($dbc, "DELETE FROM orders WHERE $row='$id'");
+		$delete_items = mysqli_query($dbc, "DELETE FROM order_item WHERE $row='$id'");
+
+		if ($delete_items && $delete_order) {
+			$msg = "Data has been deleted...";
 			$sts = "success";
 		} else {
 			$msg = mysqli_error($dbc);
@@ -100,7 +103,7 @@ if (isset($_REQUEST['delete_bymanually'])) {
 				if (!empty($batch_no) && $quantity > 0) {
 					$batch_condition = "product_id = '" . $proR['product_id'] . "' 
 					                    AND batch_no = '" . mysqli_real_escape_string($dbc, $batch_no) . "'";
-					
+
 					if ($expiry_date) {
 						$batch_condition .= " AND expiry_date = '$expiry_date'";
 					} else {
@@ -145,7 +148,7 @@ if (isset($_REQUEST['delete_bymanually'])) {
 				mysqli_query($dbc, "UPDATE product SET quantity_instock = '$newqty' WHERE product_id = '" . $proR['product_id'] . "'");
 
 				// REVERSE BATCH: Deleting Purchase Return -> Add stock back to batch
-				$batch_id = $proR['batch_id'] ?? null; 
+				$batch_id = $proR['batch_id'] ?? null;
 				$batch_no = trim($proR['batch_no'] ?? '');
 
 				if ($batch_id) {
@@ -158,7 +161,7 @@ if (isset($_REQUEST['delete_bymanually'])) {
 					// Restore by Name
 					$b_cond = "product_id = '" . $proR['product_id'] . "' AND batch_no = '" . mysqli_real_escape_string($dbc, $batch_no) . "'";
 					$check = mysqli_query($dbc, "SELECT batch_id, available_qty FROM product_batches WHERE $b_cond LIMIT 1");
-					
+
 					if (mysqli_num_rows($check) > 0) {
 						$b_row = mysqli_fetch_assoc($check);
 						$bid = $b_row['batch_id'];
@@ -198,19 +201,19 @@ if (isset($_REQUEST['delete_bymanually'])) {
 				$quantity = (float) $proR['quantity'];
 
 				$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$p_id'"));
-				$newqty = max(0, (float)$quantity_instock['quantity_instock'] - $quantity); // Decrease stock since return is being deleted
+				$newqty = max(0, (float) $quantity_instock['quantity_instock'] - $quantity); // Decrease stock since return is being deleted
 				mysqli_query($dbc, "UPDATE product SET quantity_instock='$newqty' WHERE product_id='$p_id'");
 
 				// REVERSE BATCH: Deleting Sale Return -> Remove stock from batch
-				$batch_id = $proR['batch_id'] ?? null; 
+				$batch_id = $proR['batch_id'] ?? null;
 				$batch_no = trim($proR['batch_no'] ?? '');
 
 				if ($batch_id && $quantity > 0) {
 					$check = mysqli_query($dbc, "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'");
 					if (mysqli_num_rows($check) > 0) {
 						$b_row = mysqli_fetch_assoc($check);
-						$new_avail = max(0, (float)$b_row['available_qty'] - $quantity);
-						
+						$new_avail = max(0, (float) $b_row['available_qty'] - $quantity);
+
 						mysqli_query($dbc, "UPDATE product_batches 
 											SET qty_out = qty_out + $quantity,
 												available_qty = '$new_avail',
@@ -223,7 +226,7 @@ if (isset($_REQUEST['delete_bymanually'])) {
 					if (mysqli_num_rows($check) > 0) {
 						$b_row = mysqli_fetch_assoc($check);
 						$bid = $b_row['batch_id'];
-						$new_avail = max(0, (float)$b_row['available_qty'] - $quantity);
+						$new_avail = max(0, (float) $b_row['available_qty'] - $quantity);
 						mysqli_query($dbc, "UPDATE product_batches SET qty_out = qty_out + $quantity, available_qty = '$new_avail', updated_at = NOW() WHERE batch_id = '$bid'");
 					}
 				}

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 10, 2026 at 10:31 AM
+-- Generation Time: Feb 19, 2026 at 10:21 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,6 +24,25 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `areas`
+--
+
+CREATE TABLE `areas` (
+  `area_id` int(11) NOT NULL,
+  `area_name` varchar(255) NOT NULL,
+  `area_status` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `areas`
+--
+
+INSERT INTO `areas` (`area_id`, `area_name`, `area_status`) VALUES
+(1, 'madina town', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `brands`
 --
 
@@ -39,13 +58,45 @@ CREATE TABLE `brands` (
 --
 
 INSERT INTO `brands` (`brand_id`, `brand_name`, `brand_active`, `brand_status`) VALUES
-(1, 'lasani Bedsheet', 0, 1),
+(1, 'dsfr', 0, 1),
 (2, '', 0, 1),
 (3, '', 0, 1),
 (4, '', 0, 1),
-(6, 'lasani ', 0, 1),
-(7, 'lasani collections', 0, 1),
-(8, 'JJ', 0, 1);
+(5, '', 0, 1),
+(6, '', 0, 1),
+(7, '', 0, 1),
+(8, '', 0, 1),
+(9, '', 0, 1),
+(10, '', 0, 1),
+(11, '', 0, 1),
+(12, '', 0, 1),
+(13, '', 0, 1),
+(14, '', 0, 1),
+(15, '', 0, 1),
+(16, '', 0, 1),
+(17, '', 0, 1),
+(18, '', 0, 1),
+(19, '', 0, 1),
+(20, '', 0, 1),
+(21, '', 0, 1),
+(22, '', 0, 1),
+(23, '', 0, 1),
+(24, '', 0, 1),
+(25, '', 0, 1),
+(26, '', 0, 1),
+(27, '', 0, 1),
+(28, '', 0, 1),
+(29, '', 0, 1),
+(30, '', 0, 1),
+(31, '', 0, 1),
+(32, '', 0, 1),
+(33, '', 0, 1),
+(34, '', 0, 1),
+(35, '', 0, 1),
+(36, 'sdsa', 0, 1),
+(37, 'newww', 0, 0),
+(39, 'tessss', 0, 1),
+(40, 'dess', 0, 1);
 
 -- --------------------------------------------------------
 
@@ -79,13 +130,6 @@ CREATE TABLE `budget` (
   `budget_date` date NOT NULL,
   `budget_add_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
---
--- Dumping data for table `budget`
---
-
-INSERT INTO `budget` (`budget_id`, `budget_name`, `budget_amount`, `budget_type`, `voucher_id`, `voucher_type`, `budget_date`, `budget_add_date`) VALUES
-(1, 'expense added to kharcha', 2000, 'expense', 4, 0, '2026-01-26', '2026-01-26 09:52:57');
 
 -- --------------------------------------------------------
 
@@ -121,103 +165,44 @@ CREATE TABLE `categories` (
 
 INSERT INTO `categories` (`categories_id`, `categories_name`, `category_price`, `category_purchase`, `categories_active`, `categories_status`) VALUES
 (1, '', '1', '', 0, 1),
-(2, 'double blankt', '1', '', 0, 1),
-(3, 'Pillow', '1', '', 0, 1),
-(4, 'FILLING', '1', '', 0, 1),
-(5, 'gool takia', '1', '', 0, 1),
-(6, 'multani double', '1', '', 0, 1),
-(7, 'crystal singe bedsheet', '1', '', 0, 1),
-(8, 'double blankt', '1', '', 0, 1),
-(9, 'double blankt', '1', '', 0, 1),
-(10, 'ac double blanket', '1', '', 0, 1),
-(11, 'floor cusion filling', '1', '', 0, 1),
-(12, 'single razai', '1', '', 0, 1),
-(13, 'double razai', '1', '', 0, 1),
-(14, 'gada filling', '1', '', 0, 1),
-(15, 'nikrool filling', '1', '', 0, 1),
-(16, 'cusion filling', '1', '', 0, 1),
-(17, 'SHAGGY RAZAI', '1', '', 0, 1),
-(18, 'single razai', '1', '', 0, 1),
-(19, 'SHAGGY RAZAI', '1', '', 0, 1),
-(20, 'COTTON BEDSHEETS', '1', '', 0, 1),
-(21, 'export bedsheet', '1', '', 0, 1),
-(22, 'rad silk bedsheet haji saleem', '1', '', 0, 1),
-(23, 'rad silk bedsheet abs', '1', '', 0, 1),
-(24, 'barfi kadai haji saleem', '1', '', 0, 1),
-(25, 'malai kadai bedsheet abs', '1', '', 0, 1),
-(26, 'malai qulit bedsheet abs', '1', '', 0, 1),
-(27, 'texture qulit bedsheet abs', '1', '', 0, 1),
-(28, 'elvet jecquard', '1', '', 0, 1),
-(29, 'vetvet jecquard', '1', '', 0, 1),
-(30, 'foami bedsheet', '1', '', 0, 1),
-(31, 'ROOMA DOUBLE BEDSHEET', '1', '', 0, 1),
-(32, 'vicos quilt bedsheet', '1', '', 0, 1),
+(2, '', '1', '', 0, 1),
+(3, '', '1', '', 0, 1),
+(4, '', '1', '', 0, 1),
+(5, '', '1', '', 0, 1),
+(6, '', '1', '', 0, 1),
+(7, '', '1', '', 0, 1),
+(8, '', '1', '', 0, 1),
+(9, '', '1', '', 0, 1),
+(10, '', '1', '', 0, 1),
+(11, '', '1', '', 0, 1),
+(12, '', '1', '', 0, 1),
+(13, '', '1', '', 0, 1),
+(14, '', '1', '', 0, 1),
+(15, '', '1', '', 0, 1),
+(16, '', '1', '', 0, 1),
+(17, '', '1', '', 0, 1),
+(18, '', '1', '', 0, 1),
+(19, '', '1', '', 0, 1),
+(20, '', '1', '', 0, 1),
+(21, '', '1', '', 0, 1),
+(22, '', '1', '', 0, 1),
+(23, '', '1', '', 0, 1),
+(24, '', '1', '', 0, 1),
+(25, '', '1', '', 0, 1),
+(26, '', '1', '', 0, 1),
+(27, '', '1', '', 0, 1),
+(28, '', '1', '', 0, 1),
+(29, '', '1', '', 0, 1),
+(30, '', '1', '', 0, 1),
+(31, '', '1', '', 0, 1),
+(32, '', '1', '', 0, 1),
 (33, '', '1', '', 0, 1),
 (34, '', '1', '', 0, 1),
-(35, 'sada texture 3pc bedsheet', '1', '', 0, 1),
-(36, 'viscous sada bedsheet', '1', '', 0, 1),
-(37, 'palachi sada bedsheet', '1', '', 0, 1),
-(38, 'special palachi 4 border ', '1', '', 0, 1),
-(39, 'malai embossed bedsheet', '1', '', 0, 1),
-(40, 'barfi sada bedsheet', '1', '', 0, 1),
-(41, 'spread cotton bedsheet', '1', '', 0, 1),
-(42, 'normal jacket bedsheet', '1', '', 0, 1),
-(43, 'normal fleece 4pc bed sheet', '1', '', 0, 1),
-(44, 'vip fleece set plachi', '1', '', 0, 1),
-(45, 'arani fleece set', '1', '', 0, 1),
-(46, 'sada kadai malai set', '1', '', 0, 1),
-(47, 'farooq single bedsheet', '1', '', 0, 1),
-(48, 'khan tex all over bedsheet', '1', '', 0, 1),
-(49, 'ag tex cloudy kambal', '1', '', 0, 1),
-(50, 'china spread abs', '1', '', 0, 1),
-(51, 'kala mora bare bedsheet', '1', '', 0, 1),
-(52, 'normal shaheen multani bedsheet', '1', '', 0, 1),
-(53, 'xl shaheen bedsheet', '1', '', 0, 1),
-(54, 'khaddar jal bedsheet', '1', '', 0, 1),
-(55, 'khaddar single bedsheet', '1', '', 0, 1),
-(56, 'tawal cotton 27x54', '1', '', 0, 1),
-(57, 'tawal vip 27x54', '1', '', 0, 1),
-(58, 'zero twist 27x54', '1', '', 0, 1),
-(59, 'medium towel', '1', '', 0, 1),
-(60, 'towel normal size cotton', '1', '', 0, 1),
-(61, '6 payel tela + tela  jora ', '1', '', 0, 1),
-(62, '6 payel jora daga + tela ', '1', '', 0, 1),
-(63, 'jaal kadai ', '1', '', 0, 1),
-(64, '4 payel emobes ', '1', '', 0, 1),
-(65, '4 payel emobes ', '1', '', 0, 1),
-(66, 'fomi razai cover single', '1', '', 0, 1),
-(67, 'jacket razai cover single', '1', '', 0, 1),
-(68, 'shaggy razaie cover single ', '1', '', 0, 1),
-(69, 'plachi razai cover single', '1', '', 0, 1),
-(70, 'normal shaggy razai cover', '1', '', 0, 1),
-(71, ' palachi razai cover double', '1', '', 0, 1),
-(72, 'shaggy razai cover double ', '1', '', 0, 1),
-(73, 'double barfi razai cover', '1', '', 0, 1),
-(74, 'double Jacquard razaie cover', '1', '', 0, 1),
-(75, 'ac kambal', '1', '', 0, 1),
-(76, 'matres cover', '1', '', 0, 1),
-(77, 'matres cover', '1', '', 0, 1),
-(78, ' fleece set', '1', '', 0, 1),
-(79, 'rezaie istar', '1', '', 0, 1),
-(80, 'gada cover', '1', '', 0, 1),
-(81, 'gada shaggy rb', '1', '', 0, 1),
-(82, 'karandi gada', '1', '', 0, 1),
-(83, 'gada', '1', '', 0, 1),
-(84, 'razai cover', '1', '', 0, 1),
-(85, 'baby kambal', '1', '', 0, 1),
-(86, 'dari', '1', '', 0, 1),
-(87, 'khais', '1', '', 0, 1),
-(88, 'razai set', '1', '', 0, 1),
-(89, 'comfortor set', '1', '', 0, 1),
-(90, 'single 2 ply blacket', '1', '', 0, 1),
-(91, 'single 1 ply blanket ', '1', '', 0, 1),
-(92, 'double blanket 1 ply', '1', '', 0, 1),
-(93, 'blanket set 4 piece', '1', '', 0, 1),
-(94, 'jaye namaz', '1', '', 0, 1),
-(95, 'cusion ', '1', '', 0, 1),
-(96, '', '1', '', 0, 1),
-(97, 'bedsheets', '2500', '2000', 0, 1),
-(98, '', '1', '', 0, 1);
+(35, '', '1', '', 0, 1),
+(36, 'new5', '', '', 0, 1),
+(37, 'new5', '', '', 0, 1),
+(42, 'tessss', '1', '', 0, 1),
+(43, 'dess', '1', '', 0, 1);
 
 -- --------------------------------------------------------
 
@@ -263,7 +248,7 @@ CREATE TABLE `company` (
 --
 
 INSERT INTO `company` (`id`, `name`, `logo`, `address`, `company_phone`, `personal_phone`, `email`, `stock_manage`, `sale_interface`, `print_url`) VALUES
-(5, 'AMG', 'user.png', 'Head Office : P#10 Central Mill Road , Ayub Colony Jhang road Faisalabad Pakistan  ', '123456897', '231546897', 'https://lasanibedsheets.com/', 1, 'gui', 'print_order.php');
+(5, 'AMG', 'user.png', 'P-160 Rachna Town # 1 Satyana Road Faisalabad', '03255455557', '', 'https://lasanibedsheets.com/', 1, 'gui', 'print_order.php');
 
 -- --------------------------------------------------------
 
@@ -277,6 +262,7 @@ CREATE TABLE `customers` (
   `customer_email` varchar(200) NOT NULL,
   `customer_phone` varchar(13) NOT NULL,
   `customer_address` text NOT NULL,
+  `customer_area` int(11) DEFAULT NULL,
   `customer_status` int(255) NOT NULL,
   `customer_type` varchar(250) DEFAULT NULL,
   `customer_limit` varchar(10) NOT NULL DEFAULT '0',
@@ -287,10 +273,21 @@ CREATE TABLE `customers` (
 -- Dumping data for table `customers`
 --
 
-INSERT INTO `customers` (`customer_id`, `customer_name`, `customer_email`, `customer_phone`, `customer_address`, `customer_status`, `customer_type`, `customer_limit`, `customer_add_date`) VALUES
-(1, 'cash in hand', '', '03230641322', '', 1, 'bank', '0', '2025-06-27 15:24:51'),
-(5, 'asif fiber', '', '03004607278', 'lal mills chowk fsd', 1, 'supplier', '0', '2025-06-27 15:34:44'),
-(20, 'muhammad ahsan', 'ahsan@gmail.com', '03067055997', '67 jb sadhar', 1, 'customer', '0', '2026-02-06 09:27:54');
+INSERT INTO `customers` (`customer_id`, `customer_name`, `customer_email`, `customer_phone`, `customer_address`, `customer_area`, `customer_status`, `customer_type`, `customer_limit`, `customer_add_date`) VALUES
+(1, 'cash in hand', '', '03230641322', '', NULL, 1, 'bank', '0', '2025-06-27 15:24:51'),
+(25, 'heilung pharmacetical company ', '', '031356622223', 'p-80 al qasim balosom view lasani pully sarghoda road faisalabad', 0, 1, 'supplier', '0', '2026-02-11 06:04:19'),
+(26, 'new imran medicine company', '', '32423', 'fsd', 1, 1, 'customer', '0', '2026-02-13 09:43:31'),
+(27, 'mian enterprises faisalabad', 'mianbest5570@gmail.com', '04343443', '67 jb sadhar', 3, 1, 'customer', '0', '2026-02-14 06:39:55'),
+(28, '1', '', '34324', 'fsdfd', 4, 1, 'customer', '0', '2026-02-14 07:09:02'),
+(29, 'dgsd', '', '35325', 'dsggdsg', 5, 1, 'customer', '0', '2026-02-14 07:09:15'),
+(30, 'muhammad ahsan', 'mianbest5570@gmail.com', '45345', '67 jb sadhar', 6, 1, 'customer', '0', '2026-02-14 07:09:26'),
+(31, 'muhammad ahsan', 'mianbest5570@gmail.com', '534543', '67 jb sadhar', 7, 1, 'customer', '0', '2026-02-14 07:09:37'),
+(32, 'muhammad ahsan', 'mianbest5570@gmail.com', '45345', '67 jb sadhar', 7, 1, 'customer', '0', '2026-02-14 07:09:52'),
+(33, 'muhammad ahsan', 'mianbest5570@gmail.com', '45345', '67 jb sadhar', 8, 1, 'customer', '0', '2026-02-14 07:10:03'),
+(34, 'muhammad ahsan', 'mianbest5570@gmail.com', '546546', '67 jb sadhar', 9, 1, 'customer', '0', '2026-02-14 07:10:14'),
+(35, 'muhammad ahsan', 'mianbest5570@gmail.com', '45654', '67 jb sadhar', 10, 1, 'customer', '0', '2026-02-14 07:10:32'),
+(36, 'muhammad ahsan7546', 'mianbest5570@gmail.com', '456456', '67 jb sadhar', 11, 1, 'customer', '0', '2026-02-14 07:10:45'),
+(37, 'muhammad ahsan', 'mianbest5570@gmail.com', '56546', '67 jb sadhar', 12, 1, 'customer', '0', '2026-02-14 07:10:56');
 
 -- --------------------------------------------------------
 
@@ -356,8 +353,6 @@ INSERT INTO `menus` (`id`, `title`, `page`, `parent_id`, `icon`, `sort_order`, `
 (123, 'product purchase report', 'product_purchase_report.php', 115, 'fa fa-edit', NULL, 0, 0, 0, '2021-04-20 18:07:34'),
 (125, 'product sale report', 'product_sale_report.php', 115, 'fa fa-edit', NULL, 0, 0, 0, '2021-04-21 19:48:47'),
 (127, 'expense report', 'expence_report.php', 115, 'fa fa-edit', NULL, 0, 0, 0, '2021-04-21 20:11:51'),
-(128, 'income report', 'income_report.php', 115, 'fa fa-edit', NULL, 0, 0, 0, '2021-04-21 20:12:23'),
-(129, 'profit and loss', 'profit_loss.php', 115, 'fa fa-edit', NULL, 0, 0, 0, '2021-04-21 20:12:38'),
 (130, 'profit summary', 'profit_summary.php', 115, 'fa fa-edit', NULL, 0, 0, 0, '2021-04-21 20:12:58'),
 (131, 'trail balance', 'trail_balance.php#', 115, 'fa fa-edit', 6, 0, 0, 0, '2021-06-02 23:19:37'),
 (133, 'expense type', 'expense_type.php', 107, 'local_shipping', NULL, 0, 0, 0, '2021-06-10 19:04:02'),
@@ -365,25 +360,26 @@ INSERT INTO `menus` (`id`, `title`, `page`, `parent_id`, `icon`, `sort_order`, `
 (135, 'View Cash Sales', 'view_orders.php###', 104, 'local_shipping', NULL, 0, 0, 0, '2026-02-07 15:07:00'),
 (136, 'view credit sales', 'credit_orders.php#', 104, 'local_shipping', NULL, 0, 0, 0, '2026-02-07 15:07:54'),
 (137, 'analytics', 'analytics.php', 115, 'local_shipping', NULL, 0, 0, 0, '2021-08-29 17:56:15'),
-(138, 'sale reports', 'sale_report.php', 107, 'local_shipping', NULL, 0, 0, 0, '2021-06-15 17:40:17'),
-(139, 'purchase reports', 'purchase_report.php', 107, 'local_shipping', NULL, 0, 0, 0, '2021-06-15 17:41:00'),
+(138, 'sale reports', 'sale_report.php#', 115, 'local_shipping', NULL, 0, 0, 0, '2026-02-13 10:40:00'),
+(139, 'purchase reports', 'purchase_report.php#', 115, 'local_shipping', NULL, 0, 0, 0, '2026-02-13 10:40:19'),
 (140, 'general voucher', 'voucher.php?act=general_voucher', 101, 'local_shipping', NULL, 1, 0, 1, '2021-06-21 19:42:27'),
 (141, 'expense voucher', 'voucher.php?act=expense_voucher', 101, 'local_shipping', NULL, 1, 0, 1, '2021-06-21 19:43:15'),
 (142, 'single voucher', 'voucher.php?act=single_voucher#', 101, 'local_shipping', NULL, 1, 0, 1, '2021-06-21 19:44:55'),
 (143, 'backup & restore', 'backup.php', 107, 'local_shipping', NULL, 1, 0, 1, '2021-06-26 20:36:25'),
 (144, 'pending cash bills ', 'pending_bills.php?search_it=all', 115, '', NULL, 0, 0, 0, '2021-08-20 19:43:20'),
-(145, 'pending report', 'customerpendingreport.php', 107, '', NULL, 0, 0, 0, '2021-08-20 19:58:40'),
+(145, 'pending report', 'customerpendingreport.php#', 115, '', NULL, 0, 0, 0, '2026-02-13 10:38:41'),
 (147, 'check list ', 'check_list.php', 101, '', NULL, 1, 1, 1, '2021-09-19 12:53:19'),
 (148, 'products', '#', 0, '', 5, 0, 0, 0, '2024-08-06 06:28:41'),
-(149, 'inventory products', 'inventory.php?act=add', 148, '', NULL, 1, 1, 1, '2021-09-19 12:58:26'),
-(150, 'inventory p list ', 'inventory.php?act=list', 148, '', NULL, 1, 1, 1, '2021-09-19 12:59:06'),
-(151, 'customer due report', 'reports3.php?type=customer#', 107, '', NULL, 0, 0, 0, '2021-11-15 11:47:04'),
+(151, 'customer due report', 'reports3.php?type=customer##', 115, '', NULL, 0, 0, 0, '2026-02-13 10:39:06'),
 (153, 'cash purchase return', 'cash_purchase_return.php###', 112, '', NULL, 1, 1, 1, '2025-06-16 06:04:08'),
 (154, 'cash sale return', 'cash_sale_return.php#####', 104, '', NULL, 1, 1, 1, '2025-06-16 06:01:43'),
 (155, 'credit sale return', 'credit_sale_return.php##', 104, '', NULL, 1, 1, 1, '2025-06-16 06:03:04'),
 (156, 'view sale returns', 'view_sale_return.php###', 104, '', NULL, 1, 1, 1, '2025-06-16 06:00:33'),
 (158, 'credit purchase return', 'credit_purchase_return.php##', 112, '', NULL, 1, 1, 1, '2025-06-16 06:04:43'),
-(159, 'view purchase returns', 'view_purchase_return.php###', 112, '', NULL, 1, 1, 1, '2025-06-16 06:01:02');
+(159, 'view purchase returns', 'view_purchase_return.php###', 112, '', NULL, 1, 1, 1, '2025-06-16 06:01:02'),
+(160, 'areas', 'areas.php#', 107, '', NULL, 1, 1, 1, '2026-02-13 09:50:05'),
+(161, 'product wise area wise sales report', 'product_area_wise_sale_report.php', 115, '', NULL, 0, 0, 0, '2026-02-13 10:37:27'),
+(162, 'ssr report', 'ssr_report.php', 148, '', NULL, 0, 0, 0, '2026-02-14 10:51:26');
 
 -- --------------------------------------------------------
 
@@ -427,6 +423,14 @@ CREATE TABLE `orders` (
   `credit_sale_type` varchar(20) NOT NULL DEFAULT 'none',
   `vehicle_no` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`order_id`, `transaction_paid_id`, `order_date`, `bill_no`, `client_name`, `client_contact`, `sub_total`, `vat`, `total_amount`, `discount`, `cod`, `grand_total`, `paid`, `due`, `payment_type`, `payment_status`, `customer_account`, `payment_account`, `order_status`, `address`, `charges`, `note`, `pending_order`, `tracking`, `customer_profit`, `transaction_id`, `broker_id`, `type`, `delaytime`, `freight`, `order_narration`, `timestamp`, `credit_sale_type`, `vehicle_no`) VALUES
+(37, 52, '2026-02-16', '', 'new imran medicine company', '32423', '', '', '79475', '0', '', '79475', '79475.00', '0', 'cash_in_hand', 1, 26, 1, '1', '', '', '', '', '', '', 0, NULL, NULL, NULL, '', '', '2026-02-16 06:18:14', 'none', ''),
+(38, 0, '2026-02-16', '', 'mian enterprises faisalabad', '04343443', '', '', '7947.5', '0', '', '7947.5', '7947.5', '0', 'credit_sale', 1, 27, 1, '1', '', '', '', '', '', '', 53, NULL, NULL, NULL, '', '', '2026-02-16 06:28:34', '15days', '');
 
 -- --------------------------------------------------------
 
@@ -500,13 +504,8 @@ CREATE TABLE `order_item` (
 --
 
 INSERT INTO `order_item` (`order_item_id`, `order_id`, `product_id`, `batch_id`, `product_detail`, `quantity`, `rate`, `total`, `order_item_status`, `discount`, `gauge`, `width`) VALUES
-(18, 2, 2, 8, NULL, 100, 0, 0, 1, NULL, NULL, NULL),
-(22, 1, 2, 8, NULL, 300, 0, 0, 1, NULL, NULL, NULL),
-(25, 3, 2, 8, NULL, 100, 31000, 3100000, 1, NULL, NULL, NULL),
-(29, 4, 2, 8, 'undefined', 300, 31000, 9300000, 1, NULL, NULL, NULL),
-(30, 4, 2, 10, 'undefined', 300, 31000, 9300000, 1, NULL, NULL, NULL),
-(31, 5, 2, 8, NULL, 100, 31000, 3100000, 1, NULL, NULL, NULL),
-(32, 5, 2, 10, NULL, 100, 31000, 3100000, 1, NULL, NULL, NULL);
+(3, 37, 1, 35, NULL, 100, 794.75, 79475, 1, NULL, NULL, NULL),
+(4, 38, 1, 35, 'undefined', 10, 794.75, 7947.5, 1, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -653,6 +652,7 @@ INSERT INTO `privileges` (`privileges_id`, `user_id`, `nav_id`, `nav_url`, `addb
 CREATE TABLE `product` (
   `product_id` int(200) NOT NULL,
   `product_name` varchar(255) NOT NULL,
+  `product_pack` varchar(255) DEFAULT NULL,
   `product_code` varchar(250) DEFAULT NULL,
   `product_image` text NOT NULL,
   `brand_id` int(11) NOT NULL,
@@ -680,183 +680,48 @@ CREATE TABLE `product` (
 -- Dumping data for table `product`
 --
 
-INSERT INTO `product` (`product_id`, `product_name`, `product_code`, `product_image`, `brand_id`, `category_id`, `quantity_instock`, `purchased`, `current_rate`, `f_days`, `t_days`, `purchase_rate`, `status`, `availability`, `alert_at`, `weight`, `actual_rate`, `product_description`, `product_mm`, `product_inch`, `product_meter`, `adddatetime`, `inventory`) VALUES
-(1, 'rooma doble bedsheet', '035', '', 1, 1, 0, 0, 0, '', '', 1100, 0, 1, 20, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(2, 'super select double ', '155', '', 1, 2, 8400, 0, 31000, '', '', 51000, 1, 1, 5, '', '', '', '', '', '', '2026-02-10 09:23:01', 0),
-(3, 'master pillow', '001', '', 1, 3, 2000, 0, 400, '', '', 335, 1, 1, 30, '', '', '', '', '', '', '2026-02-10 06:42:54', 0),
-(4, 'nishat pillow', '002', '', 1, 3, 0, 0, 500, '', '', 415, 1, 1, 30, '', '', '', '', '', '', '2026-02-06 09:39:06', 0),
-(5, 'korean open pillow', '003', '', 1, 3, 0, 0, 0, '', '', 515, 1, 1, 30, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(6, 'voli pillow', '005', '', 1, 3, 0, 0, 0, '', '', 190, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(7, 'master gadi set', '006', '', 1, 4, 0, 0, 0, '', '', 505, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(8, 'gadi set voli', '007', '', 1, 4, 0, 0, 0, '', '', 400, 1, 1, 1, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(9, '5piece gadi set ravi', '008', '', 1, 4, 0, 0, 0, '', '', 685, 1, 1, 2, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(10, 'master golol takia', '0010', '', 1, 5, 0, 0, 0, '', '', 485, 1, 1, 10, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(11, 'ravi gool takia', '009', '', 1, 5, 0, 0, 0, '', '', 655, 1, 1, 3, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(12, 'rabar gool takia', '012', '', 1, 5, 0, 0, 0, '', '', 350, 1, 1, 2, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(13, 'foam gool takia', '011', '', 2, 5, 0, 0, 0, '', '', 425, 1, 1, 5, '', '', '', '', '', '', '2025-06-23 12:28:41', 0),
-(14, 'light weight double  al farooq ', '067', '', 1, 6, 0, 0, 0, '', '', 1650, 1, 1, 8, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(15, 'rooma single bedsheet', '036', '', 1, 7, 0, 0, 0, '', '', 1250, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(16, 'super cloudy double', '160', '', 1, 8, 0, 0, 0, '', '', 6000, 1, 1, 2, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(17, 'perfect king blanket', '157', '', 1, 9, 0, 0, 0, '', '', 7950, 1, 1, 0, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(18, 'home sweet ac blanket', '102', '', 1, 10, 0, 0, 0, '', '', 2390, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(19, 'press pillow korian', '004', '', 1, 3, 0, 0, 0, '', '', 590, 1, 1, 15, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(20, 'master floor cusion ', '013', '', 1, 11, 0, 0, 0, '', '', 505, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(21, 'floor cusion ravi ', '014', '', 1, 11, 0, 0, 0, '', '', 675, 1, 1, 2, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(22, 'single razai collection', '015', '', 1, 12, 0, 0, 0, '', '', 1450, 1, 1, 10, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(23, 'single razai sapna ', '016', '', 1, 12, 0, 0, 0, '', '', 2400, 1, 1, 15, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(24, 'sada razai single', '017', '', 1, 12, 0, 0, 0, '', '', 2200, 1, 1, 0, '', '', '', '', '', '', '2025-06-23 14:01:18', 0),
-(25, 'double razai sada', '018', '', 1, 13, 0, 0, 0, '', '', 2900, 1, 1, 0, '', '', '', '', '', '', '2025-06-23 14:03:34', 0),
-(26, 'double razai collection', '019', '', 1, 13, 0, 0, 0, '', '', 2000, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(27, 'double razai sapna', '020', '', 1, 13, 0, 0, 0, '', '', 3150, 1, 1, 10, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(28, 'double razai korean', '021', '', 1, 13, 0, 0, 0, '', '', 3400, 1, 1, 5, '', '', '', '', '', '', '2025-06-23 14:08:07', 0),
-(29, 'single razai korean', '022', '', 1, 12, 0, 0, 0, '', '', 2400, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(30, 'gada collection 2 meter', '023', '', 1, 14, 0, 0, 0, '', '', 1050, 1, 1, 10, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(31, 'gada collection 2.5 meter', '026', '', 1, 14, 0, 0, 0, '', '', 1350, 1, 1, 0, '', '', '', '', '', '', '2025-06-23 14:12:04', 0),
-(32, 'sada gada 2 meter ', '024', '', 1, 14, 0, 0, 0, '', '', 900, 1, 1, 0, '', '', '', '', '', '', '2025-06-23 14:14:03', 0),
-(33, 'sapna gada 2.5 meter', '027', '', 1, 14, 0, 0, 0, '', '', 1450, 1, 1, 15, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(34, 'nikrool set filling', '028', '', 1, 15, 0, 0, 0, '', '', 105, 1, 1, 10, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(35, 'dil cusion filling ', '029', '', 1, 16, 0, 0, 0, '', '', 105, 1, 1, 10, '', '', '', '', '', '', '2025-06-23 14:20:18', 0),
-(36, 'cusion filling 18*18', '030', '', 1, 16, 0, 0, 0, '', '', 170, 1, 1, 10, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(37, 'shaggy razai ', '031', '', 1, 17, 0, 0, 0, '', '', 8000, 1, 1, 0, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(38, 'shaggy razai  set', '032', '', 1, 18, 0, 0, 0, '', '', 11000, 1, 1, 0, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(39, 'bubble razai ', '033', '', 1, 19, 0, 0, 0, '', '', 9500, 1, 1, 0, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(40, 'china razai ', '034', '', 1, 19, 0, 0, 0, '', '', 8200, 1, 1, 0, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(41, 'pure cotton double open bedsheet', '037', '', 1, 20, 0, 0, 0, '', '', 1500, 1, 1, 10, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(42, 'single pure cotton open bedsheet', '038', '', 1, 20, 0, 0, 0, '', '', 1750, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(43, 'fitted bedsheet', '039', '', 1, 20, 0, 0, 0, '', '', 1500, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(44, 'dynesty pure cotton ', '040', '', 1, 20, 0, 0, 0, '', '', 1500, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(45, 'double export bedsheet', '041', '', 1, 21, 0, 0, 0, '', '', 900, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(46, 'single export bedsheet', '042', '', 1, 21, 0, 0, 0, '', '', 1050, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(47, 'rad silk 3 peiece bedsheet', '043', '', 1, 22, 0, 0, 0, '', '', 6000, 1, 1, 2, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(48, 'rad silk 3 peiece bedsheet', '025', '', 1, 23, 0, 0, 0, '', '', 6500, 1, 1, 2, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(49, 'barfi velvet kadai bedsheet', '044', '', 1, 24, 0, 0, 0, '', '', 6500, 1, 1, 2, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(50, 'malai kadai bedsheet', '053', '', 1, 25, 0, 0, 0, '', '', 7200, 1, 1, 2, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(51, 'malai qulit bedsheet', '045', '', 1, 26, 0, 0, 0, '', '', 6000, 1, 1, 2, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(52, 'texture qulit bedsheet', '047', '', 1, 27, 0, 0, 0, '', '', 6500, 1, 1, 0, '', '', '', '', '', '', '2025-06-26 11:30:41', 0),
-(53, 'velvet jecquard double bedsht', '051', '', 1, 28, 0, 0, 0, '', '', 3500, 0, 1, 25, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(54, 'velvet jecquard double bedsheet', '051', '', 1, 29, 0, 0, 0, '', '', 3500, 1, 1, 25, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(55, 'single velvet jecquard bedsheet', '052', '', 1, 29, 0, 0, 0, '', '', 4500, 1, 1, 2, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(56, 'foami doublebedsheet', '065', '', 1, 30, 0, 0, 0, '', '', 3400, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(57, 'rooma doble bedsheet', '035', '', 1, 31, 0, 0, 0, '', '', 1100, 1, 1, 20, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(58, 'vicos quilt bedsheet', '048', '', 3, 32, 0, 0, 0, '', '', 5500, 1, 1, 2, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(59, 'quilt china 3pc', '049', '', 1, 33, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:27:25', 0),
-(60, 'quilt cotton print ', '050', '', 1, 34, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:28:09', 0),
-(61, 'sada texture 3pc bedsheet', '054', '', 1, 35, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:29:23', 0),
-(62, 'viscous sada bedsheet', '055', '', 1, 36, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:30:15', 0),
-(63, 'palachi sada bedsheet', '056', '', 1, 37, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:31:05', 0),
-(64, 'special palachi 4 border bedsheet', '057', '', 4, 38, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:31:42', 0),
-(65, 'malai embossed bedsheet', '058', '', 1, 39, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:32:16', 0),
-(66, 'barfi sada bedsheet', '059', '', 1, 40, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:32:52', 0),
-(67, 'spread cotton bedsheet', '060', '', 1, 41, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:33:21', 0),
-(68, 'normal jacket bedsheet', '061', '', 1, 42, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:33:54', 0),
-(69, 'normal fleece 4pc bed sheet', '062', '', 1, 43, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:34:30', 0),
-(70, 'vip fleece set plachi', '063', '', 1, 44, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:35:20', 0),
-(71, 'arani fleece set', '064', '', 1, 45, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:35:51', 0),
-(72, 'sada kadai malai set', '066', '', 1, 46, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:36:17', 0),
-(73, 'farooq single bedsheet', '068', '', 1, 47, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:36:55', 0),
-(74, 'khan tex all over bedsheet', '069', '', 1, 48, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:38:08', 0),
-(75, 'ag tex cloudy kambal', '070', '', 1, 49, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:39:02', 0),
-(76, 'china spread abs', '208', '', 1, 50, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:40:04', 0),
-(77, 'kala mora bare bedsheet', '071', '', 1, 51, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:41:48', 0),
-(78, 'normal shaheen multani bedsheet', '072', '', 1, 52, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:42:18', 0),
-(79, 'xl shaheen bedsheet', '073', '', 1, 53, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:42:50', 0),
-(80, 'khaddar jal bedsheet', '075', '', 1, 54, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:44:52', 0),
-(81, 'khaddar single bedsheet', '076', '', 1, 55, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:45:10', 0),
-(82, 'tawal cotton 27x54', '077', '', 1, 56, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:45:38', 0),
-(83, 'tawal vip 27x54', '078', '', 1, 57, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:46:03', 0),
-(84, 'zero twist 27x54', '079', '', 1, 58, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:46:36', 0),
-(85, 'medium towel', '080', '', 1, 59, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:46:58', 0),
-(86, 'towel normal size cotton', '081', '', 1, 60, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:47:44', 0),
-(87, '6 payel tela + tela jora', '083', '', 1, 61, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:49:04', 0),
-(88, '6 payel jora daga + tela ', '084', '', 1, 62, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:49:53', 0),
-(89, 'jaal kadai ', '085', '', 1, 63, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:50:27', 0),
-(90, '4 payel emobes ', '086', '', 1, 64, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:51:12', 0),
-(91, '6 payel emobes ', '087', '', 1, 65, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:51:28', 0),
-(92, 'fomi razai cover single', '088', '', 1, 66, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:52:01', 0),
-(93, 'jacket razai cover single', '089', '', 1, 67, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:52:41', 0),
-(94, 'shaggy razaie cover single ', '090', '', 1, 68, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:53:19', 0),
-(95, 'plachi razai cover single', '091', '', 1, 69, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:54:12', 0),
-(96, 'normal shaggy razai cover', '092', '', 1, 70, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:54:41', 0),
-(97, ' palachi razai cover double', '093', '', 1, 71, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:55:17', 0),
-(98, 'shaggy razai cover double ', '094', '', 1, 72, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:56:52', 0),
-(99, 'double barfi razai cover', '095', '', 1, 73, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:57:32', 0),
-(100, 'double jacquard razaie cover', '096', '', 1, 74, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:59:03', 0),
-(101, 'irani ac kambal double', '097', '', 1, 75, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 11:59:58', 0),
-(102, 'irani ac kambal single', '098', '', 1, 75, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:00:33', 0),
-(103, 'sada ac kambal double', '100', '', 1, 75, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:01:01', 0),
-(104, 'hbk normal kambal a tex ', '1', '', 1, 75, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:01:54', 0),
-(105, 'sada matres cover', '103', '', 1, 76, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:02:30', 0),
-(106, 'aa matres cover', '104', '', 1, 77, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:03:00', 0),
-(107, 'abs matres cover', '105', '', 1, 76, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:03:26', 0),
-(108, 'texture fleece set', '210', '', 1, 78, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:04:08', 0),
-(109, 'rezaie istar', '119', '', 1, 79, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:06:43', 0),
-(110, 'gada cover rb', '120', '', 1, 80, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:07:20', 0),
-(111, 'gada shaggy rb', '121', '', 1, 81, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:08:23', 0),
-(112, 'karandi gada', '122', '', 1, 82, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:08:57', 0),
-(113, 'special gada bare', '123', '', 1, 83, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:09:38', 0),
-(114, 'normal shaggy gada ', '124', '', 1, 83, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:10:38', 0),
-(115, 'razai cover single rb', '125', '', 1, 84, 0, 0, 0, '', '', 125, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:11:24', 0),
-(116, 'double razai cover rb', '126', '', 1, 84, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:12:16', 0),
-(117, 'baby kambal', '127', '', 1, 85, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:12:46', 0),
-(118, 'rocket dari', '128', '', 1, 86, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:13:17', 0),
-(119, 'velvet dari', '129', '', 1, 86, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:13:46', 0),
-(120, 'soti khais vip', '130', '', 1, 87, 0, 0, 0, '', '', 10, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:14:32', 0),
-(121, 'nirmal soti khais ', '131', '', 1, 87, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:15:05', 0),
-(122, 'majnu soti khais', '132', '', 1, 87, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:15:33', 0),
-(123, 'onai majnu qais', '133', '', 1, 87, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:16:16', 0),
-(124, 'white special khais', '135', '', 1, 87, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:17:20', 0),
-(125, 'onai khais', '134', '', 1, 87, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:17:48', 0),
-(126, 'palachi razai set 9pcs', '136', '', 1, 88, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:18:32', 0),
-(127, '4 border plachi set 9pcs', '137', '', 1, 88, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:19:35', 0),
-(128, 'barfi velvet razai set 9pcs', '138', '', 1, 88, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:20:16', 0),
-(129, 'rad silk set 9pcs', '140', '', 1, 88, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:22:05', 0),
-(130, 'texture set 9pcs', '141', '', 1, 88, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:22:40', 0),
-(131, 'laser set 9 pcs', '143', '', 1, 88, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:23:20', 0),
-(132, 'viscous set 9pcs', '144', '', 1, 88, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:23:55', 0),
-(133, '3 motiv set 9pcs', '145', '', 1, 88, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:25:00', 0),
-(134, 'tela+tela set 9pcs', '146', '', 1, 88, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:25:43', 0),
-(135, 'hand made set 9pcs', '147', '', 1, 88, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:26:35', 0),
-(136, 'abs laser comforter set 9pcs', '148', '', 1, 89, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-02 12:27:39', 0),
-(137, 'texture ac kambal', '149', '', 1, 75, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:37:42', 0),
-(138, 'single 2 ply blacket cloudy', '150', '', 1, 90, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:39:59', 0),
-(139, 'single 2 ply blanket snow cloudy ', '152', '', 1, 90, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:42:29', 0),
-(140, 'single 2 ply blanket super select ', '151', '', 1, 90, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:43:15', 0),
-(141, 'single 2 ply blanket normal', '153', '', 1, 90, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:46:05', 0),
-(142, 'single 1 ply blanket ', '154', '', 1, 91, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:46:45', 0),
-(143, 'double blanket 1ply ', '156', '', 1, 92, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:48:14', 0),
-(144, 'double blanket select comfort', '158', '', 1, 2, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:49:07', 0),
-(145, 'double blanket spin', '159', '', 1, 2, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:49:25', 0),
-(146, 'double blanket love for ever', '161', '', 1, 2, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:49:57', 0),
-(147, 'double blanket bali dream', '162', '', 1, 2, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:50:32', 0),
-(148, 'double blanket sun flower', '163', '', 1, 2, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:50:48', 0),
-(149, '4piece blanket set super cloudy ', '165', '', 1, 93, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:54:23', 0),
-(150, 'double blanket 2 ply perfection', '164', '', 1, 2, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:54:52', 0),
-(151, '4 piece blanket set black rose', '166', '', 1, 93, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:55:32', 0),
-(152, '4 piece blanket set golden cloudy ', '167', '', 1, 93, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:56:02', 0),
-(153, '4 piece blanket set universal ugt ', '168', '', 1, 93, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:56:52', 0),
-(154, '4 piece blanket set clasic ugt ', '169', '', 1, 93, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:57:19', 0),
-(155, '4 piece blanket set denza', '170', '', 1, 93, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:57:48', 0),
-(156, '4 piece blanket set bloom betle ', '171', '', 1, 93, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:58:27', 0),
-(157, '4 piece blanket set summer choice', '172', '', 1, 93, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:59:00', 0),
-(158, '4 piece blanket set riched cloudy ', '173', '', 1, 93, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 11:59:38', 0),
-(159, '4 piece blanket set platinum ', '174', '', 1, 93, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 12:00:02', 0),
-(160, 'jaye namaz nomral ', '175', '', 1, 93, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 12:00:39', 0),
-(161, 'jaye namaz vip', '176', '', 1, 94, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 12:01:07', 0),
-(162, 'lazer cusion back velvet', '4', '', 1, 95, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 12:01:51', 0),
-(163, 'lazer cusion back silk ', '178', '', 1, 95, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 12:02:24', 0),
-(164, 'lazer cusion itlan ', '1797', '', 1, 95, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 12:02:38', 0),
-(165, 'tesal cusion vip', '180', '', 1, 95, 0, 0, 0, '', '', 1, 1, 1, 5, '', '', '', '', '', '', '2025-07-03 12:03:07', 0),
-(166, 'versace jacket cushion', '181', '', 1, 95, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 12:04:27', 0),
-(167, 'far dil cusion ', '182', '', 1, 95, 0, 0, 0, '', '', 1, 1, 1, 5, '', '', '', '', '', '', '2025-07-03 12:04:53', 0),
-(168, 'digtal cusion ', '183', '', 1, 95, 0, 0, 0, '', '', 1, 1, 1, 0, '', '', '', '', '', '', '2025-07-03 12:05:14', 0),
-(169, 'test product', '1234', '', 1, 37, 0, 0, 0, '', '', 1000, 1, 1, 5, '', '', 'soft pillow good quality', '', '', '', '2026-01-27 11:03:24', 0),
-(170, 'bedsheets', '345', '', 7, 96, 0, 0, 0, '', '', 4000, 1, 1, 5, '', '', 'waterproof bedsheets', '', '', '', '2026-01-27 11:03:24', 0),
-(171, 'pillow', '10', '', 1, 3, 0, 0, 0, '', '', 200, 1, 1, 5, '', '', 'abc', '', '', '', '2026-01-27 11:03:24', 0),
-(172, 'razai 1', '12', '', 8, 13, 0, 0, 0, '', '', 250, 1, 1, 5, '', '', '', '', '', '', '2026-01-27 11:03:24', 0),
-(173, 'cover', '333', '', 1, 98, 0, 0, 300, '', '', 250, 1, 0, 0, '', '', 'cover open', '', '', '', '2026-01-27 11:03:24', 0),
-(174, 'cover', '842824337', '', 1, 2, 0, 0, 0, '', '', 270, 1, 1, 5, '', '', '', '', '', '', '2026-02-09 12:06:09', 1),
-(175, 'testing', '34424', '', 1, 2, 0, 0, 0, '', '', 40000, 1, 1, 5, '', '', 'dfsdfgdf', '', '', '', '2026-02-09 12:24:49', 0),
-(176, 'testing', '985033246', '', 0, 0, 0, 0, 40000, NULL, NULL, 40000, 1, 1, 5, '', NULL, NULL, '0', '0', '0', '2026-02-09 12:25:23', 1);
+INSERT INTO `product` (`product_id`, `product_name`, `product_pack`, `product_code`, `product_image`, `brand_id`, `category_id`, `quantity_instock`, `purchased`, `current_rate`, `f_days`, `t_days`, `purchase_rate`, `status`, `availability`, `alert_at`, `weight`, `actual_rate`, `product_description`, `product_mm`, `product_inch`, `product_meter`, `adddatetime`, `inventory`) VALUES
+(1, 'caradex 30 mg ', '30', '25l019', '', 1, 1, 136, 0, 794.75, '', '', 794.75, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:26:02', 0),
+(2, 'caradex 60mg cap', '30s', '25j031', '', 2, 2, 281, 0, 1198.5, '', '', 1198.5, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:55', 0),
+(3, 'iron-p tab ', '30s', '14', '', 3, 3, 654, 0, 586.5, '', '', 586.5, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:36', 0),
+(4, 'cefpec inj 2g', '1s', 'fp-87', '', 4, 4, 178, 0, 629, '', '', 629, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:02:09', 0),
+(5, 'ciptop tab 500mg ', '10s', 'cp-84', '', 5, 5, 320, 0, 320.45, '', '', 320.45, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:36', 0),
+(6, 'ketowise inj 1ml ', '1ml*5', '6', '', 6, 6, 685, 0, 663, '', '', 663, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:36', 0),
+(7, 'r-eze syp 120 ml ', '1s', '7', '', 7, 7, 1399, 0, 297.5, '', '', 297.5, 1, 1, 5, '', '', '', '', '', '', '2026-02-11 09:52:16', 0),
+(8, 'omson inj 40mg ', '1 vial ', '8', '', 8, 8, 1269, 0, 447.95, '', '', 447.95, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:13', 0),
+(9, 'ov-m ', '10 satet', '9', '', 9, 9, 47, 0, 719.1, '', '', 719.1, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:02:36', 0),
+(10, 'cefpec inj 1gm', '1s', '11', '', 10, 10, 264, 0, 459, '', '', 459, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:00', 0),
+(11, 'sg kal 120ml syp ', '1s', '12', '', 11, 11, 400, 0, 289, '', '', 289, 1, 1, 5, '', '', '', '', '', '', '2026-02-11 09:52:16', 0),
+(12, 'neropenem inj 500mg ', '1s', '13', '', 12, 12, 65, 0, 1422.05, '', '', 1422.05, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:02:39', 0),
+(13, 'neropenem inj 1gm ', '1s', '15', '', 13, 13, 180, 0, 2760.8, '', '', 2760.8, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:02:43', 0),
+(14, 'ciptop sus 125mg', '1s', '16', '', 14, 14, 374, 0, 163.2, '', '', 163.2, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:03', 0),
+(15, 'dia-go cap', '30 cap', '17', '', 15, 15, 156, 0, 1785, '', '', 1785, 1, 1, 5, '', '', '', '', '', '', '2026-02-11 09:52:16', 0),
+(16, 'od q-10 tab ', '30s', '19', '', 16, 16, 354, 0, 1827.5, '', '', 1827.75, 1, 1, 5, '', '', '', '', '', '', '2026-02-11 09:52:16', 0),
+(17, 'nerfit tab ', '30s', '20', '', 17, 17, 5834, 0, 1190, '', '', 1190, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:13', 0),
+(18, 'santosa tab ', '20s', '21', '', 18, 18, 840, 0, 561, '', '', 561, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:36', 0),
+(19, 'ciptop tab 250mg ', '20s', '22', '', 19, 19, 410, 0, 193.8, '', '', 193.8, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:03', 0),
+(20, 'sg kal tab ', '30s', '23', '', 20, 20, 20, 0, 756.5, '', '', 756.5, 1, 1, 5, '', '', '', '', '', '', '2026-02-11 09:52:16', 0),
+(21, 'estarown tab 10mg ', '20s', '24', '', 21, 21, 1620, 0, 382.5, '', '', 382.5, 1, 1, 5, '', '', '', '', '', '', '2026-02-11 09:52:16', 0),
+(22, 'axigon tab 550mg ', '10s', '25', '', 22, 22, 200, 0, 1096.5, '', '', 1096.5, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:13', 0),
+(23, 'ginobit tab ', '30s', '26', '', 23, 23, 460, 0, 1275, '', '', 1275, 1, 1, 5, '', '', '', '', '', '', '2026-02-11 09:52:16', 0),
+(24, 'iris inj 100mg', '5s', '27', '', 24, 24, 225, 0, 1997.5, '', '', 1997.5, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:02:39', 0),
+(25, 'cholewise-d oral amp', '1s', '28', '', 25, 25, 1032, 0, 238, '', '', 238, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:36', 0),
+(26, 'sita-wis tab 50/500', '10s', '29', '', 26, 26, 864, 0, 382.5, '', '', 382.5, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:02:50', 0),
+(27, 'montrial tab 10mg', '14s', '30', '', 27, 27, 270, 0, 467.5, '', '', 467.5, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:36', 0),
+(28, 'danalac lf 200g', '1s', '31', '', 28, 28, 690, 0, 930, '', '', 930, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:36', 0),
+(29, 'danalac 1 200g ', '1s', '32', '', 29, 29, 1218, 0, 930, '', '', 930, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:26', 0),
+(30, 'danalac mama 200g', '1s', '33', '', 30, 30, 56, 0, 930, '', '', 930, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:36', 0),
+(31, 'sg labam powder 400g', '1s', '34', '', 31, 31, 711, 0, 2700, '', '', 2700, 1, 1, 5, '', '', '', '', '', '', '2026-02-12 06:32:28', 0),
+(32, 'danalac lf 400g', '1s', '35', '', 32, 32, 216, 0, 2209, '', '', 2209, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:02:30', 0),
+(33, 'dia-go 200g', '1s', '36', '', 33, 33, 40, 0, 930, '', '', 930, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:02:30', 0),
+(34, 'hacer syp 120ml', '1s', '38', '', 34, 34, 2445, 0, 246.5, '', '', 246.5, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:03:32', 0),
+(35, 'ciotop sus 250mg ', '1s', '40', '', 35, 35, 0, 0, 0, '', '', 297.5, 1, 1, 5, '', '', '', '', '', '', '2026-02-12 08:43:00', 0),
+(36, 'ciptop sus 250mg ', '1s', '41', '', 36, 36, 187, 0, 0, '0', '0', 0, 1, 1, 5, '', '', '', '', '', '', '2026-02-13 12:02:37', 0),
+(37, 'ventrum tab ', '20s', '42', '', 37, 37, 1303, 0, 0, '0', '0', 0, 1, 1, 5, '', '', '', '', '', '', '2026-02-16 06:04:09', 0),
+(38, 'tessss', '40', '34234', '', 38, 41, 0, 0, 0, '0', '0', 0, 0, 1, 5, '', '', '', '', '', '', '2026-02-13 12:26:52', 0),
+(39, 'testingmodal', '', '34442', '', 1, 36, 0, 0, 300, '', '', 0, 0, 0, 0, '', '', '', '', '', '', '2026-02-14 06:42:01', 0),
+(40, 'testingds', '', '534534', '', 39, 42, 0, 0, 400, '', '', 0, 0, 0, 0, '', '', 'dfdsfsd', '', '', '', '2026-02-14 06:42:05', 0),
+(41, 'newsss', '', '3434324', '', 40, 43, 0, 0, 300, '', '', 0, 0, 0, 0, '', '', 'dfdfsf', '', '', '', '2026-02-14 06:42:08', 0);
 
 -- --------------------------------------------------------
 
@@ -882,20 +747,59 @@ CREATE TABLE `product_batches` (
 --
 
 INSERT INTO `product_batches` (`batch_id`, `product_id`, `batch_no`, `expiry_date`, `qty_in`, `qty_out`, `available_qty`, `purchase_id`, `created_at`, `updated_at`) VALUES
-(1, 2, 'fd454', '2026-02-24', 0, 0, 0, 1, '2026-02-10 06:25:41', '2026-02-10 06:29:22'),
-(2, 2, 'dfdsf343', '2026-02-25', 0, 0, 0, 1, '2026-02-10 06:25:41', '2026-02-10 06:29:22'),
-(3, 2, 'fd454', '2026-02-25', 0, 0, 0, 1, '2026-02-10 06:29:22', '2026-02-10 06:33:40'),
-(4, 3, 'fd454', '2026-02-24', 0, 0, 0, 1, '2026-02-10 06:29:22', '2026-02-10 06:33:40'),
-(5, 2, '123a', '2026-02-24', 0, 0, 0, 2, '2026-02-10 06:37:24', '2026-02-10 07:41:06'),
-(6, 3, '3456a', '2026-02-20', 0, 0, 0, 2, '2026-02-10 06:37:24', '2026-02-10 06:42:54'),
-(7, 2, '123a', '2026-02-24', 0, 0, 0, 2, '2026-02-10 06:39:28', '2026-02-10 07:41:06'),
-(8, 2, '123a', '2026-02-24', 0, 0, 0, 3, '2026-02-10 06:43:46', '2026-02-10 07:42:37'),
-(9, 2, '123a', '2026-02-27', 0, 0, 0, 4, '2026-02-10 06:57:34', '2026-02-10 07:42:43'),
-(10, 2, 'fd45', '2026-02-26', 0, 0, 0, 5, '2026-02-10 07:20:34', '2026-02-10 07:41:03'),
-(11, 2, 'sd567', '2026-02-28', 0, 0, 0, 6, '2026-02-10 07:43:06', '2026-02-10 07:43:16'),
-(12, 2, '123a', '2026-02-25', 0, 0, 0, 7, '2026-02-10 09:17:50', '2026-02-10 09:23:01'),
-(13, 2, '3456a', '2026-02-25', 0, 0, 0, 7, '2026-02-10 09:17:50', '2026-02-10 09:23:01'),
-(14, 2, '123a', '2026-02-22', 1100, 0, 1100, 7, '2026-02-10 09:23:01', '2026-02-10 09:23:01');
+(1, 23, '001', '2026-10-31', 460, 0, 460, 1, '2026-02-11 09:52:16', '2026-02-11 09:52:16'),
+(2, 22, '001', '2026-11-30', 200, 0, 200, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:13'),
+(3, 2, '25j031', '2027-08-31', 35, 0, 35, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:55'),
+(4, 12, '26a004', '2027-12-31', 65, 0, 65, 1, '2026-02-11 09:52:16', '2026-02-16 06:02:39'),
+(5, 8, 'osi016', '2027-02-28', 1269, 0, 1269, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:13'),
+(6, 15, '01', '2026-11-30', 156, 0, 156, 1, '2026-02-11 09:52:16', '2026-02-11 09:52:16'),
+(7, 3, '14', '2027-03-31', 654, 0, 654, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:36'),
+(8, 17, '960', '2027-09-30', 634, 0, 634, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:13'),
+(9, 16, '608', '2026-10-31', 354, 0, 354, 1, '2026-02-11 09:52:16', '2026-02-11 09:52:16'),
+(10, 9, '929', '2027-08-31', 47, 0, 47, 1, '2026-02-11 09:52:16', '2026-02-16 06:02:36'),
+(11, 32, '002', '2026-12-31', 216, 0, 216, 1, '2026-02-11 09:52:16', '2026-02-16 06:02:30'),
+(12, 7, 'rz002', '2027-09-30', 1399, 0, 1399, 1, '2026-02-11 09:52:16', '2026-02-11 09:52:16'),
+(13, 10, 'f-68', '0027-05-31', 4, 0, 4, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:00'),
+(14, 10, 'f-70', '2027-10-31', 260, 0, 260, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:00'),
+(15, 4, 'fp-88', '2027-10-31', 146, 0, 146, 1, '2026-02-11 09:52:16', '2026-02-16 06:02:09'),
+(16, 25, 'cw-023', '2027-08-31', 369, 0, 369, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:36'),
+(17, 5, 'cp-84', '2027-08-31', 170, 0, 170, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:36'),
+(18, 28, 'hd0010', '2027-11-30', 168, 0, 168, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:36'),
+(19, 30, 'hd0004', '2027-10-30', 56, 0, 56, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:36'),
+(20, 33, 'hd0004', '2027-05-31', 40, 0, 40, 1, '2026-02-11 09:52:16', '2026-02-16 06:02:30'),
+(21, 24, 'ir-013', '2027-04-30', 225, 0, 225, 1, '2026-02-11 09:52:16', '2026-02-16 06:02:39'),
+(22, 6, 'kt-029', '2027-08-31', 35, 0, 35, 1, '2026-02-11 09:52:16', '2026-02-11 09:52:16'),
+(23, 6, 'kt-030', '2027-10-31', 250, 0, 250, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:36'),
+(24, 11, 'sg002', '2027-03-31', 400, 0, 400, 1, '2026-02-11 09:52:16', '2026-02-11 09:52:16'),
+(25, 20, 'he006', '2027-03-31', 20, 0, 20, 1, '2026-02-11 09:52:16', '2026-02-11 09:52:16'),
+(26, 31, '008', '2027-03-31', 140, 0, 140, 1, '2026-02-11 09:52:16', '2026-02-11 09:52:16'),
+(27, 18, 's-48', '2027-10-31', 840, 0, 840, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:36'),
+(28, 26, 'sw-34', '2027-09-30', 864, 0, 864, 1, '2026-02-11 09:52:16', '2026-02-16 06:02:50'),
+(29, 4, 'fp-86', '2027-05-31', 11, 0, 11, 1, '2026-02-11 09:52:16', '2026-02-11 09:52:16'),
+(30, 19, 'c-77', '2027-03-31', 236, 0, 236, 1, '2026-02-11 09:52:16', '2026-02-16 06:02:50'),
+(31, 21, '1035', '2026-11-30', 1620, 0, 1620, 1, '2026-02-11 09:52:16', '2026-02-11 09:52:16'),
+(32, 27, 'mt-36', '2027-03-31', 70, 0, 70, 1, '2026-02-11 09:52:16', '2026-02-16 06:03:36'),
+(33, 4, 'fp-87', '2027-08-31', 21, 0, 21, 1, '2026-02-11 09:52:16', '2026-02-11 09:52:16'),
+(34, 19, 'c-78', '2027-05-31', 174, 0, 174, 2, '2026-02-12 06:14:03', '2026-02-16 06:03:03'),
+(35, 1, '25l019', '2027-10-31', 246, 110, 136, 3, '2026-02-12 06:22:11', '2026-02-16 06:26:02'),
+(36, 2, '25l020', '2027-10-31', 246, 0, 246, 3, '2026-02-12 06:22:11', '2026-02-16 06:03:40'),
+(37, 29, 'hd006', '2027-11-30', 1218, 0, 1218, 3, '2026-02-12 06:22:11', '2026-02-16 06:03:26'),
+(38, 34, 'he012', '2027-05-31', 1640, 0, 1640, 4, '2026-02-12 06:27:47', '2026-02-16 06:03:32'),
+(39, 34, 'he013', '2027-05-31', 805, 0, 805, 5, '2026-02-12 06:29:45', '2026-02-16 06:03:29'),
+(40, 31, '008', '2027-07-31', 28, 0, 28, 6, '2026-02-12 06:32:28', '2026-02-12 06:32:28'),
+(41, 31, '26023', '2027-12-31', 515, 0, 515, 6, '2026-02-12 06:32:28', '2026-02-12 06:32:28'),
+(42, 31, '007', '2027-07-31', 28, 0, 28, 6, '2026-02-12 06:32:28', '2026-02-12 06:32:28'),
+(43, 17, '1069', '2027-12-31', 5200, 0, 5200, 9, '2026-02-12 08:13:50', '2026-02-16 06:03:13'),
+(44, 25, 'cw-023', '2027-08-30', 663, 0, 663, 10, '2026-02-12 08:55:42', '2026-02-16 06:02:27'),
+(45, 14, 'cx-24', '2027-07-31', 374, 0, 374, 10, '2026-02-12 08:55:42', '2026-02-16 06:03:03'),
+(46, 36, 'cf-14', '2027-09-30', 187, 0, 187, 10, '2026-02-12 08:55:42', '2026-02-12 08:55:42'),
+(47, 5, 'cp-84', '2027-08-30', 45, 0, 45, 10, '2026-02-12 08:55:42', '2026-02-12 08:55:42'),
+(48, 5, 'cp-85', '2027-08-30', 105, 0, 105, 10, '2026-02-12 08:55:42', '2026-02-12 08:55:42'),
+(49, 27, 'mt-37', '2027-12-31', 200, 0, 200, 10, '2026-02-12 08:55:42', '2026-02-16 06:03:13'),
+(50, 6, 'kt-030', '2027-10-30', 400, 0, 400, 10, '2026-02-12 08:55:42', '2026-02-16 06:03:00'),
+(51, 28, 'hd 0010', '2027-11-30', 522, 0, 522, 11, '2026-02-12 10:24:49', '2026-02-16 06:02:47'),
+(52, 13, '26a002', '2027-12-31', 180, 0, 180, 12, '2026-02-12 10:32:04', '2026-02-16 06:02:43'),
+(53, 37, '949', '2027-08-31', 1303, 0, 1303, 13, '2026-02-12 10:45:13', '2026-02-16 06:04:09');
 
 -- --------------------------------------------------------
 
@@ -931,7 +835,19 @@ CREATE TABLE `purchase` (
 --
 
 INSERT INTO `purchase` (`purchase_id`, `purchase_date`, `client_name`, `bill_no`, `client_contact`, `sub_total`, `vat`, `total_amount`, `discount`, `grand_total`, `paid`, `due`, `payment_type`, `payment_account`, `customer_account`, `payment_status`, `transaction_id`, `transaction_paid_id`, `purchase_narration`, `timestamp`) VALUES
-(7, '2026-02-10', 'asif fiber', '', '03004607278', '', '', '56100000', '0', '56100000', '56100000.00', '0', 'cash_purchase', 1, 5, 1, 0, 25, '', '2026-02-10 09:17:50');
+(1, '2026-02-11', 'heilung pharmacetical company ', '1383', '03135662222', '', '', '7194594.6', '0', '7194594.6', '7194594', '0.59999999962747', 'cash_purchase', 1, 25, 1, 0, 1, '', '2026-02-11 09:52:16'),
+(2, '2026-02-12', 'heilung pharmacetical company ', '', '03135662222', '', '', '33721.2', '0', '33721.2', '33721', '0.20000000000437', 'cash_purchase', 1, 25, 1, 0, 2, '', '2026-02-12 06:14:03'),
+(3, '2026-02-12', 'heilung pharmacetical company ', '1386', '03135662222', '', '', '706099.5', '0', '706099.5', '706099', '0.5', 'cash_purchase', 1, 25, 1, 0, 3, '', '2026-02-12 06:22:11'),
+(4, '2026-02-12', 'heilung pharmacetical company ', '1396', '03135662222', '', '', '348500', '0', '348500', '348500.00', '0', 'cash_purchase', 1, 25, 1, 0, 4, '', '2026-02-12 06:27:47'),
+(5, '2026-02-12', 'heilung pharmacetical company ', '1397', '03135662222', '', '', '198432.5', '0', '198432.5', '198432', '0.5', 'cash_purchase', 1, 25, 1, 0, 5, '', '2026-02-12 06:29:45'),
+(6, '2026-02-12', 'heilung pharmacetical company ', '1399', '03135662222', '', '', '1541700', '0', '1541700', '1541700.00', '0', 'cash_purchase', 1, 25, 1, 0, 6, '', '2026-02-12 06:32:28'),
+(7, '2026-02-12', 'heilung pharmacetical company ', '1405', '03135662222', '', '', '656580', '0', '656580', '656580.00', '0', 'cash_purchase', 1, 25, 1, 0, 12, '', '2026-02-12 08:11:35'),
+(8, '2026-02-12', 'heilung pharmacetical company ', '1403', '03135662222', '', '', '260400', '0', '260400', '260400.00', '0', 'cash_purchase', 1, 25, 1, 0, 13, '', '2026-02-12 08:12:40'),
+(9, '2026-02-12', 'heilung pharmacetical company ', '1410', '03135662222', '', '', '6188000', '0', '6188000', '6188000.00', '0', 'cash_purchase', 1, 25, 1, 0, 14, '', '2026-02-12 08:13:50'),
+(10, '2026-02-12', 'heilung pharmacetical company ', '113', '03135662222', '', '', '681230.8', '0', '681230.8', '681230', '0.80000000004657', 'cash_purchase', 1, 25, 1, 0, 19, '', '2026-02-12 08:55:42'),
+(11, '2026-02-12', 'heilung pharmacetical company ', '', '03135662222', '', '', '485460', '0', '485460', '485460.00', '0', 'cash_purchase', 1, 25, 1, 0, 28, '', '2026-02-12 10:24:49'),
+(12, '2026-02-12', 'heilung pharmacetical company ', '1436', '03135662222', '', '', '496944', '0', '496944', '496944.00', '5.8207660913467E-11', 'cash_purchase', 1, 25, 1, 0, 30, '', '2026-02-12 10:32:04'),
+(13, '2026-02-12', 'heilung pharmacetical company ', '', '03135662222', '', '', '1235730', '0', '1235730', '1235730.00', '0', 'cash_purchase', 1, 25, 1, 0, 33, '', '2026-02-12 10:45:13');
 
 -- --------------------------------------------------------
 
@@ -958,7 +874,62 @@ CREATE TABLE `purchase_item` (
 --
 
 INSERT INTO `purchase_item` (`purchase_item_id`, `purchase_id`, `product_id`, `batch_no`, `expiry_date`, `product_detail`, `quantity`, `rate`, `sale_rate`, `total`, `purchase_item_status`) VALUES
-(4, 7, 2, '123a', '2026-02-22', '', '1100', '51000', '31000', '56100000', 1);
+(1, 1, 23, '001', '2026-10-31', '', '460', '1275', '1275', '586500', 1),
+(2, 1, 22, '001', '2026-11-30', '', '200', '1096.5', '1096.5', '219300', 1),
+(3, 1, 2, '25j031', '2027-08-31', '', '35', '1198.5', '1198.5', '41947.5', 1),
+(4, 1, 12, '26a004', '2027-12-31', '', '65', '1422.05', '1422.05', '92433.25', 1),
+(5, 1, 8, 'osi016', '2027-02-28', '', '1269', '447.95', '447.95', '568448.55', 1),
+(6, 1, 15, '01', '2026-11-30', '', '156', '1785', '1785', '278460', 1),
+(7, 1, 3, '14', '2027-03-31', '', '654', '586.5', '586.5', '383571', 1),
+(8, 1, 17, '960', '2027-09-30', '', '154', '1190', '1190', '183260', 1),
+(9, 1, 16, '608', '2026-10-31', '', '354', '1827.75', '1827.5', '647023.5', 1),
+(10, 1, 9, '929', '2027-08-31', '', '47', '719.1', '719.1', '33797.7', 1),
+(11, 1, 32, '002', '2026-12-31', '', '216', '2209', '2209', '477144', 1),
+(12, 1, 7, 'rz002', '2027-09-30', '', '1399', '297.5', '297.5', '416202.5', 1),
+(13, 1, 10, 'f-68', '0027-05-31', '', '4', '459', '459', '1836', 1),
+(14, 1, 10, 'f-70', '2027-10-31', '', '260', '459', '459', '119340', 1),
+(15, 1, 4, 'fp-88', '2027-10-31', '', '146', '629', '629', '91834', 1),
+(16, 1, 25, 'cw-023', '2027-08-31', '', '369', '238', '238', '87822', 1),
+(17, 1, 5, 'cp-84', '2027-08-31', '', '170', '320.45', '320.45', '54476.5', 1),
+(18, 1, 28, 'hd0010', '2027-11-30', '', '168', '930', '930', '156240', 1),
+(19, 1, 30, 'hd0004', '2027-10-30', '', '56', '930', '930', '52080', 1),
+(20, 1, 33, 'hd0004', '2027-05-31', '', '40', '930', '930', '37200', 1),
+(21, 1, 24, 'ir-013', '2027-04-30', '', '225', '1997.5', '1997.5', '449437.5', 1),
+(22, 1, 6, 'kt-029', '2027-08-31', '', '35', '663', '663', '23205', 1),
+(23, 1, 6, 'kt-030', '2027-10-31', '', '250', '663', '663', '165750', 1),
+(24, 1, 11, 'sg002', '2027-03-31', '', '400', '289', '289', '115600', 1),
+(25, 1, 20, 'he006', '2027-03-31', '', '20', '756.5', '756.5', '15130', 1),
+(26, 1, 31, '008', '2027-03-31', '', '140', '2700', '2700', '378000', 1),
+(27, 1, 18, 's-48', '2027-10-31', '', '840', '561', '561', '471240', 1),
+(28, 1, 26, 'sw-34', '2027-09-30', '', '864', '382.5', '382.5', '330480', 1),
+(29, 1, 4, 'fp-86', '2027-05-31', '', '11', '629', '629', '6919', 1),
+(30, 1, 19, 'c-77', '2027-03-31', '', '236', '187.85', '187.85', '44332.6', 1),
+(31, 1, 21, '1035', '2026-11-30', '', '1620', '382.5', '382.5', '619650', 1),
+(32, 1, 27, 'mt-36', '2027-03-31', '', '70', '467.5', '467.5', '32725', 1),
+(33, 1, 4, 'fp-87', '2027-08-31', '', '21', '629', '629', '13209', 1),
+(34, 2, 19, 'c-78', '2027-05-31', '', '174', '193.8', '193.8', '33721.2', 1),
+(35, 3, 1, '25l019', '2027-10-31', '', '246', '794.75', '794.75', '195508.5', 1),
+(36, 3, 2, '25l020', '2027-10-31', '', '246', '1198.5', '1198.5', '294831', 1),
+(37, 3, 29, 'hd006', '2027-11-30', '', '232', '930', '930', '215760', 1),
+(38, 4, 34, 'he012', '2027-05-31', '', '1640', '212.5', '212.5', '348500', 1),
+(39, 5, 34, 'he013', '2027-05-31', '', '805', '246.5', '246.5', '198432.5', 1),
+(40, 6, 31, '008', '2027-07-31', '', '28', '2700', '2700', '75600', 1),
+(41, 6, 31, '26023', '2027-12-31', '', '515', '2700', '2700', '1390500', 1),
+(42, 6, 31, '007', '2027-07-31', '', '28', '2700', '2700', '75600', 1),
+(43, 7, 29, 'hd006', '2027-11-30', '', '706', '930', '930', '656580', 1),
+(44, 8, 29, 'hd006', '2027-11-30', '', '280', '930', '930', '260400', 1),
+(45, 9, 17, '1069', '2027-12-31', '', '5200', '1190', '1190', '6188000', 1),
+(46, 10, 25, 'cw-023', '2027-08-30', '', '663', '238', '238', '157794', 1),
+(47, 10, 14, 'cx-24', '2027-07-31', '', '374', '163.2', '163.2', '61036.8', 1),
+(48, 10, 36, 'cf-14', '2027-09-30', '', '187', '297.5', '297.5', '55632.5', 1),
+(49, 10, 5, 'cp-84', '2027-08-30', '', '45', '320.45', '320.45', '14420.25', 1),
+(50, 10, 5, 'cp-85', '2027-08-30', '', '105', '320.45', '320.45', '33647.25', 1),
+(51, 10, 27, 'mt-37', '2027-12-31', '', '200', '467.5', '467.5', '93500', 1),
+(52, 10, 6, 'kt-030', '2027-10-30', '', '400', '663', '663', '265200', 1),
+(53, 11, 28, 'hd 0010', '2027-11-30', '', '522', '930', '930', '485460', 1),
+(54, 12, 13, '26a002', '2027-12-31', '', '180', '2760.8', '2760.8', '496944', 1),
+(55, 13, 37, '949', '2027-08-31', '', '1303', '510', '510', '664530', 1),
+(56, 13, 17, '960', '2027-09-30', '', '480', '1190', '1190', '571200', 1);
 
 -- --------------------------------------------------------
 
@@ -1037,7 +1008,21 @@ CREATE TABLE `transactions` (
 --
 
 INSERT INTO `transactions` (`transaction_id`, `debit`, `credit`, `balance`, `customer_id`, `transaction_remarks`, `transaction_add_date`, `transaction_date`, `transaction_type`, `transaction_from`) VALUES
-(25, '56100000.00', '0', '', 1, 'purchased by purchased id#7', '2026-02-10 09:23:01', '2026-02-10', 'cash_purchase', 'purchase');
+(1, '7194594', '0', '', 1, 'purchased by purchased id#1', '2026-02-11 09:52:16', '2026-02-11', 'cash_purchase', 'purchase'),
+(2, '33721', '0', '', 1, 'purchased by purchased id#2', '2026-02-12 06:14:03', '2026-02-12', 'cash_purchase', 'purchase'),
+(3, '706099', '0', '', 1, 'purchased by purchased id#3', '2026-02-12 06:22:11', '2026-02-12', 'cash_purchase', 'purchase'),
+(4, '348500.00', '0', '', 1, 'purchased by purchased id#4', '2026-02-12 06:27:47', '2026-02-12', 'cash_purchase', 'purchase'),
+(5, '198432', '0', '', 1, 'purchased by purchased id#5', '2026-02-12 06:29:45', '2026-02-12', 'cash_purchase', 'purchase'),
+(6, '1541700.00', '0', '', 1, 'purchased by purchased id#6', '2026-02-12 06:32:28', '2026-02-12', 'cash_purchase', 'purchase'),
+(12, '656580.00', '0', '', 1, 'purchased by purchased id#7', '2026-02-12 08:11:35', '2026-02-12', 'cash_purchase', 'purchase'),
+(13, '260400.00', '0', '', 1, 'purchased by purchased id#8', '2026-02-12 08:12:40', '2026-02-12', 'cash_purchase', 'purchase'),
+(14, '6188000.00', '0', '', 1, 'purchased by purchased id#9', '2026-02-12 08:13:50', '2026-02-12', 'cash_purchase', 'purchase'),
+(19, '681230', '0', '', 1, 'purchased by purchased id#10', '2026-02-12 08:55:42', '2026-02-12', 'cash_purchase', 'purchase'),
+(28, '485460.00', '0', '', 1, 'purchased by purchased id#11', '2026-02-12 10:24:49', '2026-02-12', 'cash_purchase', 'purchase'),
+(30, '496944.00', '0', '', 1, 'purchased by purchased id#12', '2026-02-12 10:32:04', '2026-02-12', 'cash_purchase', 'purchase'),
+(33, '1235730.00', '0', '', 1, 'purchased by purchased id#13', '2026-02-12 10:45:13', '2026-02-12', 'cash_purchase', 'purchase'),
+(52, '0', '79475.00', '', 1, 'cash_sale by order id#37', '2026-02-16 06:14:24', '2026-02-16', 'cash_in_hand', 'invoice'),
+(53, '0', '7947.5', '', 27, 'credit_sale by order id#38', '2026-02-16 06:26:02', '2026-02-16', 'credit_sale', 'invoice');
 
 -- --------------------------------------------------------
 
@@ -1095,6 +1080,12 @@ CREATE TABLE `vouchers` (
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `areas`
+--
+ALTER TABLE `areas`
+  ADD PRIMARY KEY (`area_id`);
 
 --
 -- Indexes for table `brands`
@@ -1249,10 +1240,16 @@ ALTER TABLE `vouchers`
 --
 
 --
+-- AUTO_INCREMENT for table `areas`
+--
+ALTER TABLE `areas`
+  MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `brands`
 --
 ALTER TABLE `brands`
-  MODIFY `brand_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `brand_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `brokers`
@@ -1264,7 +1261,7 @@ ALTER TABLE `brokers`
 -- AUTO_INCREMENT for table `budget`
 --
 ALTER TABLE `budget`
-  MODIFY `budget_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `budget_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `budget_category`
@@ -1276,7 +1273,7 @@ ALTER TABLE `budget_category`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `categories_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=99;
+  MODIFY `categories_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `checks`
@@ -1294,7 +1291,7 @@ ALTER TABLE `company`
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `expenses`
@@ -1306,31 +1303,31 @@ ALTER TABLE `expenses`
 -- AUTO_INCREMENT for table `menus`
 --
 ALTER TABLE `menus`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=160;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=163;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `orders_return`
 --
 ALTER TABLE `orders_return`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `order_item`
 --
 ALTER TABLE `order_item`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `order_return_item`
 --
 ALTER TABLE `order_return_item`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `privileges`
@@ -1342,43 +1339,43 @@ ALTER TABLE `privileges`
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `product_id` int(200) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=177;
+  MODIFY `product_id` int(200) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `product_batches`
 --
 ALTER TABLE `product_batches`
-  MODIFY `batch_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `batch_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 
 --
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `purchase_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `purchase_item`
 --
 ALTER TABLE `purchase_item`
-  MODIFY `purchase_item_id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `purchase_item_id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT for table `purchase_return`
 --
 ALTER TABLE `purchase_return`
-  MODIFY `purchase_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `purchase_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `purchase_return_item`
 --
 ALTER TABLE `purchase_return_item`
-  MODIFY `purchase_item_id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `purchase_item_id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 
 --
 -- AUTO_INCREMENT for table `users`
