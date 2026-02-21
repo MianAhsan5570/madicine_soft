@@ -150,7 +150,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                </div> -->
                <div class="col-6 col-sm-2 col-md-2">
                  <label>Sale Price</label>
-                 <input type="number" min="0" class="form-control" placeholder="Sale Price" id="sale_product_price">
+                 <input type="number" min="0" step="0.01" class="form-control" placeholder="Sale Price" id="sale_product_price">
                </div>
               <div class="col-6 col-sm-2 col-md-1">
                 <label>Quantity</label>
@@ -258,7 +258,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
 
                             <input onkeyup="getOrderTotal()" type="number" id="ordered_discount"
                               class="form-control form-control-sm "
-                              value="<?= @empty($_REQUEST['edit_order_id']) ? "0" : $fetchOrder['discount'] ?>" min="0"
+                              value="<?= @empty($_REQUEST['edit_order_id']) ? "0" : $fetchOrder['discount'] ?>" min="0" max="100" step="0.01"
                                name="ordered_discount">
 
                           </div>

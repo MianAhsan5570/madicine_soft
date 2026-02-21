@@ -157,11 +157,24 @@ if (!empty($_REQUEST['edit_order_id'])) {
                 <label>Sale Price</label>
                 <input type="number" min="0" class="form-control" placeholder="Sale Price" id="sale_product_price">
               </div>
-              <div class="col-6 col-sm-2 col-md-2">
+              <div class="col-6 col-sm-2 col-md-1">
                 <label>Quantity</label>
                 <input type="text" class="form-control" id="get_product_quantity" value="1" min="1" name="quantity"
                   placeholder="Qty">
               </div>
+
+              <div class="col-6 col-sm-2 col-md-1">
+                <label>Bonus Qty</label>
+                <input type="number" class="form-control" placeholder="Bonus" id="get_bonus_qty"
+                  value="0" min="0">
+              </div>
+
+              <div class="col-6 col-sm-2 col-md-1">
+                <label>Disc %</label>
+                <input type="number" step="0.01" class="form-control" placeholder="Disc%" id="get_product_discount"
+                  value="0" min="0" max="100">
+              </div>
+
               <div class="col-sm-1">
                 <br>
                 <button type="button" class="btn btn-success btn-sm mt-2 float-right" id="addProductSale"><i
@@ -181,6 +194,8 @@ if (!empty($_REQUEST['edit_order_id'])) {
                         <!-- <th>Expiry</th> -->
                         <th>Sale Price</th>
                         <th>Quantity</th>
+                        <th>Bonus</th>
+                        <th>Disc%</th>
                         <th>Total Price</th>
                         <th>Action</th>
                      </tr>
@@ -199,19 +214,26 @@ if (!empty($_REQUEST['edit_order_id'])) {
                         while ($r = mysqli_fetch_assoc($q)) {
 
                       ?>
+                        <?php
+                          $item_disc = (float)($r['discount'] ?? 0);
+                          $item_bonus = (float)($r['bonus_qty'] ?? 0);
+                          $item_total = (float)$r['rate'] * (float)$r['quantity'] * (1 - $item_disc/100);
+                        ?>
                          <tr id="product_idN_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>">
-                          <input type="hidden" data-price="<?= $r['rate'] ?>" data-quantity="<?= $r['quantity'] ?>"
-                            id="product_ids_<?= $r['product_id'] ?>" class="product_ids" name="product_ids[]"
+                          <input type="hidden" data-price="<?= $r['rate'] ?>" data-quantity="<?= $r['quantity'] ?>" data-discount="<?= $item_disc ?>" data-bonus="<?= $item_bonus ?>"
+                            id="product_ids_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" class="product_ids" name="product_ids[]"
                             value="<?= $r['product_id'] ?>">
-                          <input type="hidden" id="product_quantites_<?= $r['product_id'] ?>" name="product_quantites[]"
+                          <input type="hidden" id="product_quantites_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" name="product_quantites[]"
                             value="<?= $r['quantity'] ?>">
-                          <input type="hidden" id="product_rate_<?= $r['product_id'] ?>" name="product_rates[]"
+                          <input type="hidden" id="product_rate_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" name="product_rates[]"
                             value="<?= $r['rate'] ?>">
-                          <input type="hidden" id="product_totalrate_<?= $r['product_id'] ?>" name="product_totalrates[]"
-                            value="<?= (float)$r['rate'] * (float)$r['quantity'] ?>">
+                          <input type="hidden" id="product_totalrate_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>" name="product_totalrates[]"
+                            value="<?= $item_total ?>">
                           <input type="hidden" name="batch_ids[]" value="<?= $r['batch_id'] ?>">
                           <input type="hidden" name="batch_nos[]" value="<?= $r['batch_no'] ?>">
                           <input type="hidden" name="expires[]" value="<?= @$r['expiry_date'] ?>">
+                          <input type="hidden" name="product_discounts[]" value="<?= $item_disc ?>">
+                          <input type="hidden" name="product_bonus_qtys[]" value="<?= $item_bonus ?>">
 
                           <!-- <td><?= $r['product_code'] ?></td> -->
                           <td><?= $r['product_name'] ?></td>
@@ -219,12 +241,14 @@ if (!empty($_REQUEST['edit_order_id'])) {
                           <!-- <td><?= $r['expiry_date'] ?: '-' ?></td> -->
                           <td><?= $r['rate'] ?></td>
                           <td><?= $r['quantity'] ?></td>
-                          <td><?= (float) $r['rate'] * (float) $r['quantity'] ?></td>
+                          <td><?= $item_bonus ?></td>
+                          <td><?= $item_disc ?>%</td>
+                          <td><?= round($item_total, 2) ?></td>
                           <td>
                             <button type="button" onclick="removeByid(`#product_idN_<?= $r['product_id'] ?>_<?= $r['batch_id'] ?? '0' ?>`)"
                               class="fa fa-trash text-danger" href="#"></button>
                              <button type="button"
-                               onclick="editPurchaseItem(<?= $r['product_id'] ?>,`<?= $r['batch_no'] ?>`,`<?= @$r['expiry_date'] ?>`,<?= $r['rate'] ?>,<?= $r['purchase_rate'] ?>,<?= $r['quantity'] ?>,<?= $r['batch_id'] ?>)"
+                               onclick="editSaleItem(<?= $r['product_id'] ?>,`<?= $r['product_code'] ?>`,`<?= $r['batch_id'] ?>`,<?= $r['quantity'] ?>,<?= $r['rate'] ?>,'<?= @$r['product_detail'] ?>',<?= $item_disc ?>,<?= $item_bonus ?>)"
                                class="fa fa-edit text-success ml-2 "></button>
                           </td>
                         </tr>
@@ -238,7 +262,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
 
                       <td class="table-bordered"> Sub Total :</td>
                       <td class="table-bordered" id="product_total_amount"><?= @$fetchOrder['total_amount'] ?></td>
-                      <td class="table-bordered"> Discount :</td>
+                      <td class="table-bordered"> Discount % :</td>
                       <td class="table-bordered" id="getDiscount">
                         <div class="row">
 
@@ -246,7 +270,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
 
                             <input onkeyup="getOrderTotal()" type="number" id="ordered_discount"
                               class="form-control form-control-sm "
-                              value="<?= @empty($_REQUEST['edit_order_id']) ? "0" : $fetchOrder['discount'] ?>" min="0"
+                              value="<?= @empty($_REQUEST['edit_order_id']) ? "0" : $fetchOrder['discount'] ?>" min="0" max="100" step="0.01"
                               name="ordered_discount">
 
                           </div>

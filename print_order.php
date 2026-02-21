@@ -365,7 +365,7 @@
 
         } else if ($_REQUEST['type'] == "purchase_return") {
             $nameSHow = 'Supplier';
-           $id = $_REQUEST['id'];
+            $id = $_REQUEST['id'];
 
             $sql = "SELECT p.*, c.*
                     FROM purchase_return p
@@ -425,7 +425,7 @@
             $comment = $order['order_narration'];
 
             $order_item = mysqli_query($dbc, "
-                SELECT order_item.*, product.*, product_batches.batch_no, product_batches.expiry_date as b_exp
+                SELECT order_item.*, product.*, product_batches.batch_no, product_batches.expiry_date
                 FROM order_item
                 INNER JOIN product ON order_item.product_id = product.product_id
                 LEFT JOIN product_batches ON order_item.batch_id = product_batches.batch_id
@@ -494,31 +494,62 @@
             <table class="products-table">
                 <thead>
                     <tr>
-                        <th width="60" class="text-center">QTY</th>
-                        <th class="text-left">PRODUCTS</th>
-                        <th width="130" class="text-left">FORM PACK</th>
-                        <th width="110" class="text-center">BATCH NO.</th>
-                        <th width="90" class="text-right">RATE</th>
-                        <th width="70" class="text-right">%AGE</th>
-                        <th width="110" class="text-right">AMOUNT</th>
+                        <th width="55" class="text-center">Sale<br>Qty</th>
+                        <th width="55" class="text-center">Bon<br>Qty</th>
+                        <th width="100" class="text-left">Products</th>
+                        <th width="70" class="text-center">Pack</th>
+                        <th width="85" class="text-center">Expiry</th>
+                        <th width="80" class="text-center">Batch</th>
+                        <th width="90" class="text-right">Trade<br>Price</th>
+                        <th width="95" class="text-right">Gross<br>Amount</th>
+                        <th width="60" class="text-right">Disc.<br>%</th>
+                        <th width="70" class="text-right">Disc.<br>Amount</th>
+                        <!-- <th width="60" class="text-right">S.Tax</th> -->
+                        <th width="95" class="text-right">Net<br>Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                     $c = 0;
-                    $rowCount = mysqli_num_rows($order_item);
+                    $grandTotalItems = 0;
+                    $totalGross = 0;
+                    $totalDiscountAmount = 0;
+                    $totalNet = 0;
+
                     while ($r = mysqli_fetch_assoc($order_item)) {
                         $c++;
-                        $totalQTY += $r['quantity'];
+                        $quantity = (float) $r['quantity'];
+                        $bonus_qty = (float) @$r['bonus_qty'];
+                        $rate = (float) $r['rate'];
+                        $discount_perc = !empty($r['discount']) ? (float) $r['discount'] : 0.0;
+
+                        // Calculations matching your example logic
+                        $gross_amount = $quantity * $rate;
+                        $discount_amount = $gross_amount * ($discount_perc / 100);
+                        $net_amount = $gross_amount - $discount_amount;
+                        // If you have sales tax column logic → add here (currently 0 in your sample)
+                        $sales_tax = 0.00;
+
+                        $totalGross += $gross_amount;
+                        $totalDiscountAmount += $discount_amount;
+                        $totalNet += $net_amount;
+                        $grandTotalItems += $quantity;
                         ?>
                         <tr>
-                            <td class="text-center"><?= $r['quantity'] ?></td>
-                            <td class="text-left"><?= strtoupper($r['product_name']) ?></td>
-                            <td class="text-left"><?= !empty($r['product_pack']) ? $r['product_pack'] : '---' ?></td>
-                            <td class="text-center"><?= $r['batch_no'] ?? '---' ?></td>
-                            <td class="text-right"><?= number_format($r['rate'], 2) ?></td>
-                            <td class="text-right">0.00</td>
-                            <td class="text-right"><?= number_format($r['rate'] * $r['quantity'], 2) ?></td>
+                            <td class="text-center"><?= number_format($quantity, 0) ?></td>
+                            <td class="text-center"><?= number_format($bonus_qty, 0) ?></td>
+                            <td class="text-left"><?= htmlspecialchars(strtoupper($r['product_name'])) ?></td>
+                            <td class="text-center"><?= htmlspecialchars($r['product_pack'] ?? '---') ?></td>
+                            <td class="text-center">
+                                <?= $r['expiry_date'] ? date('d/m/y', strtotime($r['expiry_date'])) : '---' ?>
+                            </td>
+                            <td class="text-center"><?= htmlspecialchars($r['batch_no'] ?? '---') ?></td>
+                            <td class="text-right"><?= number_format($rate, 2) ?></td>
+                            <td class="text-right"><?= number_format($gross_amount, 2) ?></td>
+                            <td class="text-right"><?= number_format($discount_perc, 2) ?></td>
+                            <td class="text-right"><?= number_format($discount_amount, 2) ?></td>
+                            <!-- <td class="text-right"><?= number_format($sales_tax, 2) ?></td> -->
+                            <td class="text-right font-weight-bold"><?= number_format($net_amount, 2) ?></td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -526,18 +557,18 @@
 
             <div class="summary-section">
                 <div class="items-count">
-                    ITEMS: &nbsp;&nbsp;<?= $rowCount ?>
+                    Total Items: <?= $c ?>
                 </div>
                 <div class="totals-box">
                     <div class="totals-breakdown">
                         <table>
                             <tr>
-                                <td class="label">Amount</td>
-                                <td class="amount"><?= number_format($order['grand_total'], 2) ?></td>
+                                <td class="label">Net Amount</td>
+                                <td class="amount"><?= number_format($order['total_amount'], 2) ?></td>
                             </tr>
                             <tr>
-                                <td class="label">Total value</td>
-                                <td class="amount"><?= number_format($order['total_amount'], 2) ?></td>
+                                <td class="label">Discounted Amount</td>
+                                <td class="amount"><?= number_format($order['grand_total'], 2) ?></td>
                             </tr>
                             <?php if (isset($order['freight']) && $order['freight'] > 0): ?>
                                 <tr>

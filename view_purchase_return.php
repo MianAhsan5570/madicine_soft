@@ -43,7 +43,7 @@
 
                 ?>
                   <tr>
-                    <td><?= $r['purchase_id'] ?></td>
+                    <td><?= sprintf("%05d", $r['purchase_id']) ?></td>
                     <td><?= ucfirst($r['client_name']) ?></td>
                     <td><?= $r['client_contact'] ?></td>
                     <td><?= $r['purchase_date'] ?></td>

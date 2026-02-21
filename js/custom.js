@@ -1084,11 +1084,11 @@ function getOrderTotal() {
     total_bill += rates * quantity * (1 - item_disc / 100);
   });
 
-  // Parse discount and freight values safely
+  // Parse discount and freight values safely (discount is now a %)
   var discount = parseFloat($("#ordered_discount").val());
   discount = isNaN(discount) ? 0 : discount;
 
-  var discountAmount = discount;
+  var discountAmount = total_bill * discount / 100;
 
   var freight = parseFloat($("#freight").val());
   freight = isNaN(freight) ? 0 : freight;

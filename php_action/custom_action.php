@@ -690,16 +690,17 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 
 					$x++;
 				} //end of foreach
-				$total_grand = @(float) $_REQUEST['freight'] + $total_ammount - (float) $_REQUEST['ordered_discount'];
+				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
+				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
+				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
 
-				$due_amount = (float) $total_grand - @(float) $_REQUEST['paid_ammount'];
+				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 
-				if ($due_amount > 0) {
+				if ($due_amount > 0.01) {
 					$payment_status = 0; //pending
-
 				} else {
 					$payment_status = 1; //completed
-
+					$due_amount = 0;
 				}
 				$newOrder = [
 					'total_amount' => $total_ammount,
@@ -753,7 +754,7 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 				}
 				deleteFromTable($dbc, "order_item", $_REQUEST['product_order_id'], 'order_id');
 
-// print_r($_REQUEST);
+				// print_r($_REQUEST);
 				$x = 0;
 				foreach ($_REQUEST['product_ids'] as $key => $value) {
 					$total = $qty = 0;
@@ -807,14 +808,15 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 
 					$x++;
 				} //end of foreach
-				$total_grand = @(float) $_REQUEST['freight'] + $total_ammount - (float) $_REQUEST['ordered_discount'];
-				$due_amount = (float) $total_grand - @(float) $_REQUEST['paid_ammount'];
-				if ($due_amount > 0) {
+				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
+				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
+				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
+				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
+				if ($due_amount > 0.01) {
 					$payment_status = 0; //pending
-
 				} else {
 					$payment_status = 1; //completed
-
+					$due_amount = 0;
 				}
 				$newOrder = [
 
@@ -937,8 +939,10 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 					$x++;
 				} //end of foreach
 
-				$total_grand = @(float) $_REQUEST['freight'] + $total_ammount - (float) $_REQUEST['ordered_discount'];
-				$due_amount = (float) $total_grand - @(float) $_REQUEST['paid_ammount'];
+				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
+				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
+				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
+				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 
 				$credit = [
 					'credit' => $due_amount,
@@ -1081,8 +1085,10 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 
 					$x++;
 				} //end of foreach
-				$total_grand = @(float) $_REQUEST['freight'] + $total_ammount - (float) $_REQUEST['ordered_discount'];
-				$due_amount = (float) $total_grand - @(float) $_REQUEST['paid_ammount'];
+				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
+				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
+				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
+				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 
 				$transactions = fetchRecord($dbc, "orders", "order_id", $_REQUEST['product_order_id']);
 				@deleteFromTable($dbc, "transactions", $transactions['transaction_id'], 'transaction_id');
@@ -1308,9 +1314,11 @@ if (isset($_REQUEST['cash_purchase_supplier']) && empty($_REQUEST['purchase_retu
 
 					$x++;
 				} //end of foreach
-				$total_grand = $total_ammount - (float) $_REQUEST['ordered_discount'];
+				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
+				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
+				$total_grand = round($total_ammount - $discount_amount, 2);
 
-				$due_amount = (float) $total_grand - @(float) $_REQUEST['paid_ammount'];
+				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 				if ($_REQUEST['payment_type'] == "credit_purchase"):
 					if ($due_amount > 0) {
 						$debit = [
@@ -1539,8 +1547,10 @@ if (isset($_REQUEST['cash_purchase_supplier']) && empty($_REQUEST['purchase_retu
 					$x++;
 				}
 				//end of foreach
-				$total_grand = $total_ammount - (float) $_REQUEST['ordered_discount'];
-				$due_amount = (float) $total_grand - @(float) $_REQUEST['paid_ammount'];
+				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
+				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
+				$total_grand = round($total_ammount - $discount_amount, 2);
+				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 
 
 				$transactions = fetchRecord($dbc, "purchase", "purchase_id", $_REQUEST['product_purchase_id']);
@@ -1853,269 +1863,338 @@ if (isset($_REQUEST['getCustomerLimit'])) {
 }
 
 
-if (isset($_REQUEST['credit_order_client_name']) && isset($_REQUEST['order_return'])) {
+if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_return'])) {
+
 	$get_company = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT * FROM company ORDER BY id DESC LIMIT 1"));
 
-	if (!empty($_REQUEST['product_ids'])) {
-		$total_amount = $total_grand = 0;
-		$paid = (float) @$_REQUEST['paid_ammount'];
+	if (empty($_REQUEST['product_ids'])) {
+		echo json_encode([
+			'msg' => "Please Add Any Product",
+			'sts' => 'error',
+			'order_id' => @$_REQUEST['product_order_id'],
+			'type' => 'order_return',
+			'subtype' => 'credit',
+			'print_url' => $get_company['print_url']
+		]);
+		exit;
+	}
 
-		$data = [
-			'order_date' => $_REQUEST['order_date'],
-			'client_name' => $_REQUEST['credit_order_client_name'],
-			'client_contact' => $_REQUEST['client_contact'],
-			'paid' => $paid,
-			'order_narration' => @$_REQUEST['order_narration'],
-			'payment_account' => @$_REQUEST['payment_account'],
-			'customer_account' => @$_REQUEST['customer_account'],
-			'payment_type' => 'credit',
-			'credit_sale_type' => @$_REQUEST['credit_sale_type'],
-			'vehicle_no' => @$_REQUEST['vehicle_no'],
-			'return_days' => @$_REQUEST['return_days'],
-			'freight' => @$_REQUEST['freight'],
-			'user_id' => @$_REQUEST['user_id'],
-			'bill_no' => @$_REQUEST['bill_no'],
-		];
+	$total_ammount = $total_grand = 0;
+	$paid = (float) @$_REQUEST['paid_ammount'];
 
-		$isNew = empty($_REQUEST['product_order_id']);
+	$data = [
+		'order_date' => $_REQUEST['order_date'],
+		'client_name' => $_REQUEST['credit_order_client_name'],
+		'bill_no' => @$_REQUEST['bill_no'],
+		'client_contact' => @$_REQUEST['client_contact'],
+		'paid' => $paid,
+		'order_narration' => @$_REQUEST['order_narration'],
+		'payment_account' => @$_REQUEST['payment_account'],
+		'customer_account' => @$_REQUEST['customer_account'],
+		'payment_type' => 'credit',
+		'credit_sale_type' => @$_REQUEST['credit_sale_type'],
+		'vehicle_no' => @$_REQUEST['vehicle_no'],
+		'freight' => @$_REQUEST['freight'],
+		'return_days' => @$_REQUEST['return_days'],
+		'user_id' => @$_REQUEST['user_id'],
+	];
 
-		if ($isNew) {
-			// NEW return
-			if (insert_data($dbc, 'orders_return', $data)) {
-				$last_id = mysqli_insert_id($dbc);
-			} else {
-				$msg = mysqli_error($dbc);
-				$sts = "danger";
-				echo json_encode(['msg' => $msg, 'sts' => $sts, 'type' => 'order_return', 'subtype' => 'credit', 'print_url' => $get_company['print_url']]);
-				return;
-			}
-		} else {
-			// UPDATE existing return
-			$last_id = $_REQUEST['product_order_id'];
-			if (!update_data($dbc, 'orders_return', $data, 'order_id', $last_id)) {
-				$msg = mysqli_error($dbc);
-				$sts = "danger";
-				echo json_encode(['msg' => $msg, 'sts' => $sts, 'type' => 'order_return', 'subtype' => 'credit', 'print_url' => $get_company['print_url']]);
-				return;
-			}
-		}
+	if ($_REQUEST['product_order_id'] == "") {
+		// ── NEW RETURN ──
+		if (insert_data($dbc, 'orders_return', $data)) {
+			$last_id = mysqli_insert_id($dbc);
+			$x = 0;
+			foreach ($_REQUEST['product_ids'] as $key => $value) {
+				$total = $qty = 0;
+				$product_quantites = (float) $_REQUEST['product_quantites'][$x];
+				$product_rates = (float) $_REQUEST['product_rates'][$x];
+				$item_discount = isset($_REQUEST['product_discounts'][$x]) ? (float) $_REQUEST['product_discounts'][$x] : 0;
+				$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$x]) ? (float) $_REQUEST['product_bonus_qtys'][$x] : 0;
 
-		// Handle file upload
-		if (!empty($_FILES['order_file']['tmp_name'])) {
-			$uploadDir = '../img/uploads/';
-			$fileName = time() . '_' . basename($_FILES['order_file']['name']);
-			$uploadPath = $uploadDir . $fileName;
-			if (move_uploaded_file($_FILES['order_file']['tmp_name'], $uploadPath)) {
-				update_data($dbc, "orders_return", ['order_file' => $fileName], "order_id", $last_id);
-			}
-		}
+				$total = $product_quantites * $product_rates * (1 - $item_discount / 100);
+				$total_ammount += (float) $total;
 
-		// Reverse old stock for updates
-		if (!$isNew && $get_company['stock_manage'] == 1) {
-			$res = mysqli_query($dbc, "SELECT * FROM order_return_item WHERE order_id='$last_id'");
-			while ($proR = mysqli_fetch_assoc($res)) {
-				$product_id = $proR['product_id'];
-				$o_qty = (float) $proR['quantity'];
-				$o_batch_id = $proR['batch_id'];
+				$stock_restore_qty = $product_quantites + $bonus_qty;
+				$batch_id = isset($_REQUEST['batch_ids'][$x]) ? $_REQUEST['batch_ids'][$x] : null;
 
+				$order_items = [
+					'product_id' => $_REQUEST['product_ids'][$x],
+					'batch_id' => $batch_id,
+					'rate' => $product_rates,
+					'total' => $total,
+					'order_id' => $last_id,
+					'quantity' => $product_quantites,
+					'bonus_qty' => $bonus_qty,
+					'discount' => $item_discount,
+					'product_detail' => @$_REQUEST['product_detail'][$x],
+					'order_item_status' => 1,
+				];
 
-				$stock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$product_id'"));
-				$new_qty = (float) $stock['quantity_instock'] - $o_qty;
-				mysqli_query($dbc, "UPDATE product SET quantity_instock='$new_qty' WHERE product_id='$product_id'");
+				if ($get_company['stock_manage'] == 1) {
+					$product_id = $_REQUEST['product_ids'][$x];
 
-				// REVERSE Batch Stock (Subtract since return added earlier)
-				if (!empty($o_batch_id)) {
-					mysqli_query($dbc, "UPDATE product_batches 
-					                    SET qty_out = qty_out + $o_qty, 
-					                        available_qty = available_qty - $o_qty 
-					                    WHERE batch_id = '$o_batch_id'");
-				} elseif (!empty($o_batch_no)) {
-					mysqli_query($dbc, "UPDATE product_batches 
-					                    SET qty_out = qty_out + $o_qty, 
-					                        available_qty = available_qty - $o_qty 
-					                    WHERE product_id = '$product_id' AND batch_no = '$o_batch_no'");
-				}
-			}
-		}
-
-		// Clear old items if updating
-		if (!$isNew) {
-			deleteFromTable($dbc, "order_return_item", 'order_id', $last_id);
-		}
-
-		// Insert new items and update stock
-		$x = 0;
-		foreach ($_REQUEST['product_ids'] as $key => $value) {
-			$product_id = $_REQUEST['product_ids'][$x];
-			$product_quantities = (float) $_REQUEST['product_quantites'][$x];
-			$product_rates = (float) $_REQUEST['product_rates'][$x];
-			$total = $product_quantities * $product_rates;
-			$total_amount += $total;
-
-
-			// Capture Batch ID for return
-			$batch_id = $_REQUEST['batch_ids'][$x] ?? null;
-			$batch_no = $_REQUEST['batch_nos'][$x] ?? null;
-			$order_items = [
-				'product_id' => $product_id,
-				'final_rate' => @$_REQUEST['product_final_rates'][$x],
-				'rate' => $product_rates,
-				'total' => $total,
-				'order_id' => $last_id,
-				'quantity' => $product_quantities,
-				'product_detail' => $_REQUEST['product_detail'][$x],
-				'order_item_status' => 1,
-				'user_id' => @$_REQUEST['user_id'],
-				'batch_id' => $batch_id, // Save Batch ID
-			];
-
-			if ($get_company['stock_manage'] == 1) {
-				$stock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$product_id'"));
-				$new_qty = (float) $stock['quantity_instock'] + $product_quantities;
-				mysqli_query($dbc, "UPDATE product SET quantity_instock='$new_qty' WHERE product_id='$product_id'");
-
-				// Update Batch Stock (Return means we get stock BACK)
-				$batch_id = $_REQUEST['batch_ids'][$x] ?? null;
-				$batch_no = $_REQUEST['batch_nos'][$x] ?? null;
-
-				if (!empty($batch_id)) {
-					$check = mysqli_query($dbc, "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'");
-					if (mysqli_num_rows($check) > 0) {
-						$b_row = mysqli_fetch_assoc($check);
-						$new_avail = (float) $b_row['available_qty'] + $product_quantities;
-
-						mysqli_query($dbc, "UPDATE product_batches 
-											SET qty_out = GREATEST(0, qty_out - $product_quantities),
-												available_qty = '$new_avail'
-											WHERE batch_id = '$batch_id'");
+					// Restore to batch if provided
+					if ($batch_id) {
+						$batch_query = "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'";
+						$batch_result = mysqli_query($dbc, $batch_query);
+						$batch_data = mysqli_fetch_assoc($batch_result);
+						if ($batch_data) {
+							$new_available_qty = $batch_data['available_qty'] + $stock_restore_qty;
+							mysqli_query($dbc, "UPDATE product_batches
+                                               SET available_qty = '$new_available_qty',
+                                                   qty_out = GREATEST(0, qty_out - $stock_restore_qty),
+                                                   updated_at = NOW()
+                                               WHERE batch_id = '$batch_id'");
+						}
 					}
-				} elseif (!empty($batch_no)) {
-					$b_cond = "product_id = '$product_id' AND batch_no = '$batch_no'";
-					$check = mysqli_query($dbc, "SELECT batch_id, available_qty FROM product_batches WHERE $b_cond LIMIT 1");
-					if (mysqli_num_rows($check) > 0) {
-						$b_row = mysqli_fetch_assoc($check);
-						$bid = $b_row['batch_id'];
-						$new_avail = (float) $b_row['available_qty'] + $product_quantities;
 
-						mysqli_query($dbc, "UPDATE product_batches 
-											SET qty_out = GREATEST(0, qty_out - $product_quantities),
-												available_qty = '$new_avail'
-											WHERE batch_id = '$bid'");
-					}
+					$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$product_id'"));
+					$qty = (float) $quantity_instock['quantity_instock'] + $stock_restore_qty;
+					mysqli_query($dbc, "UPDATE product SET quantity_instock='$qty' WHERE product_id='$product_id'");
 				}
+
+				insert_data($dbc, 'order_return_item', $order_items);
+				$x++;
 			}
 
-			insert_data($dbc, 'order_return_item', $order_items);
-			$x++;
-		}
+			// ── Calculations ──
+			$ordered_discount_pct = (float) @$_REQUEST['ordered_discount'];
+			$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
+			$total_grand = round((float) @$_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
+			$due_amount = round($total_grand - $paid, 2);
 
-		$total_grand = $total_amount + (float) @$_REQUEST['freight'] - (float) $_REQUEST['ordered_discount'];
-		$due_amount = $total_grand - $paid;
-		$payment_status = ($due_amount > 0) ? 0 : 1;
+			$payment_status = ($due_amount > 0) ? 0 : 1;  // 0 = pending / has due, 1 = completed
+			if ($payment_status == 1)
+				$due_amount = 0;
 
-		// Handle transactions
-		$transaction_id = 0;
-		$transaction_paid_id = 0;
+			// ── Transactions ──
+			$transaction_id = $transaction_paid_id = 0;
 
-		if (!$isNew) {
-			$existing_order = fetchRecord($dbc, "orders_return", "order_id", $last_id);
-			$transaction_id = $existing_order['transaction_id'] ?? 0;
-			$transaction_paid_id = $existing_order['transaction_paid_id'] ?? 0;
-		}
-
-		// Update or insert due transaction
-		if ($due_amount > 0) {
-			$due_transaction = [
-				'credit' => 0,
-				'debit' => $due_amount,
-				'customer_id' => @$_REQUEST['customer_account'],
-				'transaction_from' => 'sale_return',
-				'transaction_type' => 'credit_sale',
-				'transaction_remarks' => "credit_sale_return by order id#$last_id",
-				'transaction_date' => $_REQUEST['order_date'],
-			];
-
-			if ($transaction_id > 0) {
-				update_data($dbc, 'transactions', $due_transaction, 'transaction_id', $transaction_id);
-			} else {
-				insert_data($dbc, 'transactions', $due_transaction);
+			// Due amount → debit customer (reduce receivable)
+			if ($due_amount > 0) {
+				$due_trans = [
+					'credit' => 0,
+					'debit' => $due_amount,
+					'customer_id' => @$_REQUEST['customer_account'],
+					'transaction_from' => 'sale_return',
+					'transaction_type' => 'credit',
+					'transaction_remarks' => "credit_sale_return due by order id#$last_id",
+					'transaction_date' => $_REQUEST['order_date'],
+				];
+				insert_data($dbc, 'transactions', $due_trans);
 				$transaction_id = mysqli_insert_id($dbc);
 			}
-		} else {
-			// If no due amount, clear any existing due transaction
-			if ($transaction_id > 0) {
-				deleteFromTable($dbc, "transactions", 'transaction_id', $transaction_id);
-				$transaction_id = 0;
-			}
-		}
 
-		// Update or insert paid transaction
-		if ($paid > 0) {
-			$paid_transaction = [
-				'credit' => 0,
-				'debit' => $paid,
-				'customer_id' => @$_REQUEST['payment_account'],
-				'transaction_from' => 'sale_return',
-				'transaction_type' => 'credit_sale',
-				'transaction_remarks' => "credit_sale_return by order id#$last_id",
-				'transaction_date' => $_REQUEST['order_date'],
-			];
-
-			if ($transaction_paid_id > 0) {
-				update_data($dbc, 'transactions', $paid_transaction, 'transaction_id', $transaction_paid_id);
-			} else {
-				insert_data($dbc, 'transactions', $paid_transaction);
+			// Amount received back → credit payment account
+			if ($paid > 0) {
+				$paid_trans = [
+					'credit' => $paid,
+					'debit' => 0,
+					'customer_id' => @$_REQUEST['payment_account'],
+					'transaction_from' => 'sale_return',
+					'transaction_type' => 'credit',
+					'transaction_remarks' => "credit_sale_return received by order id#$last_id",
+					'transaction_date' => $_REQUEST['order_date'],
+				];
+				insert_data($dbc, 'transactions', $paid_trans);
 				$transaction_paid_id = mysqli_insert_id($dbc);
 			}
-		} else {
-			// If no paid amount, clear any existing paid transaction
-			if ($transaction_paid_id > 0) {
-				deleteFromTable($dbc, "transactions", 'transaction_id', $transaction_paid_id);
-				$transaction_paid_id = 0;
+
+			// ── Final update ──
+			$newOrder = [
+				'payment_status' => $payment_status,
+				'total_amount' => $total_ammount,
+				'discount' => $ordered_discount_pct,
+				'grand_total' => $total_grand,
+				'due' => $due_amount,
+				'order_status' => 1,
+				'transaction_id' => @$transaction_id,
+				'transaction_paid_id' => @$transaction_paid_id,
+			];
+
+			if (update_data($dbc, 'orders_return', $newOrder, 'order_id', $last_id)) {
+				$msg = "Credit Sale Return Has been Added";
+				$sts = 'success';
+			} else {
+				$msg = mysqli_error($dbc);
+				$sts = "danger";
 			}
-		}
-
-		// Update order with final details
-		$final_update = [
-			'payment_status' => $payment_status,
-			'total_amount' => $total_amount,
-			'discount' => $_REQUEST['ordered_discount'],
-			'grand_total' => $total_grand,
-			'due' => $due_amount,
-			'transaction_id' => $transaction_id,
-			'transaction_paid_id' => $transaction_paid_id,
-			'order_status' => 1,
-		];
-
-		if (update_data($dbc, 'orders_return', $final_update, 'order_id', $last_id)) {
-			$msg = $isNew ? "Order Return Has been Added" : "Return Order Updated Successfully";
-			$sts = "success";
 		} else {
 			$msg = mysqli_error($dbc);
 			$sts = "danger";
 		}
 	} else {
-		$msg = "Please Add at least one product";
-		$sts = "error";
+		// ── EDIT RETURN ──
+		$last_id = $_REQUEST['product_order_id'];
+
+		if (update_data($dbc, 'orders_return', $data, 'order_id', $last_id)) {
+
+			// ── Rollback previous stock (remove previous return effect) ──
+			if ($get_company['stock_manage'] == 1) {
+				$proQ = mysqli_query($dbc, "SELECT * FROM order_return_item WHERE order_id = '$last_id'");
+				while ($proR = mysqli_fetch_assoc($proQ)) {
+					$stock_reverse_qty = (float) $proR['quantity'] + (float) $proR['bonus_qty'];
+					$product_id = $proR['product_id'];
+					$batch_id = $proR['batch_id'] ?? null;
+
+					$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$product_id'"));
+					$newqty = (float) $quantity_instock['quantity_instock'] - $stock_reverse_qty;
+					mysqli_query($dbc, "UPDATE product SET quantity_instock='$newqty' WHERE product_id='$product_id'");
+
+					if ($batch_id) {
+						mysqli_query($dbc, "UPDATE product_batches
+                                           SET available_qty = available_qty - $stock_reverse_qty,
+                                               qty_out = qty_out + $stock_reverse_qty,
+                                               updated_at = NOW()
+                                           WHERE batch_id = '$batch_id'");
+					}
+				}
+			}
+
+			// Delete old items
+			deleteFromTable($dbc, "order_return_item", $last_id, 'order_id');
+
+			// ── Re-insert items + restore stock ──
+			$x = 0;
+			foreach ($_REQUEST['product_ids'] as $key => $value) {
+				$total = $qty = 0;
+				$product_quantites = (float) $_REQUEST['product_quantites'][$x];
+				$product_rates = (float) $_REQUEST['product_rates'][$x];
+				$item_discount = isset($_REQUEST['product_discounts'][$x]) ? (float) $_REQUEST['product_discounts'][$x] : 0;
+				$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$x]) ? (float) $_REQUEST['product_bonus_qtys'][$x] : 0;
+
+				$total = $product_quantites * $product_rates * (1 - $item_discount / 100);
+				$total_ammount += (float) $total;
+
+				$stock_restore_qty = $product_quantites + $bonus_qty;
+				$batch_id = isset($_REQUEST['batch_ids'][$x]) ? $_REQUEST['batch_ids'][$x] : null;
+
+				$order_items = [
+					'product_id' => $_REQUEST['product_ids'][$x],
+					'batch_id' => $batch_id,
+					'rate' => $product_rates,
+					'total' => $total,
+					'order_id' => $last_id,
+					'quantity' => $product_quantites,
+					'bonus_qty' => $bonus_qty,
+					'discount' => $item_discount,
+					'product_detail' => @$_REQUEST['product_detail'][$x],
+					'order_item_status' => 1,
+				];
+
+				if ($get_company['stock_manage'] == 1) {
+					$product_id = $_REQUEST['product_ids'][$x];
+
+					if ($batch_id) {
+						$batch_query = "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'";
+						$batch_result = mysqli_query($dbc, $batch_query);
+						$batch_data = mysqli_fetch_assoc($batch_result);
+						if ($batch_data) {
+							$new_available_qty = $batch_data['available_qty'] + $stock_restore_qty;
+							mysqli_query($dbc, "UPDATE product_batches
+                                               SET available_qty = '$new_available_qty',
+                                                   qty_out = GREATEST(0, qty_out - $stock_restore_qty),
+                                                   updated_at = NOW()
+                                               WHERE batch_id = '$batch_id'");
+						}
+					}
+
+					$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$product_id'"));
+					$qty = (float) $quantity_instock['quantity_instock'] + $stock_restore_qty;
+					mysqli_query($dbc, "UPDATE product SET quantity_instock='$qty' WHERE product_id='$product_id'");
+				}
+
+				insert_data($dbc, 'order_return_item', $order_items);
+				$x++;
+			}
+
+			// ── Calculations ──
+			$ordered_discount_pct = (float) @$_REQUEST['ordered_discount'];
+			$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
+			$total_grand = round((float) @$_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
+			$due_amount = round($total_grand - $paid, 2);
+
+			$payment_status = ($due_amount > 0) ? 0 : 1;
+			if ($payment_status == 1)
+				$due_amount = 0;
+
+			// ── Delete old transactions ──
+			$transactions = fetchRecord($dbc, "orders_return", "order_id", $last_id);
+			@deleteFromTable($dbc, "transactions", $transactions['transaction_id'], 'transaction_id');
+			@deleteFromTable($dbc, "transactions", $transactions['transaction_paid_id'], 'transaction_id');
+
+			$transaction_id = $transaction_paid_id = 0;
+
+			// Due amount transaction
+			if ($due_amount > 0) {
+				$due_trans = [
+					'credit' => 0,
+					'debit' => $due_amount,
+					'customer_id' => @$_REQUEST['customer_account'],
+					'transaction_from' => 'sale_return',
+					'transaction_type' => 'credit',
+					'transaction_remarks' => "credit_sale_return due by order id#$last_id",
+					'transaction_date' => $_REQUEST['order_date'],
+				];
+				insert_data($dbc, 'transactions', $due_trans);
+				$transaction_id = mysqli_insert_id($dbc);
+			}
+
+			// Paid (received back) transaction
+			if ($paid > 0) {
+				$paid_trans = [
+					'credit' => $paid,
+					'debit' => 0,
+					'customer_id' => @$_REQUEST['payment_account'],
+					'transaction_from' => 'sale_return',
+					'transaction_type' => 'credit',
+					'transaction_remarks' => "credit_sale_return received by order id#$last_id",
+					'transaction_date' => $_REQUEST['order_date'],
+				];
+				insert_data($dbc, 'transactions', $paid_trans);
+				$transaction_paid_id = mysqli_insert_id($dbc);
+			}
+
+			// ── Final update ──
+			$newOrder = [
+				'payment_status' => $payment_status,
+				'total_amount' => $total_ammount,
+				'discount' => $ordered_discount_pct,
+				'grand_total' => $total_grand,
+				'due' => $due_amount,
+				'order_status' => 1,
+				'transaction_id' => @$transaction_id,
+				'transaction_paid_id' => @$transaction_paid_id,
+			];
+
+			if (update_data($dbc, 'orders_return', $newOrder, 'order_id', $last_id)) {
+				$msg = "Credit Sale Return Has been Updated";
+				$sts = 'success';
+			} else {
+				$msg = mysqli_error($dbc);
+				$sts = "danger";
+			}
+		} else {
+			$msg = mysqli_error($dbc);
+			$sts = "danger";
+		}
 	}
 
 	echo json_encode([
 		'msg' => $msg,
 		'sts' => $sts,
 		'order_id' => @$last_id,
-		'type' => "order_return",
-		'subtype' => $_REQUEST['payment_type'],
+		'type' => 'order_return',
+		'subtype' => 'credit',
 		'print_url' => $get_company['print_url']
 	]);
 }
 
 if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'])) {
 	$get_company = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT * FROM company ORDER BY id DESC LIMIT 1"));
-
 	if (!empty($_REQUEST['product_ids'])) {
 		$total_amount = $total_grand = 0;
 		$paidAmount = (float) @$_REQUEST['paid_ammount'];
-
 		$data = [
 			'order_date' => $_REQUEST['order_date'],
 			'client_name' => $_REQUEST['sale_order_client_name'],
@@ -2130,13 +2209,10 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 			'user_id' => @$_REQUEST['user_id'],
 			'bill_no' => @$_REQUEST['bill_no'],
 		];
-
 		$isNew = empty($_REQUEST['product_order_id']);
-
 		if ($isNew) {
 			if (insert_data($dbc, 'orders_return', $data)) {
 				$last_id = mysqli_insert_id($dbc);
-
 				// Upload file
 				if (!empty($_FILES['order_file']['tmp_name'])) {
 					$uploadDir = '../img/uploads/';
@@ -2145,7 +2221,6 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 						update_data($dbc, "orders_return", ['order_file' => $fileName], "order_id", $last_id);
 					}
 				}
-
 				// Transaction
 				if ($paidAmount > 0) {
 					$transaction = [
@@ -2160,69 +2235,70 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					insert_data($dbc, 'transactions', $transaction);
 					$transaction_paid_id = mysqli_insert_id($dbc);
 				}
-
 				// Insert order return items
+				$total_amount = 0;
 				foreach ($_REQUEST['product_ids'] as $i => $product_id) {
 					$qty = (float) $_REQUEST['product_quantites'][$i];
 					$rate = (float) $_REQUEST['product_rates'][$i];
-					$total = $qty * $rate;
-					$total_amount += $total;
-
+					$item_discount_pct = isset($_REQUEST['product_discounts'][$i]) ? (float) $_REQUEST['product_discounts'][$i] : 0;
+					$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$i]) ? (float) $_REQUEST['product_bonus_qtys'][$i] : 0;
+					$item_total_after_discount = $qty * $rate * (1 - $item_discount_pct / 100);
+					$total_amount += $item_total_after_discount;
 					// Capture Batch ID for return
 					$batch_id = $_REQUEST['batch_ids'][$i] ?? null;
 					$batch_no = $_REQUEST['batch_nos'][$i] ?? null;
-
 					$item = [
 						'product_id' => $product_id,
 						'final_rate' => @$_REQUEST['product_final_rates'][$i],
 						'rate' => $rate,
-						'total' => $total,
+						'total' => round($item_total_after_discount, 2),
 						'order_id' => $last_id,
 						'quantity' => $qty,
+						'bonus_qty' => $bonus_qty,
+						'discount' => $item_discount_pct,
 						'product_detail' => @$_REQUEST['product_detail'][$i],
 						'order_item_status' => 1,
 						'user_id' => @$_REQUEST['user_id'],
 						'batch_id' => $batch_id, // Save Batch ID
 					];
 					insert_data($dbc, 'order_return_item', $item);
-
 					// Stock update (increment)
 					if ($get_company['stock_manage'] == 1) {
-						mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock + $qty WHERE product_id = '$product_id'");
-
+						$qty_to_restore = $qty + $bonus_qty;
+						mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock + $qty_to_restore WHERE product_id = '$product_id'");
 						// Update Batch Stock (Return means we get stock BACK)
 						if (!empty($batch_id)) {
-							$check = mysqli_query($dbc, "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'");
-							if (mysqli_num_rows($check) > 0) {
-								$b_row = mysqli_fetch_assoc($check);
-								$new_avail = (float) $b_row['available_qty'] + $qty;
-
-								mysqli_query($dbc, "UPDATE product_batches 
-													SET qty_out = GREATEST(0, qty_out - $qty),
-														available_qty = '$new_avail'
-													WHERE batch_id = '$batch_id'");
+							$check = mysqli_query($dbc, "SELECT available_qty, qty_out FROM product_batches WHERE batch_id = '$batch_id'");
+							if ($r = mysqli_fetch_assoc($check)) {
+								$new_avail = $r['available_qty'] + $qty_to_restore;
+								$new_out = max(0, $r['qty_out'] - $qty_to_restore);
+								mysqli_query($dbc, "UPDATE product_batches
+                                    SET qty_out = '$new_out',
+                                        available_qty = '$new_avail'
+                                    WHERE batch_id = '$batch_id'");
 							}
 						} elseif (!empty($batch_no)) {
 							$b_cond = "product_id = '$product_id' AND batch_no = '$batch_no'";
-							$check = mysqli_query($dbc, "SELECT batch_id, available_qty FROM product_batches WHERE $b_cond LIMIT 1");
-							if (mysqli_num_rows($check) > 0) {
-								$b_row = mysqli_fetch_assoc($check);
-								$bid = $b_row['batch_id'];
-								$new_avail = (float) $b_row['available_qty'] + $qty;
-
-								mysqli_query($dbc, "UPDATE product_batches 
-													SET qty_out = GREATEST(0, qty_out - $qty),
-														available_qty = '$new_avail'
-													WHERE batch_id = '$bid'");
+							$check = mysqli_query($dbc, "SELECT batch_id, available_qty, qty_out FROM product_batches WHERE $b_cond LIMIT 1");
+							if ($r = mysqli_fetch_assoc($check)) {
+								$bid = $r['batch_id'];
+								$new_avail = $r['available_qty'] + $qty_to_restore;
+								$new_out = max(0, $r['qty_out'] - $qty_to_restore);
+								mysqli_query($dbc, "UPDATE product_batches
+                                    SET qty_out = '$new_out',
+                                        available_qty = '$new_avail'
+                                    WHERE batch_id = '$bid'");
 							}
 						}
 					}
 				}
-
-				$total_grand = $total_amount + (float) @$_REQUEST['freight'] - (float) $_REQUEST['ordered_discount'];
-				$due_amount = $total_grand - $paidAmount;
-				$payment_status = $due_amount > 0 ? 0 : 1;
-
+				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
+				$discount_amount = round($total_amount * $ordered_discount_pct / 100, 2);
+				$total_grand = round($total_amount + (float) @$_REQUEST['freight'] - $discount_amount, 2);
+				$due_amount = round($total_grand - $paidAmount, 2);
+				$payment_status = $due_amount > 0.01 ? 0 : 1;
+				if ($payment_status == 1)
+					$due_amount = 0;
 				$orderUpdate = [
 					'total_amount' => $total_amount,
 					'discount' => $_REQUEST['ordered_discount'],
@@ -2233,7 +2309,6 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					'transaction_paid_id' => @$transaction_paid_id,
 				];
 				update_data($dbc, 'orders_return', $orderUpdate, 'order_id', $last_id);
-
 				$msg = "Order Return has been added.";
 				$sts = "success";
 			} else {
@@ -2243,8 +2318,9 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 		} else {
 			// Existing order update
 			$last_id = $_REQUEST['product_order_id'];
+			// print_r($last_id);
+			// exit;
 			if (update_data($dbc, 'orders_return', $data, 'order_id', $last_id)) {
-
 				// Upload file if exists
 				if (!empty($_FILES['order_file']['tmp_name'])) {
 					$uploadDir = '../img/uploads/';
@@ -2253,78 +2329,79 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 						update_data($dbc, "orders_return", ['order_file' => $fileName], "order_id", $last_id);
 					}
 				}
-
-				// Rollback previous stock (optional, since it's return — might not be needed)
+				// Rollback previous stock
 				if ($get_company['stock_manage'] == 1) {
 					$prevItems = get($dbc, "order_return_item WHERE order_id = '$last_id'");
 					while ($row = mysqli_fetch_assoc($prevItems)) {
 						$p_id = $row['product_id'];
 						$o_qty = (float) $row['quantity'];
+						$o_bonus_qty = (float) $row['bonus_qty'];
+						$qty_to_reverse = $o_qty + $o_bonus_qty;
 						$o_batch_id = $row['batch_id'];
-
-
 						// Return reversal: subtract quantity (since return added it)
-						mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock - $o_qty WHERE product_id = '$p_id'");
-
+						mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock - $qty_to_reverse WHERE product_id = '$p_id'");
 						// Reverse Batch Stock
 						if (!empty($o_batch_id)) {
-							mysqli_query($dbc, "UPDATE product_batches SET qty_out = qty_out + $o_qty, available_qty = available_qty - $o_qty WHERE batch_id = '$o_batch_id'");
-						} elseif (!empty($o_batch_no)) {
-							mysqli_query($dbc, "UPDATE product_batches SET qty_out = qty_out + $o_qty, available_qty = available_qty - $o_qty WHERE product_id = '$p_id' AND batch_no = '$o_batch_no'");
+							$check = mysqli_query($dbc, "SELECT available_qty, qty_out FROM product_batches WHERE batch_id = '$o_batch_id'");
+							if ($r = mysqli_fetch_assoc($check)) {
+								$new_avail = $r['available_qty'] - $qty_to_reverse;
+								$new_out = $r['qty_out'] + $qty_to_reverse;
+								mysqli_query($dbc, "UPDATE product_batches SET qty_out = '$new_out', available_qty = '$new_avail' WHERE batch_id = '$o_batch_id'");
+							}
+						} elseif (!empty($o_batch_no)) {  // Assuming $o_batch_no might be fetched if needed
+							// Add similar logic if batch_no is stored in table
 						}
 					}
 				}
-
 				// Delete old items
-				deleteFromTable($dbc, "order_return_item", "order_id", $last_id);
-
+				deleteFromTable($dbc, "order_return_item", $last_id, "order_id");
 				// Insert new items
+				$total_amount = 0;
 				foreach ($_REQUEST['product_ids'] as $i => $product_id) {
 					$qty = (float) $_REQUEST['product_quantites'][$i];
 					$rate = (float) $_REQUEST['product_rates'][$i];
-					$total = $qty * $rate;
-					$total_amount += $total;
-
+					$item_discount_pct = isset($_REQUEST['product_discounts'][$i]) ? (float) $_REQUEST['product_discounts'][$i] : 0;
+					$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$i]) ? (float) $_REQUEST['product_bonus_qtys'][$i] : 0;
+					$item_total_after_discount = $qty * $rate * (1 - $item_discount_pct / 100);
+					$total_amount += $item_total_after_discount;
 					$batch_id = $_REQUEST['batch_ids'][$i] ?? null;
 					$batch_no = $_REQUEST['batch_nos'][$i] ?? null;
-
 					$item = [
 						'product_id' => $product_id,
 						'rate' => $rate,
-						'total' => $total,
+						'total' => round($item_total_after_discount, 2),
 						'order_id' => $last_id,
 						'quantity' => $qty,
+						'bonus_qty' => $bonus_qty,
+						'discount' => $item_discount_pct,
 						'product_detail' => @$_REQUEST['product_detail'][$i],
 						'order_item_status' => 1,
 						'user_id' => @$_REQUEST['user_id'],
 						'batch_id' => $batch_id,
 					];
 					insert_data($dbc, 'order_return_item', $item);
-
 					if ($get_company['stock_manage'] == 1) {
-						mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock + $qty WHERE product_id = '$product_id'");
-
-						// Update Batch Stock
+						$qty_to_restore = $qty + $bonus_qty;
+						mysqli_query($dbc, "UPDATE product SET quantity_instock = quantity_instock + $qty_to_restore WHERE product_id = '$product_id'");
 						if (!empty($batch_id)) {
-							$check = mysqli_query($dbc, "SELECT available_qty FROM product_batches WHERE batch_id = '$batch_id'");
-							if (mysqli_num_rows($check) > 0) {
-								$b_row = mysqli_fetch_assoc($check);
-								$new_avail = (float) $b_row['available_qty'] + $qty;
-								mysqli_query($dbc, "UPDATE product_batches SET qty_out = GREATEST(0, qty_out - $qty), available_qty = '$new_avail' WHERE batch_id = '$batch_id'");
+							$check = mysqli_query($dbc, "SELECT available_qty, qty_out FROM product_batches WHERE batch_id = '$batch_id'");
+							if ($r = mysqli_fetch_assoc($check)) {
+								$new_avail = $r['available_qty'] + $qty_to_restore;
+								$new_out = max(0, $r['qty_out'] - $qty_to_restore);
+								mysqli_query($dbc, "UPDATE product_batches SET qty_out = '$new_out', available_qty = '$new_avail' WHERE batch_id = '$batch_id'");
 							}
 						} elseif (!empty($batch_no)) {
 							$b_cond = "product_id = '$product_id' AND batch_no = '$batch_no'";
-							$check = mysqli_query($dbc, "SELECT batch_id, available_qty FROM product_batches WHERE $b_cond LIMIT 1");
-							if (mysqli_num_rows($check) > 0) {
-								$b_row = mysqli_fetch_assoc($check);
-								$bid = $b_row['batch_id'];
-								$new_avail = (float) $b_row['available_qty'] + $qty;
-								mysqli_query($dbc, "UPDATE product_batches SET qty_out = GREATEST(0, qty_out - $qty), available_qty = '$new_avail' WHERE batch_id = '$bid'");
+							$check = mysqli_query($dbc, "SELECT batch_id, available_qty, qty_out FROM product_batches WHERE $b_cond LIMIT 1");
+							if ($r = mysqli_fetch_assoc($check)) {
+								$bid = $r['batch_id'];
+								$new_avail = $r['available_qty'] + $qty_to_restore;
+								$new_out = max(0, $r['qty_out'] - $qty_to_restore);
+								mysqli_query($dbc, "UPDATE product_batches SET qty_out = '$new_out', available_qty = '$new_avail' WHERE batch_id = '$bid'");
 							}
 						}
 					}
 				}
-
 				// Update transaction
 				if ($paidAmount > 0) {
 					$transactionUpdate = [
@@ -2335,11 +2412,13 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					$order = fetchRecord($dbc, "orders_return", "order_id", $last_id);
 					update_data($dbc, "transactions", $transactionUpdate, "transaction_id", $order['transaction_paid_id']);
 				}
-
-				$total_grand = $total_amount + (float) @$_REQUEST['freight'] - $_REQUEST['ordered_discount'];
-				$due_amount = $total_grand - $paidAmount;
-				$payment_status = $due_amount > 0 ? 0 : 1;
-
+				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
+				$discount_amount = round($total_amount * $ordered_discount_pct / 100, 2);
+				$total_grand = round($total_amount + (float) @$_REQUEST['freight'] - $discount_amount, 2);
+				$due_amount = round($total_grand - $paidAmount, 2);
+				$payment_status = $due_amount > 0.01 ? 0 : 1;
+				if ($payment_status == 1)
+					$due_amount = 0;
 				$orderUpdate = [
 					'total_amount' => $total_amount,
 					'discount' => $_REQUEST['ordered_discount'],
@@ -2348,7 +2427,6 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					'due' => $due_amount,
 				];
 				update_data($dbc, 'orders_return', $orderUpdate, 'order_id', $last_id);
-
 				$msg = "Order Return has been updated.";
 				$sts = "success";
 			} else {
@@ -2360,7 +2438,6 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 		$msg = "Please add at least one product.";
 		$sts = "error";
 	}
-
 	echo json_encode([
 		'msg' => $msg,
 		'sts' => $sts,
@@ -2509,11 +2586,13 @@ if (isset($_REQUEST['cash_purchase_supplier']) && isset($_REQUEST['purchase_retu
 			}
 		}
 
-		// Discount, total, and due
-		$discount = (float) $_REQUEST['ordered_discount'];
+		$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
 		$paid = (float) $_REQUEST['paid_ammount'];
-		$total_grand = $total_amount - $discount;
-		$due = $total_grand - $paid;
+		$discount_amount = round($total_amount * $ordered_discount_pct / 100, 2);
+		$total_grand = round($total_amount - $discount_amount, 2);
+		$due = round($total_grand - $paid, 2);
+		if ($due <= 0.01)
+			$due = 0;
 
 		$oldTxn = fetchRecord($dbc, "purchase_return", "purchase_id", $last_id);
 		$transaction_id = $transaction_paid_id = null;
@@ -2567,7 +2646,7 @@ if (isset($_REQUEST['cash_purchase_supplier']) && isset($_REQUEST['purchase_retu
 		// Final update
 		$final = [
 			'total_amount' => $total_amount,
-			'discount' => $discount,
+			'discount' => $ordered_discount_pct,
 			'grand_total' => $total_grand,
 			'due' => $due,
 			'transaction_paid_id' => $transaction_paid_id,

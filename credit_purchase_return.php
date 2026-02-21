@@ -229,10 +229,10 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
 
                       <td class="table-bordered"> Sub Total :</td>
                       <td class="table-bordered" id="product_total_amount"><?= @$fetchPurchase['total_amount'] ?></td>
-                      <td class="table-bordered"> Discount :</td>
+                      <td class="table-bordered"> Discount % :</td>
                       <td class="table-bordered" id="getDiscount"><input onkeyup="getOrderTotal()" type="number"
                           id="ordered_discount" class="form-control form-control-sm"
-                          value="<?= @empty($_REQUEST['edit_order_id']) ? "0" : $fetchPurchase['discount'] ?>" min="0"
+                          value="<?= @empty($_REQUEST['edit_purchase_id']) ? "0" : $fetchPurchase['discount'] ?>" min="0" max="100" step="0.01"
                           name="ordered_discount">
                       </td>
                     </tr>

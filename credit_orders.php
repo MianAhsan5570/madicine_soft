@@ -66,7 +66,7 @@
 
                        ?>
                        <tr>
-                          <td><?=$r['order_id']?></td>
+                          <td><?=sprintf(" %05d", $r['order_id'])?></td>
                           <td><?=ucfirst($r['client_name'])?></td>
                           <td><?=$r['client_contact']?></td>
                           <td><?=$r['order_date']?></td>

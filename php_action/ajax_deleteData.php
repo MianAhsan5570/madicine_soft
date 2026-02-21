@@ -198,7 +198,7 @@ if (isset($_REQUEST['delete_bymanually'])) {
 
 			while ($proR = mysqli_fetch_assoc($proQ)) {
 				$p_id = $proR['product_id'];
-				$quantity = (float) $proR['quantity'];
+				$quantity = (float) $proR['quantity'] + (float) $proR['bonus_qty'];
 
 				$quantity_instock = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT quantity_instock FROM product WHERE product_id='$p_id'"));
 				$newqty = max(0, (float) $quantity_instock['quantity_instock'] - $quantity); // Decrease stock since return is being deleted

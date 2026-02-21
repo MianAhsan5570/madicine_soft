@@ -239,7 +239,7 @@
                 }
 
                 // Period data (quantities and sales value per product)
-                $rece = $pret = $sales_qty = $sales_value = $sret_qty = $sret_value = [];
+                $rece = $pret = $sales_qty = $bonus_qty = $sales_value = $sret_qty = $sret_value = [];
 
                 $sql_rece = "SELECT pi.product_id, SUM(pi.quantity) AS qty
                              FROM purchase_item pi
@@ -264,8 +264,8 @@
                         $pret[$row['product_id']] = (float) $row['qty'];
                     }
                 }
-
-                $sql_sales = "SELECT oi.product_id, SUM(oi.quantity) AS qty, SUM(oi.total) AS amount
+                $tot_bonus_qty = 0;
+                $sql_sales = "SELECT oi.product_id, SUM(oi.quantity) AS qty, SUM(oi.bonus_qty) AS bonus_qty, SUM(oi.total) AS amount
                               FROM order_item oi
                               INNER JOIN orders o ON oi.order_id = o.order_id
                               WHERE o.order_date BETWEEN '$from_date' AND '$to_date'
@@ -275,6 +275,7 @@
                 if ($sales_result) {
                     while ($row = $sales_result->fetch_assoc()) {
                         $sales_qty[$row['product_id']] = (float) $row['qty'];
+                        $bonus_qty[$row['product_id']] = (float) $row['bonus_qty'];
                         $sales_value[$row['product_id']] = (float) $row['amount'];
                     }
                 }
@@ -341,6 +342,7 @@
                                             $pret_qty = $pret[$pid] ?? 0;
                                             $sales_q = $sales_qty[$pid] ?? 0;
                                             $sret_q = $sret_qty[$pid] ?? 0;
+                                            $bonus_q = $bonus_qty[$pid] ?? 0;
                                             $net_sales_q = $sales_q - $sret_q;
 
                                             $sales_val = $sales_value[$pid] ?? 0;
@@ -351,9 +353,9 @@
                                             $opening = $current - $change;
 
                                             $total_stock = $opening + $rece_qty - $pret_qty;
-                                            $closing_qty = $total_stock - $net_sales_q;
-                                            $bonus = 0;
-
+                                            $closing_qty = $total_stock - $net_sales_q - $bonus_q;
+                                            // $bonus = 0;
+                                    
                                             $pack = $product_packs[$pid] ?? '';
 
                                             // Value calculations for total row
@@ -362,6 +364,7 @@
                                             $tot_total_value += $total_stock * $avg;
                                             $tot_closing_value += $closing_qty * $avg;
                                             $tot_sales_value += $net_sales_val;
+                                            $tot_bonus_qty += $bonus_q;
                                             ?>
                                             <tr>
                                                 <td class="product-name"><?= htmlspecialchars($name) ?></td>
@@ -371,7 +374,7 @@
                                                 <td class="num-cell"><?= number_format($pret_qty, 0) ?></td>
                                                 <td class="num-cell"><?= number_format($total_stock, 0) ?></td>
                                                 <td class="num-cell"><?= number_format($net_sales_q, 0) ?></td>
-                                                <td class="num-cell"><?= number_format($bonus, 0) ?></td>
+                                                <td class="num-cell"><?= number_format($bonus_q, 0) ?></td>
                                                 <td class="num-cell"><strong><?= number_format($closing_qty, 0) ?></strong></td>
                                                 <td class="num-cell"><strong><?= number_format($net_sales_val, 2) ?></strong>
                                                 </td>
@@ -383,7 +386,8 @@
                                     <tr class="total-row">
                                         <td colspan="2"><strong>Total Value</strong></td>
                                         <td class="num-cell">
-                                            <strong><?= number_format($tot_opening_value, 2) ?></strong></td>
+                                            <strong><?= number_format($tot_opening_value, 2) ?></strong>
+                                        </td>
                                         <td class="num-cell"><strong><?= number_format($rece_value_total, 2) ?></strong>
                                         </td>
                                         <td class="num-cell"><strong><?= number_format($pret_value_total, 2) ?></strong>
@@ -392,9 +396,12 @@
                                         </td>
                                         <td class="num-cell"><strong><?= number_format($tot_sales_value, 2) ?></strong>
                                         </td>
-                                        <td class="num-cell"><strong>0.00</strong></td>
                                         <td class="num-cell">
-                                            <strong><?= number_format($tot_closing_value, 2) ?></strong></td>
+                                            <strong><?= number_format($tot_bonus_qty ?? 0, 0) ?></strong>
+                                        </td>
+                                        <td class="num-cell">
+                                            <strong><?= number_format($tot_closing_value, 2) ?></strong>
+                                        </td>
                                         <td class="num-cell"><strong><?= number_format($tot_sales_value, 2) ?></strong>
                                         </td>
                                     </tr>
