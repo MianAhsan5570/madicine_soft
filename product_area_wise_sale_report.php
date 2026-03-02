@@ -25,58 +25,56 @@
             box-shadow: none;
         }
 
-        /* Force A4 landscape */
         @page {
             size: A4 landscape;
             margin: 6mm;
         }
 
-        /* Much denser layout for better fit with many columns */
         .table {
-            font-size: 10px !important;
+            font-size: 9px !important;
             width: 100%;
         }
 
         .table th,
         .table td {
             padding: 3px 4px !important;
-            font-size: 10px !important;
-            line-height: 1.2;
+            font-size: 9px !important;
+            line-height: 1.1;
         }
 
         .product-name {
-            width: 22% !important;
-            font-size: 11px !important;
+            width: 20% !important;
+            font-size: 10px !important;
         }
 
         .pack-cell {
-            width: 8% !important;
-            font-size: 11px !important;
+            width: 6% !important;
+            font-size: 10px !important;
             text-align: center !important;
         }
 
         .qty-cell,
         .value-cell {
-            font-size: 10px !important;
+            font-size: 9px !important;
+            /* min-width: 40px; */
         }
 
         .total-row td {
-            font-size: 12px !important;
+            font-size: 11px !important;
         }
 
         .header-company {
-            font-size: 22px !important;
+            font-size: 20px !important;
         }
 
         .header-title {
-            font-size: 16px !important;
+            font-size: 15px !important;
         }
 
         .header-subtitle {
-            font-size: 14px !important;
+            font-size: 13px !important;
         }
 
-        /* Prevent bad breaks */
         tr {
             page-break-inside: avoid;
         }
@@ -91,26 +89,25 @@
     }
 
     thead tr th {
-        font-size: 18px !important;
-        font-weight: bolder !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
         color: #000 !important;
         background-color: #f8f9fa !important;
         text-align: center;
         vertical-align: middle;
-        padding: 10px 8px !important;
+        padding: 8px 6px !important;
     }
 
     tbody tr td {
-        font-size: 16px !important;
-        font-weight: 500 !important;
+        font-size: 14px !important;
         vertical-align: middle;
         color: #000 !important;
-        padding: 8px !important;
+        padding: 6px !important;
     }
 
     .total-row td {
         font-weight: bold !important;
-        font-size: 17px !important;
+        font-size: 15px !important;
         background-color: #f8f9fa !important;
     }
 
@@ -130,25 +127,25 @@
     }
 
     .header-company {
-        font-size: 28px;
+        font-size: 26px;
         font-weight: bold;
     }
 
     .header-title {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: bold;
-        margin: 10px 0;
+        margin: 8px 0;
     }
 
     .header-subtitle {
-        font-size: 18px;
-        margin: 5px 0;
+        font-size: 16px;
+        margin: 4px 0;
     }
 
     .print-btn {
         position: absolute;
-        top: 15px;
-        right: 150px;
+        top: 12px;
+        right: 140px;
     }
 </style>
 
@@ -168,7 +165,6 @@
                     <div class="card-body">
                         <form method="post">
                             <div class="row align-items-end">
-
                                 <div class="col-sm-4 col-md-3">
                                     <label>From Date <span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" name="from_date"
@@ -190,7 +186,6 @@
                                         <?php
                                         $areaSql = "SELECT * FROM areas WHERE area_status = 1 ORDER BY area_name ASC";
                                         $areaData = $connect->query($areaSql);
-
                                         while ($area = $areaData->fetch_assoc()) {
                                             $selected = (isset($_POST['area_id']) && in_array($area['area_id'], (array) $_POST['area_id'])) ? 'selected' : '';
                                             echo "<option value='{$area['area_id']}' $selected>{$area['area_name']}</option>";
@@ -201,19 +196,18 @@
 
                                 <div class="col-sm-4 col-md-3">
                                     <label style="visibility: hidden;">Search</label><br>
-                                    <button type="submit" name="show_details" class="btn btn-danger">
-                                        Show Details
-                                    </button>
+                                    <button type="submit" name="show_details" class="btn btn-danger">Show
+                                        Details</button>
                                 </div>
-
                             </div>
+
                             <div class="row mt-2">
                                 <div class="col-12">
                                     <small class="text-muted">Date range is required. Areas are optional — if none
-                                        selected, only areas with sales in the period will be shown.</small>
-                                    <br><small class="text-info"><strong>Note:</strong> The report automatically
-                                        optimizes for printing (A4 landscape, smaller fonts, tighter spacing) to ensure
-                                        all values fit properly even with many areas.</small>
+                                        selected, only areas with sales will appear.</small><br>
+                                    <small class="text-info"><strong>Note:</strong> Quantity shown as
+                                        <code>regular + bonus = total</code>. Value is based on invoiced amount
+                                        only.</small>
                                 </div>
                             </div>
                         </form>
@@ -238,7 +232,7 @@
 
                         $has_selected_areas = !empty($area_ids);
 
-                        // === Fetch all active products (status = 1) ===
+                        // All active products
                         $products = [];
                         $product_packs = [];
                         $all_prod_sql = "SELECT p.product_id, p.product_name, p.product_pack,
@@ -249,17 +243,15 @@
                                          WHERE p.status = 1 
                                          ORDER BY p.product_name ASC";
                         $all_prod_result = $connect->query($all_prod_sql);
-                        if ($all_prod_result) {
-                            while ($pr = $all_prod_result->fetch_assoc()) {
-                                $pid = $pr['product_id'];
-                                $cat = $pr['categories_name'] ? " ({$pr['categories_name']})" : "";
-                                $brand = $pr['brand_name'] ? " [{$pr['brand_name']}]" : "";
-                                $products[$pid] = $pr['product_name'] . $cat . $brand;
-                                $product_packs[$pid] = $pr['product_pack'] ?? '';
-                            }
+                        while ($pr = $all_prod_result->fetch_assoc()) {
+                            $pid = $pr['product_id'];
+                            $cat = $pr['categories_name'] ? " ({$pr['categories_name']})" : "";
+                            $brand = $pr['brand_name'] ? " [{$pr['brand_name']}]" : "";
+                            $products[$pid] = $pr['product_name'] . $cat . $brand;
+                            $product_packs[$pid] = $pr['product_pack'] ?? '';
                         }
 
-                        // === Fetch areas for columns ===
+                        // Areas
                         $area_list = [];
                         $area_totals = [];
                         if ($has_selected_areas) {
@@ -291,12 +283,11 @@
                             }
                         }
 
-                        // === Build WHERE for areas ===
                         $where_area = $has_selected_areas
                             ? "cust.customer_area IN ('" . implode("','", $area_ids) . "')"
                             : "1=1";
 
-                        // === Fetch sales data ===
+                        // Sales data
                         $sales = [];
                         $prod_totals = [];
                         $total_all_qty = 0;
@@ -305,8 +296,10 @@
                         $sql = "SELECT 
                                     prod.product_id,
                                     a.area_id,
-                                    SUM(oi.quantity) AS qty,
-                                    SUM(oi.total) AS amount
+                                    SUM(oi.quantity)     AS raw_qty,
+                                    SUM(oi.bonus_qty)    AS bonus_qty,
+                                    SUM(oi.quantity + oi.bonus_qty) AS effective_qty,
+                                    SUM(oi.total)        AS amount
                                 FROM order_item oi
                                 INNER JOIN orders o ON oi.order_id = o.order_id
                                 INNER JOIN product prod ON oi.product_id = prod.product_id
@@ -321,24 +314,32 @@
 
                         $result = $connect->query($sql);
 
-                        if ($result && $result->num_rows > 0) {
+                        if ($result) {
                             while ($row = $result->fetch_assoc()) {
                                 $pid = $row['product_id'];
                                 $aid = $row['area_id'];
-                                $qty = (float) $row['qty'];
-                                $amount = (float) $row['amount'];
+
+                                $raw_qty = (float) ($row['raw_qty'] ?? 0);
+                                $bonus_qty = (float) ($row['bonus_qty'] ?? 0);
+                                $effective_qty = (float) ($row['effective_qty'] ?? 0);
+                                $amount = (float) ($row['amount'] ?? 0);
 
                                 if (isset($area_list[$aid])) {
-                                    $sales[$pid][$aid] = $qty;
+                                    $sales[$pid][$aid] = [
+                                        'raw' => $raw_qty,
+                                        'bonus' => $bonus_qty,
+                                        'total' => $effective_qty
+                                    ];
+
                                     $area_totals[$aid] += $amount;
 
                                     if (!isset($prod_totals[$pid])) {
                                         $prod_totals[$pid] = ['qty' => 0, 'amount' => 0];
                                     }
-                                    $prod_totals[$pid]['qty'] += $qty;
+                                    $prod_totals[$pid]['qty'] += $effective_qty;
                                     $prod_totals[$pid]['amount'] += $amount;
 
-                                    $total_all_qty += $qty;
+                                    $total_all_qty += $effective_qty;
                                     $grand_amount += $amount;
                                 }
                             }
@@ -349,9 +350,11 @@
                             <div class="card-header text-center pt-4"
                                 style="background-color: #343a40; color: white; position: relative;">
                                 <div class="header-company">AMG</div>
-                                <div class="header-title">Area Wise Product Wise</div>
-                                <div class="header-subtitle">FROM <?= date('d/m/Y', strtotime($from_date)) ?> TO
-                                    <?= date('d/m/Y', strtotime($to_date)) ?>
+                                <div class="header-title">Area Wise Product Wise Sales</div>
+                                <div class="header-subtitle">
+                                    FROM <?= date('d/m/Y', strtotime($from_date)) ?>
+                                    TO <?= date('d/m/Y', strtotime($to_date)) ?>
+                                    <small style="opacity:0.8;"> (Qty: regular + bonus = total)</small>
                                 </div>
                                 <button onclick="window.print()"
                                     class="btn btn-light btn-sm print-btn d-print-none">Print</button>
@@ -362,12 +365,14 @@
                                     <table class="table table-bordered table-hover">
                                         <thead>
                                             <tr>
-                                                <th class="product-name" style="width: 25%;">Product Name</th>
-                                                <th class="pack-cell" style="width: 8%;">Pack</th>
+                                                <th class="product-name" style="width:22%;">Product Name</th>
+                                                <th class="pack-cell" style="width:7%;">Pack</th>
                                                 <?php foreach ($area_list as $aid => $aname): ?>
-                                                    <th><?= htmlspecialchars($aname) ?></th>
+                                                    <th style="min-width:70px;" title="Regular + Bonus = Total">
+                                                        <?= htmlspecialchars($aname) ?><br><small>Qty + Bonus</small>
+                                                    </th>
                                                 <?php endforeach; ?>
-                                                <th>Total Qty</th>
+                                                <th style="min-width:90px;">Total Qty<br><small>(incl. bonus)</small></th>
                                                 <th>Total Value</th>
                                             </tr>
                                         </thead>
@@ -375,7 +380,8 @@
                                             <?php if (empty($area_list)): ?>
                                                 <tr>
                                                     <td colspan="<?= count($area_list) + 4 ?>" class="text-center text-muted py-4">
-                                                        No sales records found for the selected date range.</td>
+                                                        No sales records found for the selected date range.
+                                                    </td>
                                                 </tr>
                                             <?php elseif (empty($products)): ?>
                                                 <tr>
@@ -394,17 +400,32 @@
                                                     <tr>
                                                         <td class="product-name"><?= htmlspecialchars($name) ?></td>
                                                         <td class="pack-cell"><?= htmlspecialchars($pack) ?></td>
-                                                        <?php foreach ($area_list as $aid => $aname): ?>
-                                                            <?php $qty = $sales[$pid][$aid] ?? 0; ?>
-                                                            <td class="qty-cell"><?= number_format($qty, 0) ?></td>
+
+                                                        <?php foreach ($area_list as $aid => $aname):
+                                                            $cell = $sales[$pid][$aid] ?? ['raw' => 0, 'bonus' => 0, 'total' => 0];
+                                                            $raw = $cell['raw'];
+                                                            $bonus = $cell['bonus'];
+                                                            $total = $cell['total'];
+
+                                                            if ($total == 0) {
+                                                                $display = '0';
+                                                            } elseif ($bonus == 0) {
+                                                                $display = number_format($total, 0);
+                                                            } else {
+                                                                $display = number_format($raw, 0) . ' + ' . number_format($bonus, 0) . ' = ' . number_format($total, 0);
+                                                            }
+                                                            ?>
+                                                            <td class="qty-cell"><?= $display ?></td>
                                                         <?php endforeach; ?>
+
                                                         <td class="qty-cell"><strong><?= number_format($p_qty, 0) ?></strong></td>
                                                         <td class="value-cell"><strong><?= number_format($p_amount, 2) ?></strong></td>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </tbody>
-                                        <?php if (!empty($area_list) && (!empty($products) || $grand_amount > 0)): ?>
+
+                                        <?php if (!empty($area_list) && $grand_amount > 0): ?>
                                             <tfoot>
                                                 <tr class="total-row">
                                                     <td colspan="2"><strong>Trade Value</strong></td>
@@ -429,7 +450,7 @@
 
                 <?php endif; ?>
 
-            </div> <!-- .container-fluid -->
+            </div>
         </main>
     </div>
 

@@ -39,178 +39,189 @@
 
 
 
-          <?php
-          if ($UserData['user_role'] != 'admin') {
-            # code...
+           <?php
+        if ($UserData['user_role'] != 'admin') {
+          # code...
+        
 
-
-            $getNav = mysqli_query($dbc, "SELECT * FROM menus where parent_id=0 AND page!='dashboard.php' ORDER BY sort_order ASC LIMIT 9 OFFSET 0 ");
-            $r = 1;
-            while ($fetch_nav = mysqli_fetch_assoc($getNav)) {
-              $c = 0;
-              $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav['id'] . "' AND page!='dashboard.php' ");
-              while ($child = mysqli_fetch_assoc($getChild)) {
-                if (countWhens($dbc, "privileges", 'user_id', $user_id_current, 'nav_id', $child['id']) > 0) {
-                  $c++;
-                }
-              }
-              if ($c > 0 && $r < 9) {
-          ?>
-                <li class="nav-item dropdown">
-                  <a href="<?= $fetch_nav['page'] ?>" id="ui-elementsDropdown" class="dropdown-toggle nav-link" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span class="ml-lg-2"><?= strtoupper($fetch_nav['title']) ?></span>
-                  </a>
-                  <?php
-                  if (countWhen($dbc, "menus", 'parent_id', $fetch_nav['id']) > 0) {
-                  ?>
-                    <div class="dropdown-menu" aria-labelledby="ui-elementsDropdown">
-                      <?php
-                      $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav['id'] . "' AND page!='dashboard.php' ");
-                      while ($child = mysqli_fetch_assoc($getChild)) {
-                        if (countWhens($dbc, "privileges", 'user_id', $user_id_current, 'nav_id', $child['id']) > 0) {
-                      ?>
-                          <a class="nav-link pl-lg-2" href="<?= $child['page'] ?>"><span class="ml-1"><?= strtoupper($child['title']) ?></span></a>
-
-                      <?php }
-                      } //end while child 
-                      ?>
-                    </div>
-
-
-                  <?php     } //check statement 
-                  ?>
-                </li>
-
-
-              <?php $r++;
-              }
-            }
-            if ($r > 9) {
-
-              ?>
-              <li class="nav-item dropdown more">
-                <a class="dropdown-toggle more-horizontal nav-link" href="#" id="moreDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <span class="ml-2 sr-only">More</span>
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="moreDropdown">
-                  <?php $getNav2 = mysqli_query($dbc, "SELECT * FROM menus where parent_id=0 AND page!='dashboard.php' ORDER BY sort_order ASC LIMIT 10 OFFSET 10 ");
-                  $r = 1;
-                  while ($fetch_nav2 = mysqli_fetch_assoc($getNav2)) {
-                    $c = 0;
-                    $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav2['id'] . "' AND page!='dashboard.php' ");
-                    while ($child = mysqli_fetch_assoc($getChild)) {
-                      if (countWhens($dbc, "privileges", 'user_id', $user_id_current, 'nav_id', $child['id']) > 0) {
-                        $c++;
-                      }
-                    }
-                    if ($c > 0) {
-                      # code...
-
-                  ?>
-                      <li class="nav-item dropdown">
-                        <a class="dropdown-toggle nav-link pl-lg-2" href="#" data-toggle="collapse" id="pagesDropdown" aria-expanded="false">
-                          <span class="ml-1"><?= strtoupper($fetch_nav2['title']) ?></span>
-                        </a>
-
-                        <ul class="dropdown-menu" aria-labelledby="pagesDropdown">
-                          <?php
-                          $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav2['id'] . "' AND page!='dashboard.php' ");
-                          while ($child = mysqli_fetch_assoc($getChild)) {
-                            if (countWhens($dbc, "privileges", 'user_id', $user_id_current, 'nav_id', $child['id']) > 0) {
-                          ?>
-
-                              <a class="nav-link pl-lg-2" href="<?= $child['page'] ?>">
-                                <span class="ml-1"><?= strtoupper($child['title']) ?></span>
-                              </a>
-                          <?php }
-                          } ?>
-
-                        </ul>
-                      </li>
-                  <?php  }
-                  } ?>
-                </ul>
-              </li>
-              <?php  }
-            //end of fetch nav
-          } else { /*user validation*/
-            $getNav = mysqli_query($dbc, "SELECT * FROM menus where parent_id=0 AND page!='dashboard.php'  ORDER BY sort_order ASC LIMIT 9 OFFSET 0 ");
-            $r = 1;
-            while ($fetch_nav = mysqli_fetch_assoc($getNav)) {
-              $c = 0;
-              $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav['id'] . "' AND page!='dashboard.php' ");
-              while ($child = mysqli_fetch_assoc($getChild)) {
+          $getNav = mysqli_query($dbc, "SELECT * FROM menus where parent_id=0 AND page!='dashboard.php' ORDER BY sort_order ASC LIMIT 9 OFFSET 0 ");
+          $r = 1;
+          while ($fetch_nav = mysqli_fetch_assoc($getNav)) {
+            $c = 0;
+            $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav['id'] . "' AND page!='dashboard.php' ");
+            while ($child = mysqli_fetch_assoc($getChild)) {
+              if (countWhens($dbc, "privileges", 'user_id', $user_id_current, 'nav_id', $child['id']) > 0) {
                 $c++;
               }
-              if ($c > 0 && $r < 10) {
+            }
+            if ($c > 0 && $r < 9) {
               ?>
-                <li class="nav-item dropdown">
-                  <a href="<?= $fetch_nav['page'] ?>" id="ui-elementsDropdown" class="dropdown-toggle nav-link" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span class="ml-lg-2"><?= strtoupper($fetch_nav['title']) ?></span>
-                  </a>
-                  <?php
-                  if (countWhen($dbc, "menus", 'parent_id', $fetch_nav['id']) > 0) {
+              <li class="nav-item dropdown">
+                <a href="<?= $fetch_nav['page'] ?>" id="ui-elementsDropdown" class="dropdown-toggle nav-link" role="button"
+                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <span class="ml-lg-2"><?= strtoupper($fetch_nav['title']) ?></span>
+                </a>
+                <?php
+                if (countWhen($dbc, "menus", 'parent_id', $fetch_nav['id']) > 0) {
                   ?>
-                    <div class="dropdown-menu" aria-labelledby="ui-elementsDropdown">
-                      <?php
-                      $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav['id'] . "' AND page!='dashboard.php' ");
-                      while ($child = mysqli_fetch_assoc($getChild)) {
+                  <div class="dropdown-menu" aria-labelledby="ui-elementsDropdown">
+                    <?php
+                    $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav['id'] . "' AND page!='dashboard.php'  ORDER BY nav_option_sort ASC ");
+                    while ($child = mysqli_fetch_assoc($getChild)) {
+                      if (countWhens($dbc, "privileges", 'user_id', $user_id_current, 'nav_id', $child['id']) > 0) {
+                        ?>
+                        <a class="nav-link pl-lg-2" href="<?= $child['page'] ?>"><span
+                            class="ml-1"><?= strtoupper($child['title']) ?></span></a>
 
-                      ?>
-                        <a class="nav-link pl-lg-2" href="<?= $child['page'] ?>"><span class="ml-1"><?= strtoupper($child['title']) ?></span></a>
-
-                      <?php
-                      } //end while child 
-                      ?>
-                    </div>
+                      <?php }
+                    } //end while child 
+                    ?>
+                  </div>
 
 
-                  <?php     } //check statement 
-                  ?>
-                </li>
+                <?php } //check statement 
+                ?>
+              </li>
 
 
               <?php $r++;
-              }
             }
-            if ($r > 9) {
+          }
+          if ($r > 9) {
 
-              ?>
-              <li class="nav-item dropdown more">
-                <a class="dropdown-toggle more-horizontal nav-link" href="#" id="moreDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <span class="ml-2 sr-only">More</span>
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="moreDropdown">
-                  <?php $getNav2 = mysqli_query($dbc, "SELECT * FROM menus where parent_id=0 AND page!='dashboard.php' ORDER BY sort_order ASC LIMIT 10 OFFSET 10 ");
-                  $r = 1;
-                  while ($fetch_nav2 = mysqli_fetch_assoc($getNav2)) {
-                    $c = 0; ?>
+            ?>
+            <li class="nav-item dropdown more">
+              <a class="dropdown-toggle more-horizontal nav-link" href="#" id="moreDropdown" role="button"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="ml-2 sr-only">More</span>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="moreDropdown">
+                <?php $getNav2 = mysqli_query($dbc, "SELECT * FROM menus where parent_id=0 AND page!='dashboard.php' ORDER BY sort_order ASC LIMIT 10 OFFSET 10 ");
+                $r = 1;
+                while ($fetch_nav2 = mysqli_fetch_assoc($getNav2)) {
+                  $c = 0;
+                  $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav2['id'] . "' AND page!='dashboard.php' ");
+                  while ($child = mysqli_fetch_assoc($getChild)) {
+                    if (countWhens($dbc, "privileges", 'user_id', $user_id_current, 'nav_id', $child['id']) > 0) {
+                      $c++;
+                    }
+                  }
+                  if ($c > 0) {
+                    # code...
+            
+                    ?>
                     <li class="nav-item dropdown">
-                      <a class="dropdown-toggle nav-link pl-lg-2" href="#" data-toggle="collapse" id="pagesDropdown" aria-expanded="false">
+                      <a class="dropdown-toggle nav-link pl-lg-2" href="#" data-toggle="collapse" id="pagesDropdown"
+                        aria-expanded="false">
                         <span class="ml-1"><?= strtoupper($fetch_nav2['title']) ?></span>
                       </a>
 
                       <ul class="dropdown-menu" aria-labelledby="pagesDropdown">
                         <?php
-                        $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav2['id'] . "' AND page!='dashboard.php' ");
+                        $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav2['id'] . "' AND page!='dashboard.php'   ORDER BY nav_option_sort ASC");
                         while ($child = mysqli_fetch_assoc($getChild)) {
+                          if (countWhens($dbc, "privileges", 'user_id', $user_id_current, 'nav_id', $child['id']) > 0) {
+                            ?>
 
-                        ?>
-
-                          <a class="nav-link pl-lg-2" href="<?= $child['page'] ?>">
-                            <span class="ml-1"><?= strtoupper($child['title']) ?></span>
-                          </a>
-                        <?php } ?>
+                            <a class="nav-link pl-lg-2" href="<?= $child['page'] ?>">
+                              <span class="ml-1"><?= strtoupper($child['title']) ?></span>
+                            </a>
+                          <?php }
+                        } ?>
 
                       </ul>
                     </li>
-                  <?php   } ?>
-                </ul>
-              </li>
-          <?php  }
-          }
+                  <?php }
+                } ?>
+              </ul>
+            </li>
+          <?php }
+          //end of fetch nav
+        } else { /*user validation*/
+          # code...
+        
 
-          ?>
+          $getNav = mysqli_query($dbc, "SELECT * FROM menus where parent_id=0 AND page!='dashboard.php' ORDER BY sort_order ASC LIMIT 9 OFFSET 0 ");
+          $r = 1;
+          while ($fetch_nav = mysqli_fetch_assoc($getNav)) {
+            $c = 0;
+            $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav['id'] . "' AND page!='dashboard.php' ");
+            while ($child = mysqli_fetch_assoc($getChild)) {
+              $c++;
+            }
+            if ($c > 0 && $r < 10) {
+              ?>
+              <li class="nav-item dropdown">
+                <a href="<?= $fetch_nav['page'] ?>" id="ui-elementsDropdown" class="dropdown-toggle nav-link" role="button"
+                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <span class="ml-lg-2"><?= strtoupper($fetch_nav['title']) ?></span>
+                </a>
+                <?php
+                if (countWhen($dbc, "menus", 'parent_id', $fetch_nav['id']) > 0) {
+                  ?>
+                  <div class="dropdown-menu" aria-labelledby="ui-elementsDropdown">
+                    <?php
+                    $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav['id'] . "' AND page!='dashboard.php'   ORDER BY nav_option_sort ASC");
+                    while ($child = mysqli_fetch_assoc($getChild)) {
+
+                      ?>
+                      <a class="nav-link pl-lg-2" href="<?= $child['page'] ?>"><span
+                          class="ml-1"><?= strtoupper($child['title']) ?></span></a>
+
+                      <?php
+                    } //end while child 
+                    ?>
+                  </div>
+
+
+                <?php } //check statement 
+                ?>
+              </li>
+
+
+              <?php $r++;
+            }
+          }
+          if ($r > 9) {
+
+            ?>
+            <li class="nav-item dropdown more">
+              <a class="dropdown-toggle more-horizontal nav-link" href="#" id="moreDropdown" role="button"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="ml-2 sr-only">More</span>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="moreDropdown">
+                <?php $getNav2 = mysqli_query($dbc, "SELECT * FROM menus where parent_id=0 AND page!='dashboard.php' ORDER BY sort_order ASC LIMIT 10 OFFSET 10 ");
+                $r = 1;
+                while ($fetch_nav2 = mysqli_fetch_assoc($getNav2)) {
+                  $c = 0; ?>
+                  <li class="nav-item dropdown">
+                    <a class="dropdown-toggle nav-link pl-lg-2" href="#" data-toggle="collapse" id="pagesDropdown"
+                      aria-expanded="false">
+                      <span class="ml-1"><?= strtoupper($fetch_nav2['title']) ?></span>
+                    </a>
+
+                    <ul class="dropdown-menu" aria-labelledby="pagesDropdown">
+                      <?php
+                      $getChild = mysqli_query($dbc, "SELECT * FROM menus where parent_id='" . $fetch_nav2['id'] . "' AND page!='dashboard.php'  ORDER BY nav_option_sort ASC ");
+                      while ($child = mysqli_fetch_assoc($getChild)) {
+
+                        ?>
+
+                        <a class="nav-link pl-lg-2" href="<?= $child['page'] ?>">
+                          <span class="ml-1"><?= strtoupper($child['title']) ?></span>
+                        </a>
+                      <?php } ?>
+
+                    </ul>
+                  </li>
+                <?php } ?>
+              </ul>
+            </li>
+          <?php }
+        }
+
+        ?>
 
 
         </ul>

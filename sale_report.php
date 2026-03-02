@@ -21,6 +21,15 @@
 		font-size: 18px !important;
 		background-color: #f8f9fa;
 	}
+
+	.qty-sum {
+		color: #000;
+		font-weight: bold;
+	}
+
+	.qty-part {
+		color: #444;
+	}
 </style>
 
 <body class="horizontal light">
@@ -180,7 +189,15 @@
 												<?php
 												$items = mysqli_query($dbc, "SELECT * FROM order_item WHERE order_id='{$r['order_id']}'");
 												while ($it = mysqli_fetch_assoc($items)) {
-													echo "<p>{$it['quantity']}</p>";
+													$qty = (int) $it['quantity'];
+													$bonus = isset($it['bonus_qty']) ? (int) $it['bonus_qty'] : 0;
+													$totalQty = $qty + $bonus;
+
+													if ($bonus > 0) {
+														echo "<p><span class='qty-part'>$qty</span> + <span class='qty-part'>$bonus</span> = <span class='qty-sum'>$totalQty</span></p>";
+													} else {
+														echo "<p>$totalQty</p>";
+													}
 												}
 												?>
 											</th>

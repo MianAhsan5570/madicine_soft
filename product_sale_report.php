@@ -22,6 +22,10 @@
 		font-size: 18px !important;
 		background-color: #f8f9fa;
 	}
+
+	.qty-with-bonus {
+		white-space: nowrap;
+	}
 </style>
 
 <body class="horizontal light">
@@ -87,7 +91,7 @@
 								<div class="col-sm-4 col-md-3">
 									<label style="visibility: hidden;">Search</label><br>
 									<button type="submit" name="show_details" class="btn btn-danger">
-									 Show Report
+										Show Report
 									</button>
 								</div>
 
@@ -100,8 +104,8 @@
 				<?php if (isset($_POST['show_details']) && !empty($_POST['productName'])): ?>
 
 					<?php
-					$product_id = mysqli_real_escape_string($dbc, $_POST['productName']);
-					$customer_id = !empty($_POST['customer_id']) ? mysqli_real_escape_string($dbc, $_POST['customer_id']) : '';
+					$product_id = mysqli_real_escape_string($connect, $_POST['productName']);
+					$customer_id = !empty($_POST['customer_id']) ? mysqli_real_escape_string($connect, $_POST['customer_id']) : '';
 
 					// Build WHERE clause
 					$where = ["oi.product_id = '$product_id'"];
@@ -109,8 +113,13 @@
 						$where[] = "o.customer_account = '$customer_id'";
 					}
 
-					$sql = "SELECT oi.*, o.order_date, o.order_id, c.customer_name, c.customer_phone,
-                                   p.product_name, c.customer_name AS account_name
+					$sql = "SELECT oi.*, 
+                                   o.order_date, 
+                                   o.order_id, 
+                                   c.customer_name, 
+                                   c.customer_phone,
+                                   p.product_name, 
+                                   c.customer_name AS account_name
                             FROM order_item oi
                             INNER JOIN orders o ON oi.order_id = o.order_id
                             INNER JOIN product p ON oi.product_id = p.product_id
@@ -118,22 +127,25 @@
                             WHERE " . implode(" AND ", $where) . "
                             ORDER BY o.order_date DESC, oi.order_item_id DESC";
 
-					$result = mysqli_query($dbc, $sql);
+					$result = mysqli_query($connect, $sql);
 
-					$total_qty = 0;
+					$total_sold_qty = 0;
+					$total_bonus_qty = 0;
+					$total_final_qty = 0;
 					$total_amount = 0;
 					?>
 
 					<div class="card mt-4">
 						<div class="card-header card-bg text-center">
 							<h4 style="color:white"><b>Product Sale Report</b>
-						<button onclick="window.print()" class="btn btn-admin btn-sm float-right">Print</button></h4>
+								<button onclick="window.print()" class="btn btn-admin btn-sm float-right">Print</button>
+							</h4>
 							<div class="report-subtitle">
 								<?php
-								$prod_name = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT product_name FROM product WHERE product_id = '$product_id'"))['product_name'] ?? 'Selected Product';
+								$prod_name = mysqli_fetch_assoc(mysqli_query($connect, "SELECT product_name FROM product WHERE product_id = '$product_id'"))['product_name'] ?? 'Selected Product';
 								echo "<strong style='color:white'>Product:</strong><span style='color:white'> $prod_name </span> ";
 								if ($customer_id) {
-									$cust_name = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT customer_name FROM customers WHERE customer_id = '$customer_id'"))['customer_name'] ?? '';
+									$cust_name = mysqli_fetch_assoc(mysqli_query($connect, "SELECT customer_name FROM customers WHERE customer_id = '$customer_id'"))['customer_name'] ?? '';
 									echo " &nbsp; | &nbsp; <strong>Customer:</strong> <span style='color:white'> $cust_name </span>";
 								} else {
 									echo " &nbsp; | &nbsp; <em><span style='color:white'>All Customers</span></em>";
@@ -159,40 +171,59 @@
 									<tbody>
 										<?php
 										$sl = 1;
-										while ($row = mysqli_fetch_assoc($result)):
-											$total_qty += $row['quantity'];
-											$total_amount += $row['total'];
-											?>
-											<tr>
-												<td><?= $sl++ ?></td>
-												<td><?= date('d-m-Y', strtotime($row['order_date'])) ?></td>
-												<td><?= $row['order_id'] ?></td>
-												<td>
-													<?= htmlspecialchars($row['customer_name'] ?: $row['account_name'] ?: 'Cash / Walk-in') ?>
-													<?php if (!empty($row['customer_phone'])): ?>
-														<br><small><?= $row['customer_phone'] ?></small>
-													<?php endif; ?>
-												</td>
-												<td class="text-right"><?= number_format($row['quantity'], 0) ?></td>
-												<td class="text-right"><?= number_format($row['rate'], 2) ?></td>
-												<td class="text-right"><?= number_format($row['total'], 2) ?></td>
-											</tr>
-										<?php endwhile; ?>
+										if (mysqli_num_rows($result) > 0) {
+											while ($row = mysqli_fetch_assoc($result)):
+												$qty_sold = (int) $row['quantity'];
+												$qty_bonus = (int) ($row['bonus_qty'] ?? 0);
+												$qty_total = $qty_sold + $qty_bonus;
 
-										<?php if (mysqli_num_rows($result) == 0): ?>
+												$total_sold_qty += $qty_sold;
+												$total_bonus_qty += $qty_bonus;
+												$total_final_qty += $qty_total;
+												$total_amount += (float) $row['total'];
+
+												$qty_display = number_format($qty_sold, 0);
+												if ($qty_bonus > 0) {
+													$qty_display = "<span class='qty-with-bonus'>$qty_sold + $qty_bonus = $qty_total</span>";
+												}
+												?>
+												<tr>
+													<td><?= $sl++ ?></td>
+													<td><?= date('d-m-Y', strtotime($row['order_date'])) ?></td>
+													<td><?= $row['order_id'] ?></td>
+													<td>
+														<?= htmlspecialchars($row['customer_name'] ?: $row['account_name'] ?: 'Cash / Walk-in') ?>
+														<?php if (!empty($row['customer_phone'])): ?>
+															<br><small><?= $row['customer_phone'] ?></small>
+														<?php endif; ?>
+													</td>
+													<td class="text-right"><?= $qty_display ?></td>
+													<td class="text-right"><?= number_format($row['rate'], 2) ?></td>
+													<td class="text-right"><?= number_format($row['total'], 2) ?></td>
+												</tr>
+												<?php
+											endwhile;
+										} else {
+											?>
 											<tr>
 												<td colspan="7" class="text-center text-muted py-4">
 													No sales found for this product<?= $customer_id ? ' and customer' : '' ?>.
 												</td>
 											</tr>
-										<?php endif; ?>
+										<?php } ?>
 									</tbody>
 
 									<?php if (mysqli_num_rows($result) > 0): ?>
 										<tfoot>
 											<tr class="total-row">
-												<td colspan="4" class="text-right">Total Quantity Sold:</td>
-												<td class="text-right"><?= number_format($total_qty, 0) ?></td>
+												<td colspan="4" class="text-right">Total Quantity Sold (incl. bonus):</td>
+												<td class="text-right">
+													<?= number_format($total_sold_qty, 0) ?>
+													<?php if ($total_bonus_qty > 0): ?>
+														+ <?= number_format($total_bonus_qty, 0) ?>
+														= <?= number_format($total_final_qty, 0) ?>
+													<?php endif; ?>
+												</td>
 												<td class="text-right">Total Amount:</td>
 												<td class="text-right"><?= number_format($total_amount, 2) ?></td>
 											</tr>
