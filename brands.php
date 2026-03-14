@@ -40,8 +40,8 @@ if (isset($_REQUEST['edit_brand_id'])) {
 									<label for="">Brand Status</label>
 									<select class="form-control" id="brand_status" name="brand_status"> 
 										
-										<option  <?=@($brands['brand_status']==1)?"selected":"selected"?> value="1">Active</option>
 										<option <?=@($brands['brand_status']==0)?"selected":""?> value="0">Inactive</option>
+										<option  <?=@($brands['brand_status']==1)?"selected":"selected"?> value="1">Active</option>
 									</select>
 								</div>
 								</div>
@@ -81,7 +81,7 @@ if (isset($_REQUEST['edit_brand_id'])) {
 			</thead>
 			<tbody>
 
-                      <?php   $q=mysqli_query($dbc,"SELECT * FROM brands WHERE brand_status=1 ");
+                      <?php   $q=mysqli_query($dbc,"SELECT * FROM brands ");
                       $c=0;
                         while ($r=mysqli_fetch_assoc($q)) { $c++;
                       

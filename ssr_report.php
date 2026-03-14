@@ -1,6 +1,7 @@
+<?php include_once 'includes/head.php'; ?>
 <?php
 // ────────────────────────────────────────────────
-//  Date Range Handling
+//  Date Range & Brand Handling
 // ────────────────────────────────────────────────
 $today = date('Y-m-d');
 
@@ -8,6 +9,9 @@ $from_date = date('Y-m-01');           // default: 1st of current month
 $to_date = $today;                   // default: today
 
 $date_error = '';
+
+$brand_id = 0;  // 0 = All brands
+$selected_brand_name = 'All Brands';
 
 if (isset($_GET['from_date']) && isset($_GET['to_date']) && !empty($_GET['from_date']) && !empty($_GET['to_date'])) {
     $input_from = trim($_GET['from_date']);
@@ -19,11 +23,22 @@ if (isset($_GET['from_date']) && isset($_GET['to_date']) && !empty($_GET['from_d
         $input_from <= $input_to &&
         $input_from <= $today && $input_to <= $today
     ) {
-
         $from_date = $input_from;
         $to_date = $input_to;
     } else {
         $date_error = "Invalid date range. Showing current month instead.";
+    }
+}
+
+// Brand filter
+if (isset($_GET['brand_id']) && is_numeric($_GET['brand_id']) && $_GET['brand_id'] > 0) {
+    $brand_id = (int) $_GET['brand_id'];
+    $chk = $connect->query("SELECT brand_name FROM brands WHERE brand_id = $brand_id LIMIT 1");
+    if ($chk && $chk->num_rows > 0) {
+        $rowb = $chk->fetch_assoc();
+        $selected_brand_name = $rowb['brand_name'];
+    } else {
+        $brand_id = 0;
     }
 }
 
@@ -33,11 +48,41 @@ $display_to = date('d/m/Y', strtotime($to_date));
 
 // Date for opening stock (day before from_date)
 $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
+
+// ────────────────────────────────────────────────
+// Fetch all brands for dropdown
+// ────────────────────────────────────────────────
+$brands = [0 => 'All Brands'];
+
+$sql_brands = "SELECT brand_id, brand_name 
+               FROM brands 
+               WHERE brand_status = 1 
+               ORDER BY brand_name ASC";
+$brand_result = $connect->query($sql_brands);
+if ($brand_result) {
+    while ($b = $brand_result->fetch_assoc()) {
+        $brands[$b['brand_id']] = $b['brand_name'];
+    }
+}
+
+// ────────────────────────────────────────────────
+// Brand filter variants
+// ────────────────────────────────────────────────
+$brand_filter_with_prod_alias = ($brand_id > 0)
+    ? " AND prod.product_id IN (SELECT p_inner.product_id FROM product p_inner WHERE p_inner.status = 1 AND p_inner.brand_id = $brand_id)"
+    : "";
+
+$brand_filter_no_alias = ($brand_id > 0)
+    ? " AND product_id IN (SELECT p_inner.product_id FROM product p_inner WHERE p_inner.status = 1 AND p_inner.brand_id = $brand_id)"
+    : "";
+
+$brand_main_filter = ($brand_id > 0)
+    ? " AND p.brand_id = $brand_id "
+    : "";
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-<?php include_once 'includes/head.php'; ?>
 
 <style type="text/css">
     @media screen {
@@ -201,18 +246,31 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                                     value="<?= htmlspecialchars($to_date) ?>" max="<?= $today ?>" required>
                             </div>
                             <div class="col-auto">
-                                <button type="submit" class="btn btn-primary px-4 mt-4">
-                                    Generate Report
-                                </button>
+                                <label class="form-label">Brand</label>
+                                <select name="brand_id" class="form-control">
+                                    <?php foreach ($brands as $bid => $bname): ?>
+                                        <option value="<?= $bid ?>" <?= $bid == $brand_id ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($bname) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                             <div class="col-auto">
-                                <a href="?" class="btn btn-outline-secondary mt-4">Reset to Current Month</a>
+                                <button type="submit" class="btn btn-primary px-4 mt-4">Generate Report</button>
+                            </div>
+                            <div class="col-auto">
+                                <a href="?" class="btn btn-outline-secondary mt-4">Reset Filters</a>
                             </div>
                         </form>
 
                         <?php if ($date_error): ?>
-                            <div class="alert alert-warning mt-3">
-                                <?= htmlspecialchars($date_error) ?>
+                            <div class="alert alert-warning mt-3"><?= htmlspecialchars($date_error) ?></div>
+                        <?php endif; ?>
+
+                        <?php if ($brand_id > 0 && $selected_brand_name !== 'All Brands'): ?>
+                            <div class="alert alert-info mt-2">
+                                Showing products only for brand:
+                                <strong><?= htmlspecialchars($selected_brand_name) ?></strong>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -227,6 +285,11 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                         <div style="font-size: 18px; margin-top: 10px;">
                             FROM <?= $display_from ?> TO <?= $display_to ?>
                         </div>
+                        <?php if ($brand_id > 0 && $selected_brand_name !== 'All Brands'): ?>
+                            <div style="font-size: 16px; margin-top: 5px;">
+                                Brand: <?= htmlspecialchars($selected_brand_name) ?>
+                            </div>
+                        <?php endif; ?>
                         <button onclick="window.print()"
                             class="btn btn-light btn-sm print-btn d-print-none">Print</button>
                     </div>
@@ -235,16 +298,19 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
 
                         <?php
                         // ────────────────────────────────────────────────
-                        // Fetch all active products
+                        // Fetch active products
                         // ────────────────────────────────────────────────
                         $products = $product_packs = [];
+
                         $all_prod_sql = "SELECT p.product_id, p.product_name, p.product_pack,
                                                 c.categories_name, b.brand_name 
                                          FROM product p 
                                          LEFT JOIN categories c ON p.category_id = c.categories_id 
                                          LEFT JOIN brands b ON p.brand_id = b.brand_id 
                                          WHERE p.status = 1 
+                                         $brand_main_filter
                                          ORDER BY p.product_name ASC";
+
                         $all_prod_result = $connect->query($all_prod_sql);
                         if ($all_prod_result) {
                             while ($pr = $all_prod_result->fetch_assoc()) {
@@ -256,7 +322,9 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                             }
                         }
 
-                        // Opening stock (cumulative up to day before from_date)
+                        // ────────────────────────────────────────────────
+                        // Opening stock - uses prod alias
+                        // ────────────────────────────────────────────────
                         $opening_stock = [];
                         $sql_opening = "SELECT prod.product_id,
                             COALESCE(purch.qty,0) - COALESCE(pret.qty,0) - COALESCE(sale.qty,0) + COALESCE(sret.qty,0) AS opening_qty
@@ -282,7 +350,8 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                                    INNER JOIN orders_return orr ON ori.order_id = orr.order_id 
                                    WHERE orr.order_date <= '$opening_date' 
                                    GROUP BY ori.product_id) sret ON sret.product_id = prod.product_id
-                        WHERE prod.status = 1";
+                        WHERE prod.status = 1 $brand_filter_with_prod_alias";
+
                         $opening_result = $connect->query($sql_opening);
                         if ($opening_result) {
                             while ($row = $opening_result->fetch_assoc()) {
@@ -290,13 +359,15 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                             }
                         }
 
-                        // Historical average cost (up to opening_date)
+                        // ────────────────────────────────────────────────
+                        // Historical average cost - no prod alias
+                        // ────────────────────────────────────────────────
                         $avg_cost = [];
                         $sql_avg = "SELECT pi.product_id, 
                                     CASE WHEN SUM(pi.quantity) > 0 THEN SUM(pi.total) / SUM(pi.quantity) ELSE 0 END AS avg_rate
                                     FROM purchase_item pi
                                     INNER JOIN purchase p ON pi.purchase_id = p.purchase_id
-                                    WHERE p.purchase_date <= '$opening_date'
+                                    WHERE p.purchase_date <= '$opening_date' $brand_filter_no_alias
                                     GROUP BY pi.product_id";
                         $avg_result = $connect->query($sql_avg);
                         if ($avg_result) {
@@ -305,13 +376,15 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                             }
                         }
 
+                        // ────────────────────────────────────────────────
                         // Period values
+                        // ────────────────────────────────────────────────
                         $rece_value_total = $pret_value_total = 0;
 
                         $sql_rece_value = "SELECT SUM(pi.total) AS amount
                                            FROM purchase_item pi
                                            INNER JOIN purchase p ON pi.purchase_id = p.purchase_id
-                                           WHERE p.purchase_date BETWEEN '$from_date' AND '$to_date'";
+                                           WHERE p.purchase_date BETWEEN '$from_date' AND '$to_date' $brand_filter_no_alias";
                         $rece_v = $connect->query($sql_rece_value);
                         if ($rece_v && $r = $rece_v->fetch_assoc())
                             $rece_value_total = (float) ($r['amount'] ?? 0);
@@ -319,39 +392,34 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                         $sql_pret_value = "SELECT SUM(pri.total) AS amount
                                            FROM purchase_return_item pri
                                            INNER JOIN purchase_return pr ON pri.purchase_id = pr.purchase_id
-                                           WHERE pr.purchase_date BETWEEN '$from_date' AND '$to_date'";
+                                           WHERE pr.purchase_date BETWEEN '$from_date' AND '$to_date' $brand_filter_no_alias";
                         $pret_v = $connect->query($sql_pret_value);
                         if ($pret_v && $r = $pret_v->fetch_assoc())
                             $pret_value_total = (float) ($r['amount'] ?? 0);
 
+                        // ────────────────────────────────────────────────
                         // Period quantities per product
+                        // ────────────────────────────────────────────────
                         $rece = $pret = $sales_qty = $bonus_qty = $sales_value = $sret_qty = $sret_value = [];
 
-                        // Receive qty
                         $sql_rece = "SELECT pi.product_id, SUM(pi.quantity) AS qty
                                      FROM purchase_item pi INNER JOIN purchase p ON pi.purchase_id = p.purchase_id
-                                     WHERE p.purchase_date BETWEEN '$from_date' AND '$to_date'
+                                     WHERE p.purchase_date BETWEEN '$from_date' AND '$to_date' $brand_filter_no_alias
                                      GROUP BY pi.product_id";
                         $res = $connect->query($sql_rece);
-                        if ($res) {
-                            while ($r = $res->fetch_assoc()) {
+                        if ($res)
+                            while ($r = $res->fetch_assoc())
                                 $rece[$r['product_id']] = (float) $r['qty'];
-                            }
-                        }
 
-                        // Purchase return qty
                         $sql_pret = "SELECT pri.product_id, SUM(pri.quantity) AS qty
                                      FROM purchase_return_item pri INNER JOIN purchase_return pr ON pri.purchase_id = pr.purchase_id
-                                     WHERE pr.purchase_date BETWEEN '$from_date' AND '$to_date'
+                                     WHERE pr.purchase_date BETWEEN '$from_date' AND '$to_date' $brand_filter_no_alias
                                      GROUP BY pri.product_id";
                         $res = $connect->query($sql_pret);
-                        if ($res) {
-                            while ($r = $res->fetch_assoc()) {
+                        if ($res)
+                            while ($r = $res->fetch_assoc())
                                 $pret[$r['product_id']] = (float) $r['qty'];
-                            }
-                        }
 
-                        // Sales qty, bonus, value
                         $sql_sales = "SELECT oi.product_id, 
                                              SUM(oi.quantity) AS qty, 
                                              SUM(oi.bonus_qty) AS bonus_qty, 
@@ -359,7 +427,7 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                                       FROM order_item oi 
                                       INNER JOIN orders o ON oi.order_id = o.order_id
                                       WHERE o.order_date BETWEEN '$from_date' AND '$to_date'
-                                      AND o.order_status = '1' AND oi.order_item_status = 1
+                                      AND o.order_status = '1' AND oi.order_item_status = 1 $brand_filter_no_alias
                                       GROUP BY oi.product_id";
                         $res = $connect->query($sql_sales);
                         if ($res) {
@@ -370,11 +438,10 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                             }
                         }
 
-                        // Sales return qty & value
                         $sql_sret = "SELECT ori.product_id, SUM(ori.quantity) AS qty, SUM(ori.total) AS amount
                                      FROM order_return_item ori 
                                      INNER JOIN orders_return orr ON ori.order_id = orr.order_id
-                                     WHERE orr.order_date BETWEEN '$from_date' AND '$to_date'
+                                     WHERE orr.order_date BETWEEN '$from_date' AND '$to_date' $brand_filter_no_alias
                                      GROUP BY ori.product_id";
                         $res = $connect->query($sql_sret);
                         if ($res) {
@@ -406,7 +473,8 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                                 <tbody>
                                     <?php if (empty($products)): ?>
                                         <tr>
-                                            <td colspan="10" class="text-center text-muted py-4">No active products found.
+                                            <td colspan="10" class="text-center text-muted py-4">
+                                                No active products found<?= $brand_id > 0 ? " for selected brand" : "" ?>.
                                             </td>
                                         </tr>
                                     <?php else: ?>
@@ -421,14 +489,13 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                                             $net_sales_q = $sales_q - $sret_q;
                                             $net_receive_q = $rece_qty - $pret_qty;
 
-                                            $total_stock = $opening + $rece_qty - $pret_qty;
+                                            $total_stock = $opening + $net_receive_q;
                                             $closing_qty = $total_stock - $net_sales_q - $bonus_q;
 
                                             $net_sales_val = ($sales_value[$pid] ?? 0) - ($sret_value[$pid] ?? 0);
 
                                             $pack = $product_packs[$pid] ?? '';
 
-                                            // Accumulate totals
                                             $avg = $avg_cost[$pid] ?? 0;
                                             $tot_opening_value += $opening * $avg;
                                             $tot_total_value += $total_stock * $avg;
@@ -456,8 +523,7 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                                     <tr class="total-row">
                                         <td colspan="2"><strong>Total Value</strong></td>
                                         <td class="num-cell">
-                                            <strong><?= number_format($tot_opening_value, 2) ?></strong>
-                                        </td>
+                                            <strong><?= number_format($tot_opening_value, 2) ?></strong></td>
                                         <td class="num-cell"><strong><?= number_format($rece_value_total, 2) ?></strong>
                                         </td>
                                         <td class="num-cell"><strong><?= number_format($pret_value_total, 2) ?></strong>
@@ -469,8 +535,7 @@ $opening_date = date('Y-m-d', strtotime($from_date . ' -1 day'));
                                         <td class="num-cell"><strong><?= number_format($tot_bonus_qty, 0) ?></strong>
                                         </td>
                                         <td class="num-cell">
-                                            <strong><?= number_format($tot_closing_value, 2) ?></strong>
-                                        </td>
+                                            <strong><?= number_format($tot_closing_value, 2) ?></strong></td>
                                         <td class="num-cell"><strong><?= number_format($tot_sales_value, 2) ?></strong>
                                         </td>
                                     </tr>

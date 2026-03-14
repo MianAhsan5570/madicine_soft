@@ -60,7 +60,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
                 <label>Customer Account</label>
                 <div class="input-group">
 
-                  <select class="form-control" onchange="getBalance(this.value,'customer_account_exp')"
+                  <select class="form-control searchableSelect" onchange="getBalance(this.value,'customer_account_exp')"
                     name="sale_order_client_name" id="sale_order_client_name" required aria-label="Username"
                     aria-describedby="basic-addon1">
                     <option value="">Customer Account</option>
@@ -94,7 +94,7 @@ if (!empty($_REQUEST['edit_order_id'])) {
               <div class="col-6 col-md-4">
                 <label>Products</label>
                 <input type="hidden" id="add_pro_type" value="add">
-                <select class="form-control searchableSelect" id="get_product_name" name="product_id">
+                <select class="form-control searchableSelect product_dropdown" id="get_product_name" name="product_id">
                   <option value=" ">Select Product</option>
                   <?php
                   $result = mysqli_query($dbc, "SELECT * FROM product WHERE status=1 ");

@@ -97,7 +97,8 @@ $btn_name = isset($_REQUEST['edit_product_id']) ? "Update" : "Add";
                         while ($row = mysqli_fetch_array($result)) {
                           ?>
                           <option data-price="<?= $row["category_price"] ?>" <?= @($fetchproduct['category_id'] != $row["categories_id"]) ? "" : "selected" ?> value="<?= $row["categories_id"] ?>">
-                            <?= $row["categories_name"] ?>-<?= $row["category_price"] ?></option>
+                            <?= $row["categories_name"] ?>-<?= $row["category_price"] ?>
+                          </option>
                         <?php } ?>
                       </select>
                     </div>
@@ -115,7 +116,7 @@ $btn_name = isset($_REQUEST['edit_product_id']) ? "Update" : "Add";
                     <button type="button" class="btn btn-danger btn-sm " style="display: none;"
                       id="cancelCategoryBtn">Cancel</button>
                   </div>
-                  <div class="col-sm-2  mb-sm-0">
+                  <div class="col-sm-2 mt-3">
                     <label for="">Purchase Price</label>
                     <input type="text" class="form-control" id="purchase_rate" placeholder=" Rate" name="purchase_rate"
                       required value="<?= @$fetchproduct['purchase_rate'] ?>">
@@ -189,11 +190,11 @@ $btn_name = isset($_REQUEST['edit_product_id']) ? "Update" : "Add";
                     $total_stock = 0;
                     $batch_details = "";
                     if ($get_company['stock_manage'] == 1) {
-                        $batches_q = mysqli_query($dbc, "SELECT * FROM product_batches WHERE product_id = '".$r['product_id']."' AND available_qty > 0 ORDER BY expiry_date ASC");
-                        while($batch = mysqli_fetch_assoc($batches_q)) {
-                            $total_stock += (float)$batch['available_qty'];
-                            $batch_details .= "<div class='border-bottom mb-1 pb-1'><small>".$batch['batch_no']." | ".$batch['expiry_date']." | <b>".$batch['available_qty']."</b></small></div>";
-                        }
+                      $batches_q = mysqli_query($dbc, "SELECT * FROM product_batches WHERE product_id = '" . $r['product_id'] . "' AND available_qty > 0 ORDER BY expiry_date ASC");
+                      while ($batch = mysqli_fetch_assoc($batches_q)) {
+                        $total_stock += (float) $batch['available_qty'];
+                        $batch_details .= "<div class='border-bottom mb-1 pb-1'><small>" . $batch['batch_no'] . " | " . $batch['expiry_date'] . " | <b>" . $batch['available_qty'] . "</b></small></div>";
+                      }
                     }
                     ?>
                     <tr>
@@ -212,7 +213,7 @@ $btn_name = isset($_REQUEST['edit_product_id']) ? "Update" : "Add";
                       </td>
                       <?php if ($get_company['stock_manage'] == 1): ?>
                         <td><?= $batch_details ?: '<small>No active batches</small>' ?></td>
-                        <?php if ($total_stock > (float)$r['alert_at']): ?>
+                        <?php if ($total_stock > (float) $r['alert_at']): ?>
                           <td>
                             <span class="badge p-1 badge-success d-print-none"><?= $total_stock ?></span>
                           </td>

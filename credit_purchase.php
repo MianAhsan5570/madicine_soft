@@ -82,7 +82,7 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
               <div class="col-sm-5">
                 <label>Select Supplier</label>
                 <div class="input-group">
-                  <select class="form-control" name="cash_purchase_supplier" id="credit_order_client_name" required
+                  <select class="form-control searchableSelect" name="cash_purchase_supplier" id="credit_order_client_name" required
                     onchange="getBalance(this.value,'customer_account_exp')" aria-label="Username"
                     aria-describedby="basic-addon1">
                     <option value="">Select Supplier</option>
@@ -128,7 +128,7 @@ if (!empty($_REQUEST['edit_purchase_id'])) {
                     style="font-size: 0.9rem;">InStock: 0</span>
                 </div>
                 <div class="input-group input-group-sm">
-                  <select class="form-control form-control-sm searchableSelect" id="get_product_name" name="product_id">
+                  <select class="form-control form-control-sm searchableSelect product_dropdown" id="get_product_name" name="product_id">
                     <option value="">Select Product</option>
                     <?php
                     $result = mysqli_query($dbc, "SELECT * FROM product WHERE status=1 ");

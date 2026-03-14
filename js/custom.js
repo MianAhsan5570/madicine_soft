@@ -1136,7 +1136,7 @@ function editPurchaseItem(id, batch_no, expiry_date, price, sale_price, qty, bat
   var is_return_mode = ($("#purchase_return").length > 0 || $("#order_return").length > 0);
 
   // 1. Trigger product selection
-  $(".searchableSelect").val(id).trigger('change');
+  $(".product_dropdown").val(id).trigger('change');
 
   // 2. Handle Batch & Expiry
   if (is_return_mode) {
@@ -1177,7 +1177,7 @@ function editPurchaseItem(id, batch_no, expiry_date, price, sale_price, qty, bat
 }
 
 function editSaleItem(id, code, batch_id, quantity, price, detail, disc, bonus) {
-  $(".searchableSelect").val(id).trigger('change');
+  $(".product_dropdown").val(id).trigger('change');
   // $("#get_product_code").val(code); // Optional if using name
   $("#add_pro_type").val("update");
 
