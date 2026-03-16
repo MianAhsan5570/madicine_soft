@@ -98,14 +98,14 @@ if (!empty($_REQUEST['edit_order_id'])) {
                   <?php
                   $result = mysqli_query($dbc, "SELECT * FROM product WHERE status=1 ");
                   while ($row = mysqli_fetch_array($result)) {
-                    $getBrand = fetchRecord($dbc, "brands", "brand_id", $row['brand_id']);
-                    $getCat = fetchRecord($dbc, "categories", "categories_id", $row['category_id']);
+                    // $getBrand = fetchRecord($dbc, "brands", "brand_id", $row['brand_id']);
+                    // $getCat = fetchRecord($dbc, "categories", "categories_id", $row['category_id']);
                     ?>
 
                     <option data-price="<?= $row["current_rate"] ?>" <?= empty($r['product_id']) ? "" : "selected" ?>
                       value="<?= $row["product_id"] ?>">
-                      <?= ucwords($row["product_name"]) ?> |
-                      <?= ucwords(@$getBrand["brand_name"]) ?>(<?= @$getCat["categories_name"] ?>)
+                      <?= ucwords($row["product_name"]) ?> 
+                      <!-- <?= ucwords(@$getBrand["brand_name"]) ?>(<?= @$getCat["categories_name"] ?>) -->
                     </option>
 
                   <?php } ?>
