@@ -247,7 +247,7 @@
                             $pid = $pr['product_id'];
                             $cat = $pr['categories_name'] ? " ({$pr['categories_name']})" : "";
                             $brand = $pr['brand_name'] ? " [{$pr['brand_name']}]" : "";
-                            $products[$pid] = $pr['product_name'] . $cat . $brand;
+                            $products[$pid] = $pr['product_name'];
                             $product_packs[$pid] = $pr['product_pack'] ?? '';
                         }
 

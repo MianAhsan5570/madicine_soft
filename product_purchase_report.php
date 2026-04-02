@@ -59,7 +59,7 @@
 											$brand = $row['brand_name'] ? " [{$row['brand_name']}]" : "";
 											echo "<option value='{$row['product_id']}' " .
 												(isset($_POST['productName']) && $_POST['productName'] == $row['product_id'] ? 'selected' : '') .
-												">{$row['product_name']}$cat$brand</option>";
+												">{$row['product_name']}</option>";
 										}
 										?>
 									</select>
