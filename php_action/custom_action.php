@@ -11,6 +11,7 @@ if (isset($_REQUEST['add_manually_user'])) {
 		'customer_status' => @$_REQUEST['customer_status'],
 		'customer_type' => @$_REQUEST['add_manually_user'],
 		'customer_area' => @$_REQUEST['customer_area'],
+		'license_no' => @$_REQUEST['customer_license_no'],
 	];
 	if ($_REQUEST['customer_id'] == "") {
 
@@ -601,7 +602,7 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 		# code...
 		// print_r(json_encode($_REQUEST));
 		// exit;
-		$total_ammount = $total_grand = 0;
+		$total_ammount = $total_grand = $total_tax = 0;
 
 		$data = [
 			'order_date' => $_REQUEST['order_date'],
@@ -644,8 +645,10 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 					$product_rates = (float) $_REQUEST['product_rates'][$x];
 					$item_discount = isset($_REQUEST['product_discounts'][$x]) ? (float) $_REQUEST['product_discounts'][$x] : 0;
 					$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$x]) ? (float) $_REQUEST['product_bonus_qtys'][$x] : 0;
-					$total = (float) $product_quantites * $product_rates * (1 - $item_discount / 100);
-					$total_ammount += (float) $total;
+					$item_tax = isset($_REQUEST['product_taxes'][$x]) ? (float) $_REQUEST['product_taxes'][$x] : 0;
+					$item_total_without_tax = (float) ($product_quantites * $product_rates * (1 - $item_discount / 100));
+					$total = $item_total_without_tax + $item_tax;
+					$total_ammount += (float) $item_total_without_tax;
 					// Get batch_id if provided
 					$batch_id = isset($_REQUEST['batch_ids'][$x]) ? $_REQUEST['batch_ids'][$x] : null;
 					$stock_deduct_qty = $product_quantites + $bonus_qty;
@@ -659,6 +662,8 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 						'quantity' => $product_quantites,
 						'bonus_qty' => $bonus_qty,
 						'discount' => $item_discount,
+						'tax' => $item_tax,
+
 						'order_item_status' => 1,
 					];
 					if ($get_company['stock_manage'] == 1) {
@@ -692,7 +697,8 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 				} //end of foreach
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
 				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
-				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
+				$total_tax = (float) $_REQUEST['ordered_tax'];
+				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
 
 				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 
@@ -706,6 +712,7 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 					'total_amount' => $total_ammount,
 					'discount' => $_REQUEST['ordered_discount'],
 					'grand_total' => $total_grand,
+					'tax' => $total_tax,
 					'payment_status' => $payment_status,
 					'due' => $due_amount,
 					'order_status' => 1,
@@ -762,8 +769,10 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 					$product_rates = (float) $_REQUEST['product_rates'][$x];
 					$item_discount = isset($_REQUEST['product_discounts'][$x]) ? (float) $_REQUEST['product_discounts'][$x] : 0;
 					$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$x]) ? (float) $_REQUEST['product_bonus_qtys'][$x] : 0;
-					$total = $product_quantites * $product_rates * (1 - $item_discount / 100);
-					$total_ammount += (float) $total;
+					$item_tax = isset($_REQUEST['product_taxes'][$x]) ? (float) $_REQUEST['product_taxes'][$x] : 0;
+					$item_total_without_tax = (float) ($product_quantites * $product_rates * (1 - $item_discount / 100));
+					$total = $item_total_without_tax + $item_tax;
+					$total_ammount += (float) $item_total_without_tax;
 					$stock_deduct_qty = $product_quantites + $bonus_qty;
 
 					// Get batch_id if provided
@@ -778,6 +787,7 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 						'quantity' => $product_quantites,
 						'bonus_qty' => $bonus_qty,
 						'discount' => $item_discount,
+						'tax' => $item_tax,
 						'order_item_status' => 1,
 					];
 					if ($get_company['stock_manage'] == 1) {
@@ -810,7 +820,8 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 				} //end of foreach
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
 				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
-				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
+				$total_tax = (float) $_REQUEST['ordered_tax'];
+				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
 				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 				if ($due_amount > 0.01) {
 					$payment_status = 0; //pending
@@ -823,6 +834,7 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 					'total_amount' => $total_ammount,
 					'discount' => $_REQUEST['ordered_discount'],
 					'grand_total' => $total_grand,
+					'tax' => $total_tax,
 					'payment_status' => $payment_status,
 					'due' => $due_amount,
 				];
@@ -862,7 +874,7 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 	$get_company = mysqli_fetch_assoc(mysqli_query($dbc, "SELECT * FROM company ORDER BY id DESC LIMIT 1"));
 	if (!empty($_REQUEST['product_ids'])) {
 		# code...
-		$total_ammount = $total_grand = 0;
+		$total_ammount = $total_grand = $total_tax = 0;
 
 		$data = [
 			'order_date' => $_REQUEST['order_date'],
@@ -890,8 +902,10 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 					$product_rates = (float) $_REQUEST['product_rates'][$x];
 					$item_discount = isset($_REQUEST['product_discounts'][$x]) ? (float) $_REQUEST['product_discounts'][$x] : 0;
 					$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$x]) ? (float) $_REQUEST['product_bonus_qtys'][$x] : 0;
-					$total = $product_quantites * $product_rates * (1 - $item_discount / 100);
-					$total_ammount += (float) $total;
+					$item_tax = isset($_REQUEST['product_taxes'][$x]) ? (float) $_REQUEST['product_taxes'][$x] : 0;
+					$item_total_without_tax = (float) ($product_quantites * $product_rates * (1 - $item_discount / 100));
+					$total = $item_total_without_tax + $item_tax;
+					$total_ammount += (float) $item_total_without_tax;
 					$stock_deduct_qty = $product_quantites + $bonus_qty;
 
 					// Get batch_id if provided
@@ -906,6 +920,8 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 						'quantity' => $product_quantites,
 						'bonus_qty' => $bonus_qty,
 						'discount' => $item_discount,
+						'tax' => $item_tax,
+
 						'product_detail' => @$_REQUEST['product_detail'][$x],
 						'order_item_status' => 1,
 					];
@@ -941,7 +957,8 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
 				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
-				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
+				$total_tax = (float) $_REQUEST['ordered_tax'];
+				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
 				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 
 				$credit = [
@@ -982,6 +999,7 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 					'total_amount' => $total_ammount,
 					'discount' => $_REQUEST['ordered_discount'],
 					'grand_total' => $total_grand,
+					'tax' => $total_tax,
 					'due' => $due_amount,
 					'order_status' => 1,
 					'transaction_id' => @$transaction_id,
@@ -1038,8 +1056,10 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 					$product_rates = (float) $_REQUEST['product_rates'][$x];
 					$item_discount = isset($_REQUEST['product_discounts'][$x]) ? (float) $_REQUEST['product_discounts'][$x] : 0;
 					$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$x]) ? (float) $_REQUEST['product_bonus_qtys'][$x] : 0;
-					$total = $product_quantites * $product_rates * (1 - $item_discount / 100);
-					$total_ammount += (float) $total;
+					$item_tax = isset($_REQUEST['product_taxes'][$x]) ? (float) $_REQUEST['product_taxes'][$x] : 0;
+					$item_total_without_tax = (float) ($product_quantites * $product_rates * (1 - $item_discount / 100));
+					$total = $item_total_without_tax + $item_tax;
+					$total_ammount += (float) $item_total_without_tax;
 					$stock_deduct_qty = $product_quantites + $bonus_qty;
 
 					// Get batch_id if provided
@@ -1054,6 +1074,8 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 						'quantity' => $product_quantites,
 						'bonus_qty' => $bonus_qty,
 						'discount' => $item_discount,
+						'tax' => $item_tax,
+
 						'product_detail' => @$_REQUEST['product_detail'][$x],
 						'order_item_status' => 1,
 					];
@@ -1087,7 +1109,8 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 				} //end of foreach
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
 				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
-				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
+				$total_tax = (float) $_REQUEST['ordered_tax'];
+				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
 				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 
 				$transactions = fetchRecord($dbc, "orders", "order_id", $_REQUEST['product_order_id']);
@@ -1131,6 +1154,7 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 					'total_amount' => $total_ammount,
 					'discount' => $_REQUEST['ordered_discount'],
 					'grand_total' => $total_grand,
+					'tax' => $total_tax,
 					'due' => $due_amount,
 					'transaction_id' => @$transaction_id,
 					'transaction_paid_id' => @$transaction_paid_id,
@@ -1879,7 +1903,7 @@ if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_retu
 		exit;
 	}
 
-	$total_ammount = $total_grand = 0;
+	$total_ammount = $total_grand = $total_tax = 0;
 	$paid = (float) @$_REQUEST['paid_ammount'];
 
 	$data = [
@@ -1910,9 +1934,10 @@ if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_retu
 				$product_rates = (float) $_REQUEST['product_rates'][$x];
 				$item_discount = isset($_REQUEST['product_discounts'][$x]) ? (float) $_REQUEST['product_discounts'][$x] : 0;
 				$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$x]) ? (float) $_REQUEST['product_bonus_qtys'][$x] : 0;
-
-				$total = $product_quantites * $product_rates * (1 - $item_discount / 100);
-				$total_ammount += (float) $total;
+				$item_tax = isset($_REQUEST['product_taxes'][$x]) ? (float) $_REQUEST['product_taxes'][$x] : 0;
+				$item_total_without_tax = (float) ($product_quantites * $product_rates * (1 - $item_discount / 100));
+				$total = $item_total_without_tax + $item_tax;
+				$total_ammount += (float) $item_total_without_tax;
 
 				$stock_restore_qty = $product_quantites + $bonus_qty;
 				$batch_id = isset($_REQUEST['batch_ids'][$x]) ? $_REQUEST['batch_ids'][$x] : null;
@@ -1926,6 +1951,7 @@ if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_retu
 					'quantity' => $product_quantites,
 					'bonus_qty' => $bonus_qty,
 					'discount' => $item_discount,
+					'tax' => $item_tax,
 					'product_detail' => @$_REQUEST['product_detail'][$x],
 					'order_item_status' => 1,
 				];
@@ -1960,7 +1986,8 @@ if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_retu
 			// ── Calculations ──
 			$ordered_discount_pct = (float) @$_REQUEST['ordered_discount'];
 			$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
-			$total_grand = round((float) @$_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
+			$total_tax = (float) @$_REQUEST['ordered_tax'];
+			$total_grand = round((float) @$_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
 			$due_amount = round($total_grand - $paid, 2);
 
 			$payment_status = ($due_amount > 0) ? 0 : 1;  // 0 = pending / has due, 1 = completed
@@ -2006,6 +2033,7 @@ if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_retu
 				'total_amount' => $total_ammount,
 				'discount' => $ordered_discount_pct,
 				'grand_total' => $total_grand,
+				'tax' => $total_tax,
 				'due' => $due_amount,
 				'order_status' => 1,
 				'transaction_id' => @$transaction_id,
@@ -2062,9 +2090,10 @@ if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_retu
 				$product_rates = (float) $_REQUEST['product_rates'][$x];
 				$item_discount = isset($_REQUEST['product_discounts'][$x]) ? (float) $_REQUEST['product_discounts'][$x] : 0;
 				$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$x]) ? (float) $_REQUEST['product_bonus_qtys'][$x] : 0;
-
-				$total = $product_quantites * $product_rates * (1 - $item_discount / 100);
-				$total_ammount += (float) $total;
+				$item_tax = isset($_REQUEST['product_taxes'][$x]) ? (float) $_REQUEST['product_taxes'][$x] : 0;
+				$item_total_without_tax = (float) ($product_quantites * $product_rates * (1 - $item_discount / 100));
+				$total = $item_total_without_tax + $item_tax;
+				$total_ammount += (float) $item_total_without_tax;
 
 				$stock_restore_qty = $product_quantites + $bonus_qty;
 				$batch_id = isset($_REQUEST['batch_ids'][$x]) ? $_REQUEST['batch_ids'][$x] : null;
@@ -2078,6 +2107,7 @@ if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_retu
 					'quantity' => $product_quantites,
 					'bonus_qty' => $bonus_qty,
 					'discount' => $item_discount,
+					'tax' => $item_tax,
 					'product_detail' => @$_REQUEST['product_detail'][$x],
 					'order_item_status' => 1,
 				];
@@ -2111,7 +2141,8 @@ if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_retu
 			// ── Calculations ──
 			$ordered_discount_pct = (float) @$_REQUEST['ordered_discount'];
 			$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
-			$total_grand = round((float) @$_REQUEST['freight'] + $total_ammount - $discount_amount, 2);
+			$total_tax = (float) @$_REQUEST['ordered_tax'];
+			$total_grand = round((float) @$_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
 			$due_amount = round($total_grand - $paid, 2);
 
 			$payment_status = ($due_amount > 0) ? 0 : 1;
@@ -2161,6 +2192,7 @@ if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_retu
 				'total_amount' => $total_ammount,
 				'discount' => $ordered_discount_pct,
 				'grand_total' => $total_grand,
+				'tax' => $total_tax,
 				'due' => $due_amount,
 				'order_status' => 1,
 				'transaction_id' => @$transaction_id,
@@ -2242,8 +2274,10 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					$rate = (float) $_REQUEST['product_rates'][$i];
 					$item_discount_pct = isset($_REQUEST['product_discounts'][$i]) ? (float) $_REQUEST['product_discounts'][$i] : 0;
 					$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$i]) ? (float) $_REQUEST['product_bonus_qtys'][$i] : 0;
-					$item_total_after_discount = $qty * $rate * (1 - $item_discount_pct / 100);
-					$total_amount += $item_total_after_discount;
+					$item_tax = isset($_REQUEST['product_taxes'][$i]) ? (float) $_REQUEST['product_taxes'][$i] : 0;
+					$item_total_without_tax = ($qty * $rate * (1 - $item_discount_pct / 100));
+					$item_total_after_discount = $item_total_without_tax + $item_tax;
+					$total_amount += $item_total_without_tax;
 					// Capture Batch ID for return
 					$batch_id = $_REQUEST['batch_ids'][$i] ?? null;
 					$batch_no = $_REQUEST['batch_nos'][$i] ?? null;
@@ -2256,6 +2290,7 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 						'quantity' => $qty,
 						'bonus_qty' => $bonus_qty,
 						'discount' => $item_discount_pct,
+						'tax' => $item_tax,
 						'product_detail' => @$_REQUEST['product_detail'][$i],
 						'order_item_status' => 1,
 						'user_id' => @$_REQUEST['user_id'],
@@ -2294,7 +2329,8 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 				}
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
 				$discount_amount = round($total_amount * $ordered_discount_pct / 100, 2);
-				$total_grand = round($total_amount + (float) @$_REQUEST['freight'] - $discount_amount, 2);
+				$total_tax = (float) $_REQUEST['ordered_tax'];
+				$total_grand = round($total_amount + (float) @$_REQUEST['freight'] - $discount_amount + $total_tax, 2);
 				$due_amount = round($total_grand - $paidAmount, 2);
 				$payment_status = $due_amount > 0.01 ? 0 : 1;
 				if ($payment_status == 1)
@@ -2303,6 +2339,7 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					'total_amount' => $total_amount,
 					'discount' => $_REQUEST['ordered_discount'],
 					'grand_total' => $total_grand,
+					'tax' => $total_tax,
 					'payment_status' => $payment_status,
 					'due' => $due_amount,
 					'order_status' => 1,
@@ -2362,8 +2399,10 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					$rate = (float) $_REQUEST['product_rates'][$i];
 					$item_discount_pct = isset($_REQUEST['product_discounts'][$i]) ? (float) $_REQUEST['product_discounts'][$i] : 0;
 					$bonus_qty = isset($_REQUEST['product_bonus_qtys'][$i]) ? (float) $_REQUEST['product_bonus_qtys'][$i] : 0;
-					$item_total_after_discount = $qty * $rate * (1 - $item_discount_pct / 100);
-					$total_amount += $item_total_after_discount;
+					$item_tax = isset($_REQUEST['product_taxes'][$i]) ? (float) $_REQUEST['product_taxes'][$i] : 0;
+					$item_total_without_tax = ($qty * $rate * (1 - $item_discount_pct / 100));
+					$item_total_after_discount = $item_total_without_tax + $item_tax;
+					$total_amount += $item_total_without_tax;
 					$batch_id = $_REQUEST['batch_ids'][$i] ?? null;
 					$batch_no = $_REQUEST['batch_nos'][$i] ?? null;
 					$item = [
@@ -2374,6 +2413,7 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 						'quantity' => $qty,
 						'bonus_qty' => $bonus_qty,
 						'discount' => $item_discount_pct,
+						'tax' => $item_tax,
 						'product_detail' => @$_REQUEST['product_detail'][$i],
 						'order_item_status' => 1,
 						'user_id' => @$_REQUEST['user_id'],
@@ -2414,7 +2454,8 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 				}
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
 				$discount_amount = round($total_amount * $ordered_discount_pct / 100, 2);
-				$total_grand = round($total_amount + (float) @$_REQUEST['freight'] - $discount_amount, 2);
+				$total_tax = (float) $_REQUEST['ordered_tax'];
+				$total_grand = round($total_amount + (float) @$_REQUEST['freight'] - $discount_amount + $total_tax, 2);
 				$due_amount = round($total_grand - $paidAmount, 2);
 				$payment_status = $due_amount > 0.01 ? 0 : 1;
 				if ($payment_status == 1)
@@ -2423,6 +2464,7 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					'total_amount' => $total_amount,
 					'discount' => $_REQUEST['ordered_discount'],
 					'grand_total' => $total_grand,
+					'tax' => $total_tax,
 					'payment_status' => $payment_status,
 					'due' => $due_amount,
 				];

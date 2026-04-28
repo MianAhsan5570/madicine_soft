@@ -478,11 +478,11 @@
                                 <?= !empty($order['customer_address']) ? strtoupper($order['customer_address']) : '____' ?>
                             </td>
                         </tr>
-                        <!-- <tr>
-                            <th>AREA</th>
-                            <td>: <?= !empty($order['customer_area']) ? strtoupper($order['customer_area']) : '____' ?>
+                        <tr>
+                            <th>License No</th>
+                            <td>: <?= !empty($order['license_no']) ? strtoupper($order['license_no']) : '____' ?>
                             </td>
-                        </tr> -->
+                        </tr>
                     </table>
                 </div>
                 <div class="invoice-meta-right">
@@ -504,7 +504,9 @@
                         <th width="95" class="text-right">Gross<br>Amount</th>
                         <th width="60" class="text-right">Disc.<br>%</th>
                         <th width="70" class="text-right">Disc.<br>Amount</th>
-                        <!-- <th width="60" class="text-right">S.Tax</th> -->
+                        <?php if ($_REQUEST['type'] == "order"): ?>
+                            <th width="60" class="text-right">S.TAX</th>
+                        <?php endif; ?>
                         <th width="95" class="text-right">Net<br>Amount</th>
                     </tr>
                 </thead>
@@ -548,8 +550,10 @@
                             <td class="text-right"><?= number_format($gross_amount, 2) ?></td>
                             <td class="text-right"><?= number_format($discount_perc, 2) ?></td>
                             <td class="text-right"><?= number_format($discount_amount, 2) ?></td>
-                            <!-- <td class="text-right"><?= number_format($sales_tax, 2) ?></td> -->
-                            <td class="text-right font-weight-bold"><?= number_format($net_amount, 2) ?></td>
+                            <?php if ($_REQUEST['type'] == "order"): ?>
+                                <td class="text-right"><?= number_format($r['tax'], 2) ?></td>
+                            <?php endif; ?>
+                            <td class="text-right font-weight-bold"><?= number_format($net_amount + ($r['tax'] ?? 0), 2) ?></td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -564,7 +568,9 @@
                         <table>
                             <tr>
                                 <td class="label">Net Amount</td>
-                                <td class="amount"><?= number_format($order['total_amount'], 2) ?></td>
+                                <td class="amount">
+                                    <?= number_format($order['total_amount'] + ($_REQUEST['type'] == "order" ? $order['tax'] : 0), 2) ?>
+                                </td>
                             </tr>
                             <tr>
                                 <td class="label">Discounted Amount</td>

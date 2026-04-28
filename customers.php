@@ -80,17 +80,16 @@ if (@$getCustomer) {
 									</div> -->
 
 
+									<?php if ($_REQUEST['type'] == "customer"): ?>
+										<div class="form-group row">
+											<div class="col-sm-6">
+												<label for="address">License No:</label>
+												<input type="text" name="customer_license_no" id="customer_license_no"
+													placeholder="License No" class="form-control"
+													value="<?= @$Getdata['license_no'] ?>">
+											</div>
+											<div class="col-sm-6">
 
-									<div class="form-group row">
-										<div class="col-sm-6">
-											<label for="address">Address:</label>
-											<textarea name="customer_address" id="customer_address" cols="30" rows="4"
-												placeholder="Address"
-												class="form-control"><?= @$Getdata['customer_address'] ?></textarea>
-
-										</div>
-										<div class="col-sm-6">
-											<?php if ($_REQUEST['type'] == "customer"): ?>
 												<label for="area">Area:</label>
 												<select class="form-control searchableSelect" id="customer_area"
 													name="customer_area">
@@ -100,18 +99,26 @@ if (@$getCustomer) {
 													while ($row = mysqli_fetch_array($result)) {
 														?>
 
-														<option 
-															<?= empty($r['area_id']) ? "" : "selected" ?>
+														<option <?= empty($r['area_id']) ? "" : "selected" ?>
 															value="<?= $row["area_id"] ?>">
 															<?= ucwords($row["area_name"]) ?>
 														</option>
 
 													<?php } ?>
 												</select>
-											<?php endif ?>
+											</div>
+										</div>
+									<?php endif ?>
+
+									<div class="form-group row">
+										<div class="col-sm-12">
+											<label for="address">Address:</label>
+											<textarea name="customer_address" id="customer_address" cols="30" rows="4"
+												placeholder="Address"
+												class="form-control"><?= @$Getdata['customer_address'] ?></textarea>
+
 										</div>
 									</div>
-
 									<div class="modal-footer">
 										<?php
 										if (isset($_REQUEST['id'])) {

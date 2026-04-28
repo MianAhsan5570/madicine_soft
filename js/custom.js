@@ -725,6 +725,7 @@ $("#addProductSale").on("click", function () {
   // NEW: Discount % and Bonus Qty
   var disc_percent = parseFloat($("#get_product_discount").val()) || 0;
   var bonus_qty = parseInt($("#get_bonus_qty").val()) || 0;
+  var tax = parseFloat($("#get_product_tax").val()) || 0;
 
   // ============================================================================
   // Batch-related variables
@@ -785,6 +786,7 @@ $("#addProductSale").on("click", function () {
     $("#get_batch_no").val("").trigger("change");
     $("#get_product_discount").val("0");
     $("#get_bonus_qty").val("0");
+    $("#get_product_tax").val("0");
 
 
 
@@ -807,12 +809,11 @@ $("#addProductSale").on("click", function () {
             : bonus_qty;
 
           // Apply discount to total
-          total_price = parseFloat(price) * parseFloat(Currentquantity) * (1 - disc_percent / 100);
-
+          total_price = (parseFloat(price) * parseFloat(Currentquantity) * (1 - disc_percent / 100)) + tax;
           if (Currentquantity <= max_qty) {
             $("#" + rowId).replaceWith(`
               <tr id="${rowId}">
-                <input type="hidden" data-price="${price}" data-quantity="${Currentquantity}" data-discount="${disc_percent}" data-bonus="${currentBonus}"
+                <input type="hidden" data-price="${price}" data-quantity="${Currentquantity}" data-discount="${disc_percent}" data-bonus="${currentBonus}" data-tax="${tax}"
                        id="product_ids_${id}_${batch_id}" class="product_ids" name="product_ids[]" value="${id}">
                 <input type="hidden" id="product_quantites_${id}_${batch_id}" name="product_quantites[]" value="${Currentquantity}">
                 <input type="hidden" id="product_rate_${id}_${batch_id}" name="product_rates[]" value="${price}">
@@ -823,6 +824,7 @@ $("#addProductSale").on("click", function () {
                 <input type="hidden" name="expires[]" value="${expiry_date}">
                 <input type="hidden" name="product_discounts[]" value="${disc_percent}">
                 <input type="hidden" name="product_bonus_qtys[]" value="${currentBonus}">
+                <input type="hidden" name="product_taxes[]" value="${tax}">
 
                 <td>${name}</td>
                 <td>${batch_no || '-'}</td>
@@ -830,10 +832,11 @@ $("#addProductSale").on("click", function () {
                 <td>${Currentquantity}</td>
                 <td>${currentBonus}</td>
                 <td>${disc_percent}%</td>
+                <td>${tax}</td>
                 <td>${total_price.toFixed(2)}</td>
                 <td>
                   <button type="button" onclick="removeByid('#${rowId}')" class="fa fa-trash text-danger"></button>
-                  <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${Currentquantity},'${price}', '${detail}', ${disc_percent}, ${currentBonus})" class="fa fa-edit text-success"></button>
+                  <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${Currentquantity},'${price}', '${detail}', ${disc_percent}, ${currentBonus}, ${tax})" class="fa fa-edit text-success"></button>
                 </td>
               </tr>
             `);
@@ -845,11 +848,11 @@ $("#addProductSale").on("click", function () {
       });
     } else {
       // Apply discount to total for new row
-      total_price = parseFloat(price) * parseFloat(product_quantity) * (1 - disc_percent / 100);
+      total_price = (parseFloat(price) * parseFloat(product_quantity) * (1 - disc_percent / 100)) + tax;
 
       $("#purchase_product_tb").append(`
         <tr id="${rowId}">
-          <input type="hidden" data-price="${price}" data-quantity="${product_quantity}" data-discount="${disc_percent}" data-bonus="${bonus_qty}"
+          <input type="hidden" data-price="${price}" data-quantity="${product_quantity}" data-discount="${disc_percent}" data-bonus="${bonus_qty}" data-tax="${tax}"
                  id="product_ids_${id}_${batch_id}" class="product_ids" name="product_ids[]" value="${id}">
           <input type="hidden" id="product_quantites_${id}_${batch_id}" name="product_quantites[]" value="${product_quantity}">
           <input type="hidden" id="product_rate_${id}_${batch_id}" name="product_rates[]" value="${price}">
@@ -860,16 +863,18 @@ $("#addProductSale").on("click", function () {
           <input type="hidden" name="expires[]"       value="${expiry_date}">
           <input type="hidden" name="product_discounts[]" value="${disc_percent}">
           <input type="hidden" name="product_bonus_qtys[]" value="${bonus_qty}">
+          <input type="hidden" name="product_taxes[]" value="${tax}">
           <td>${name}</td>
           <td>${batch_no || "-"}</td>
           <td>${price}</td>
           <td>${product_quantity}</td>
           <td>${bonus_qty}</td>
           <td>${disc_percent}%</td>
+          <td>${tax}</td>
           <td>${total_price.toFixed(2)}</td>
           <td>
             <button type="button" onclick="removeByid('#${rowId}')" class="fa fa-trash text-danger"></button>
-            <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${product_quantity},'${price}', '${detail}', ${disc_percent}, ${bonus_qty})" class="fa fa-edit text-success"></button>
+            <button type="button" onclick="editSaleItem(${id}, '${code}', '${batch_id}', ${product_quantity},'${price}', '${detail}', ${disc_percent}, ${bonus_qty}, ${tax})" class="fa fa-edit text-success"></button>
           </td>
         </tr>
       `);
@@ -1069,40 +1074,50 @@ function removeByid(id) {
 
 function getOrderTotal() {
   var payment_type = $("#payment_type").val();
-  var total_bill = 0;
+  var sub_total = 0;
+  var total_tax = 0;
 
   $(".product_ids").each(function () {
     var quantity = parseFloat($(this).data("quantity"));
     var rates = parseFloat($(this).data("price"));
     var item_disc = parseFloat($(this).data("discount")) || 0;
+    var item_tax = parseFloat($(this).data("tax")) || 0;
 
-    // Validate and fallback to 0 if NaN
     quantity = isNaN(quantity) ? 0 : quantity;
     rates = isNaN(rates) ? 0 : rates;
 
-    // Apply per-item discount
-    total_bill += rates * quantity * (1 - item_disc / 100);
+    var lineTotal = rates * quantity;
+    var discountedTotal = lineTotal * (1 - item_disc / 100);
+    sub_total += discountedTotal;
+    total_tax += item_tax;
   });
-
-  // Parse discount and freight values safely (discount is now a %)
+var sub_total =sub_total + total_tax;
+  // Parse discount and freight values safely (discount is a %)
   var discount = parseFloat($("#ordered_discount").val());
   discount = isNaN(discount) ? 0 : discount;
 
-  var discountAmount = total_bill * discount / 100;
+  var discountAmount = sub_total * discount / 100;
 
   var freight = parseFloat($("#freight").val());
   freight = isNaN(freight) ? 0 : freight;
 
-  // Set freight to 0 for other payment types
+  // Set freight to 0 for payment types other than cash_in_hand or credit_sale
   if (!(payment_type == "cash_in_hand" || payment_type == "credit_sale")) {
     freight = 0;
   }
 
-  // Calculate grand total using percentage discount
-  var grand_total = freight + total_bill - discountAmount;
+  // Calculate grand total
+  
+  var grand_total = freight + sub_total - discountAmount;
+
+  // Set hidden total tax for DB submission
+  if ($("#ordered_tax").length) {
+      $("#ordered_tax").val(total_tax.toFixed(2));
+  }
 
   // Display totals in HTML
-  $("#product_total_amount").html(total_bill.toFixed(2));
+  $("#product_total_amount").html(sub_total.toFixed(2));
+  $("#product_tax_amount").html(total_tax.toFixed(2));
   $("#product_grand_total_amount").html(grand_total.toFixed(2));
 
   // Handle paid amount logic
@@ -1126,7 +1141,7 @@ function getOrderTotal() {
     $("input[name='payment_account']").prop("required", false);
   }
 
-  // Optional: update remaining balance (if needed)
+  // Update remaining balance
   getRemaingAmount();
 }
 
@@ -1176,7 +1191,7 @@ function editPurchaseItem(id, batch_no, expiry_date, price, sale_price, qty, bat
   }, 1500);
 }
 
-function editSaleItem(id, code, batch_id, quantity, price, detail, disc, bonus) {
+function editSaleItem(id, code, batch_id, quantity, price, detail, disc, bonus, tax) {
   $(".product_dropdown").val(id).trigger('change');
   // $("#get_product_code").val(code); // Optional if using name
   $("#add_pro_type").val("update");
@@ -1192,6 +1207,7 @@ function editSaleItem(id, code, batch_id, quantity, price, detail, disc, bonus) 
     $("#get_product_detail").val(detail).trigger('change').trigger('keyup');
     $("#get_product_discount").val(disc || 0);
     $("#get_bonus_qty").val(bonus || 0);
+    $("#get_product_tax").val(tax || 0);
   }, 1500);
 }
 
