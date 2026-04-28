@@ -696,9 +696,10 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 					$x++;
 				} //end of foreach
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
-				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
 				$total_tax = (float) $_REQUEST['ordered_tax'];
-				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
+				$sub_total_with_tax = $total_ammount + $total_tax;
+				$discount_amount = round($sub_total_with_tax * $ordered_discount_pct / 100, 2);
+				$total_grand = round(@(float) $_REQUEST['freight'] + $sub_total_with_tax - $discount_amount, 2);
 
 				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 
@@ -819,9 +820,10 @@ if (isset($_REQUEST['sale_order_client_name']) && empty($_REQUEST['order_return'
 					$x++;
 				} //end of foreach
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
-				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
 				$total_tax = (float) $_REQUEST['ordered_tax'];
-				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
+				$sub_total_with_tax = $total_ammount + $total_tax;
+				$discount_amount = round($sub_total_with_tax * $ordered_discount_pct / 100, 2);
+				$total_grand = round(@(float) $_REQUEST['freight'] + $sub_total_with_tax - $discount_amount, 2);
 				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 				if ($due_amount > 0.01) {
 					$payment_status = 0; //pending
@@ -956,9 +958,10 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 				} //end of foreach
 
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
-				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
 				$total_tax = (float) $_REQUEST['ordered_tax'];
-				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
+				$sub_total_with_tax = $total_ammount + $total_tax;
+				$discount_amount = round($sub_total_with_tax * $ordered_discount_pct / 100, 2);
+				$total_grand = round(@(float) $_REQUEST['freight'] + $sub_total_with_tax - $discount_amount, 2);
 				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 
 				$credit = [
@@ -1108,9 +1111,10 @@ if (isset($_REQUEST['credit_order_client_name']) && empty($_REQUEST['order_retur
 					$x++;
 				} //end of foreach
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
-				$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
 				$total_tax = (float) $_REQUEST['ordered_tax'];
-				$total_grand = round(@(float) $_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
+				$sub_total_with_tax = $total_ammount + $total_tax;
+				$discount_amount = round($sub_total_with_tax * $ordered_discount_pct / 100, 2);
+				$total_grand = round(@(float) $_REQUEST['freight'] + $sub_total_with_tax - $discount_amount, 2);
 				$due_amount = round((float) $total_grand - @(float) $_REQUEST['paid_ammount'], 2);
 
 				$transactions = fetchRecord($dbc, "orders", "order_id", $_REQUEST['product_order_id']);
@@ -1985,9 +1989,10 @@ if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_retu
 
 			// ── Calculations ──
 			$ordered_discount_pct = (float) @$_REQUEST['ordered_discount'];
-			$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
 			$total_tax = (float) @$_REQUEST['ordered_tax'];
-			$total_grand = round((float) @$_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
+			$sub_total_with_tax = $total_ammount + $total_tax;
+			$discount_amount = round($sub_total_with_tax * $ordered_discount_pct / 100, 2);
+			$total_grand = round((float) @$_REQUEST['freight'] + $sub_total_with_tax - $discount_amount, 2);
 			$due_amount = round($total_grand - $paid, 2);
 
 			$payment_status = ($due_amount > 0) ? 0 : 1;  // 0 = pending / has due, 1 = completed
@@ -2140,9 +2145,10 @@ if (isset($_REQUEST['credit_order_client_name']) && !empty($_REQUEST['order_retu
 
 			// ── Calculations ──
 			$ordered_discount_pct = (float) @$_REQUEST['ordered_discount'];
-			$discount_amount = round($total_ammount * $ordered_discount_pct / 100, 2);
 			$total_tax = (float) @$_REQUEST['ordered_tax'];
-			$total_grand = round((float) @$_REQUEST['freight'] + $total_ammount - $discount_amount + $total_tax, 2);
+			$sub_total_with_tax = $total_ammount + $total_tax;
+			$discount_amount = round($sub_total_with_tax * $ordered_discount_pct / 100, 2);
+			$total_grand = round((float) @$_REQUEST['freight'] + $sub_total_with_tax - $discount_amount, 2);
 			$due_amount = round($total_grand - $paid, 2);
 
 			$payment_status = ($due_amount > 0) ? 0 : 1;
@@ -2328,9 +2334,10 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					}
 				}
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
-				$discount_amount = round($total_amount * $ordered_discount_pct / 100, 2);
 				$total_tax = (float) $_REQUEST['ordered_tax'];
-				$total_grand = round($total_amount + (float) @$_REQUEST['freight'] - $discount_amount + $total_tax, 2);
+				$sub_total_with_tax = $total_amount + $total_tax;
+				$discount_amount = round($sub_total_with_tax * $ordered_discount_pct / 100, 2);
+				$total_grand = round($sub_total_with_tax + (float) @$_REQUEST['freight'] - $discount_amount, 2);
 				$due_amount = round($total_grand - $paidAmount, 2);
 				$payment_status = $due_amount > 0.01 ? 0 : 1;
 				if ($payment_status == 1)
@@ -2453,9 +2460,10 @@ if (isset($_REQUEST['sale_order_client_name']) && isset($_REQUEST['order_return'
 					update_data($dbc, "transactions", $transactionUpdate, "transaction_id", $order['transaction_paid_id']);
 				}
 				$ordered_discount_pct = (float) $_REQUEST['ordered_discount'];
-				$discount_amount = round($total_amount * $ordered_discount_pct / 100, 2);
 				$total_tax = (float) $_REQUEST['ordered_tax'];
-				$total_grand = round($total_amount + (float) @$_REQUEST['freight'] - $discount_amount + $total_tax, 2);
+				$sub_total_with_tax = $total_amount + $total_tax;
+				$discount_amount = round($sub_total_with_tax * $ordered_discount_pct / 100, 2);
+				$total_grand = round($sub_total_with_tax + (float) @$_REQUEST['freight'] - $discount_amount, 2);
 				$due_amount = round($total_grand - $paidAmount, 2);
 				$payment_status = $due_amount > 0.01 ? 0 : 1;
 				if ($payment_status == 1)
